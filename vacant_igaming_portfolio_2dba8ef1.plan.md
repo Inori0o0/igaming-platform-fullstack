@@ -269,11 +269,23 @@ client-portal/src/components/loading/
 
 ### 4.1 老虎機 (Slots) - 3 個主題
 
-| 主題               | 說明               |
-| ------------------ | ------------------ |
-| **vAcAnt Classic** | 品牌主題，馬的圖案 |
-| **Cyber Neon**     | 賽博龐克風格       |
-| **Lucky Fortune**  | 東方風格，財神元素 |
+> 整體視覺走 **Italian Brainrot + vAcAnt 品牌** 混合風格：AI 生成怪物、霓虹賭場感、假義大利文角色名。
+
+| 主題                     | 說明                                                                 |
+| ------------------------ | -------------------------------------------------------------------- |
+| **vAcAnt Classic**       | 品牌主題，霓虹馬 + vAcAnt logo，轉輪圖案結合籌碼、馬頭與霓虹字       |
+| **Cyber Neon**           | 賽博龐克風格，夜城霓虹、故障特效、機械籌碼                          |
+| **Italian Brainrot Slots** | 以 Italian Brainrot 宇宙為主題，所有圖標皆為腦爛角色與其代表物件     |
+
+**Italian Brainrot Slots 主要角色與圖示：**
+
+- Tralalero Tralala：三腳鯊魚穿 Nike 球鞋，作為最高獎倍率符號之一
+- Tung Tung Tung Sahur：拿平底鍋敲鐘的夜宵守門人，搭配鍋子與月亮圖示
+- Bombardiro Crocodilo：背著炸彈的鱷魚，出現時觸發隨機倍數炸開（Multiplier Bomb）
+- Brr Brr Patapim：拿喇叭的小惡魔，出現時觸發 Free Spin 或 Re-Spin
+- Lirili Larila：手拿小提琴的詭異演奏家，搭配音符 Scatter 符號
+- 「仙人掌大象」：**Elefanto Cactuso**（elephant with a cactus for a body），可作為 Wild 角色替代其他符號
+- 額外可延伸 2-3 個小角色（如義大利麵章魚、披薩天使）作為低倍率符號增加豐富度
 
 功能:
 
@@ -285,24 +297,67 @@ client-portal/src/components/loading/
 
 ### 4.2 二十一點 (Blackjack)
 
-- 標準玩法: 要牌/停牌/雙倍/分牌
-- 撲克牌動畫
-- AI 莊家邏輯
-- 賠率顯示
+> 本桌採用 **Italian Brainrot 主題**，牌桌為霓虹腦爛賭場風格，視覺風格與 `Italian Brainrot Slots`、Lottery 統一。
+
+- 規則與操作：
+  - 標準玩法: 要牌 / 停牌 / 雙倍 / 分牌（機制與原計畫相同）
+  - 基本賠率顯示與下注區維持傳統二十一點佈局
+- 角色與 UI 對應：
+  - **莊家**：由 **Lirili Larila** 擔任（拉小提琴的詭異莊家），在發牌與結算時：
+    - 進行短暫拉琴動作或表情變化（贏時拉高音、輸時拉低沉音）
+    - 背景可出現音符飄動，與彩票遊戲開獎動畫呼應
+  - **玩家提示 / 特殊事件**：由 **Brr Brr Patapim** 擔任小惡魔提示員：
+    - 玩家拿到 Blackjack、爆牌或連勝達一定局數時，會在桌面邊緣跳出短動畫與文字提示
+    - 例如「Brr Brr！」+ 腦爛風格的破義大利文台詞
+  - **高額下注 / 高賠局面**：**Bombardiro Crocodilo** 在桌邊待機：
+    - 當玩家下注金額達到高額門檻，或本局可能產生大額贏錢時，鱷魚身上的炸彈會點亮或抖動
+    - 結算時若大贏，觸發小型爆炸特效（僅視覺動畫，不影響規則）
+  - **籌碼 / 桌邊裝飾**：**Elefanto Cactuso** 以小圖示形式出現在籌碼與桌角：
+    - 籌碼面可印上縮小版仙人掌大象頭像
+    - 桌面某角落擺放迷你 Cactuso 雕像，象徵保底、幸運或守護（可純視覺）
+- 牌面與籌碼視覺：
+  - 撲克牌卡背與籌碼圖案採用 **Tralalero Tralala** 等角色剪影和 Italian Brainrot 霓虹配色
+  - 保留清晰可讀的點數與花色，確保可玩性與 UX
+
+> 本遊戲中的所有角色皆與 4.1 的 `Italian Brainrot Slots` 與 4.4 彩票遊戲共用同一宇宙與美術資產，方便後續行銷與成就系統整合。
 
 ### 4.3 百家樂 (Baccarat)
 
-- 閒/莊/和 下注
-- 發牌動畫
-- 計分板/路單 (簡化版)
+> 本桌使用 **Italian Brainrot 宇宙角色** 作為「閒 / 莊 / 和」的象徵，保留原本百家樂玩法與下注選項。
 
-### 4.4 彩票遊戲
+- 規則與核心功能：
+  - 閒 / 莊 / 和 下注（可支援基本的投注區域）
+  - 發牌動畫：牌從桌面中央洗出並分配到「閒」、「莊」區
+  - 計分板 / 路單（簡化版），顯示歷史開局結果
+- 角色對應設定：
+  - **閒家 (Player)**：由 **Tralalero Tralala** 代表
+    - 當「閒」勝利時，Tralalero 會在畫面一側出現簡短慶祝動畫（例如穿著 Nike 鞋跳躍）
+  - **莊家 (Banker)**：由 **Bombardiro Crocodilo** 代表
+    - 當「莊」勝利時，鱷魚身上的炸彈會短暫亮起，導火線點燃但不真正爆炸，營造緊張感
+  - **和局 (Tie)**：由 **Tung Tung Tung Sahur** 或 **Elefanto Cactuso** 代表
+    - 和局時，畫面可出現 Tung Tung Tung Sahur 敲鍋子示意「平衡」，或 Elefanto Cactuso 站在天秤中央維持平衡
+- 計分板與路單視覺：
+  - 不再使用單純紅藍圓點，而是：
+    - 閒：使用 Tralalero 色系或頭像輪廓
+    - 莊：使用 Bombardiro Crocodilo 色系或頭像輪廓
+    - 和：使用 Elefanto Cactuso 綠色或 Tung Tung Tung Sahur 鍋子圖示
+  - 保持簡化版路單結構，確保一眼能看懂趨勢
+- 發牌與特效：
+  - 關鍵局（例如多連勝、罕見牌型）時，**Lirili Larila** 可短暫出現，拉出一小段音效，與彩票遊戲開獎演出形成呼應。
 
-| 遊戲         | 說明                   |
-| ------------ | ---------------------- |
-| **轉盤抽獎** | 幸運轉盤，不同獎項區塊 |
-| **刮刮樂**   | 可刮開的卡片效果       |
-| **數字彩票** | 選號碼，定時開獎       |
+> 本遊戲中的「閒 / 莊 / 和」角色，同樣與 Slots 與 Lottery 共用 Italian Brainrot 角色設定，讓玩家在不同遊戲中對角色有連續記憶感。
+
+### 4.4 彩票遊戲 (Lottery) - Italian Brainrot 設定
+
+> 彩票區同樣融入 Italian Brainrot 角色，每款遊戲都綁定 1-2 個代表角色或符號。
+
+| 遊戲             | 說明                                                                 |
+| ---------------- | -------------------------------------------------------------------- |
+| **Tralalero Lucky Wheel** (轉盤抽獎) | 大型幸運轉盤，由 Tralalero Tralala 坐在中央；不同區塊以角色頭像與代表物件區分獎項，例如 Bombardiro Crocodilo 區塊對應高倍率獎勵、Elefanto Cactuso 區塊對應隨機加成 |
+| **Brainrot Scratch Cards** (刮刮樂) | 刮刮卡面印有 Tung Tung Tung Sahur、Brr Brr Patapim、Lirili Larila 等角色線稿，刮開後顯示對應角色與獎金倍率；特殊卡面可出現 Elephant Cactus 作為 Bonus 獎 |
+| **Cactuso Numbers** (數字彩票)      | 數字球造型為小型仙人掌大象頭（Elefanto Cactuso），開獎動畫由 Lirili Larila 拉小提琴，隨音符掉落數字球；特定組合可觸發 Bombardiro Crocodilo「爆擊獎池」效果 |
+
+所有彩票遊戲的 **UI 色彩與插畫風格** 與 4.1 的 Italian Brainrot Slots 統一，確保角色與世界觀一致，方便後續在行銷頁與成就系統中重複利用這些角色。
 
 ---
 
