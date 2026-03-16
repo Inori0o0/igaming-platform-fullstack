@@ -6,11 +6,14 @@ export type CardProps = PropsWithChildren<
 > & {
   title?: ReactNode;
   description?: ReactNode;
+  /** 可選的 hero 區塊，會顯示在標題上方（例如圖片 + 漸層 + 文字） */
+  hero?: ReactNode;
 };
 
 export function Card({
   title,
   description,
+  hero,
   className,
   children,
   ...props
@@ -25,6 +28,7 @@ export function Card({
       {...props}
     >
       <div className="relative space-y-3">
+        {hero && <div className="overflow-hidden rounded-xl">{hero}</div>}
         {(title || description) && (
           <header className="space-y-1">
             {title && (
