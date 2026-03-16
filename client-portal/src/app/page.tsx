@@ -1,40 +1,84 @@
 "use client";
 
-import { supabase } from "@/src/lib/supabaseClient";
+import Image from "next/image";
 import { Button } from "@/src/components/ui/Button";
 import { Card } from "@/src/components/ui/Card";
 import { Input } from "@/src/components/ui/Input";
 import { Avatar } from "@/src/components/ui/Avatar";
-import { useState } from "react";
-import { Modal } from "@/src/components/ui/Modal";
+import { useAuthStore } from "@/src/store/authStore";
 
 export default function Home() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const user = useAuthStore((s) => s.user);
+  const isLoading = useAuthStore((s) => s.isLoading);
+  const setOpenAuthModal = useAuthStore((s) => s.setOpenAuthModal);
+  const signOut = useAuthStore((s) => s.signOut);
 
-  async function handleTest() {
-    const { data, error } = await supabase.auth.getSession();
-    console.log("Supabase session:", data, error);
-  }
-
-  function toggleModal() {
-    setIsModalOpen((prev) => !prev);
+  if (isLoading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.25),transparent_55%)]">
+        <p className="text-cyan-300/90">載入中…</p>
+      </main>
+    );
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.25),transparent_55%)]">
+    <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.25),transparent_55%)]">
       <Card
+        hero={
+          <div className="relative h-40 w-full">
+            <Image
+              src="/horse-hero.png"
+              alt="vAcAnt Portal Hero"
+              fill
+              priority
+              className="object-cover"
+              sizes="(min-width: 768px) 384px, 100vw"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute inset-0 flex flex-col justify-end p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cyan-200/80">
+                vAcAnt Portal
+              </p>
+              <p className="mt-1 text-lg font-semibold text-white">
+                連線，進入霓虹賭場宇宙
+              </p>
+            </div>
+          </div>
+        }
         title="vAcAnt Client Portal"
-        description="共用 UI 元件示範區塊"
+        description="登入管理你的虛擬錢包與遊戲宇宙"
         className="w-full max-w-md"
       >
-        <div className="flex items-center gap-3">
-          <Avatar fallback="Guest User" />
-          <div className="space-y-1 text-sm">
-            <p className="font-medium text-neutral-50">Guest User</p>
-            <p className="text-xs text-neutral-400">
-              之後會接上 Supabase 使用者資料
-            </p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Avatar
+              src={
+                user && !user.is_guest
+                  ? (user.avatar_url ?? undefined)
+                  : undefined
+              }
+              fallback={user?.display_name ?? "訪客"}
+            />
+            <div className="space-y-1 text-sm">
+              <p className="font-medium text-neutral-50">
+                {user?.display_name ?? "訪客"}
+              </p>
+              <p className="text-xs text-neutral-400">
+                {user?.is_guest
+                  ? "訪客模式 · 點擊登入可綁定 Google 帳號"
+                  : (user?.email ?? "已登入")}
+              </p>
+            </div>
           </div>
+          {user?.is_guest ? (
+            <Button onClick={() => setOpenAuthModal(true)} variant="secondary">
+              登入
+            </Button>
+          ) : (
+            <Button onClick={() => signOut()} variant="ghost" size="sm">
+              登出
+            </Button>
+          )}
         </div>
 
         <div className="mt-4 space-y-3">
@@ -44,26 +88,13 @@ export default function Home() {
             helperText="暫時只是UI元件尚未送出到 Supabase"
           />
 
-          <Input
-            placeholder="搜尋..."
-            leftSlot={<span className="text-xs text-neutral-400">💰</span>}
-            rightSlot={
-              <span className="text-xs text-neutral-400">V. Coins</span>
-            }
-          />
-
           <div className="flex items-center gap-2">
-            <Button onClick={handleTest}>測試 Supabase 連線</Button>
-            <Button onClick={toggleModal}>開啟 Modal</Button>
+            <Button onClick={() => setOpenAuthModal(true)} variant="outline">
+              開啟登入 / 註冊
+            </Button>
           </div>
         </div>
       </Card>
-      <Modal open={isModalOpen} onClose={toggleModal}>
-        <div className="space-y-3">
-          <p>Modal Content</p>
-          <Button onClick={toggleModal}>關閉 Modal</Button>
-        </div>
-      </Modal>
     </main>
   );
 }
