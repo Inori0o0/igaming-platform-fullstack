@@ -56,7 +56,7 @@ function getGuestUser(): AuthUser {
   };
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isLoading: true,
   openAuthModal: false,

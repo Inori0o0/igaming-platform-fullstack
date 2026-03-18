@@ -186,7 +186,7 @@ coupons
 
 ### 2.2 vAcAnt Logo 加載動畫系統
 
-建立統一的加載動畫元件，使用品牌 Logo 搭配霓虹發光 + 淡入縮放效果。
+建立統一的加載動畫元件，使用品牌 Logo 搭配霓虹發光 + 淡入縮放效果。重點是「**以真實載入狀態驅動**」，避免假進度條或純計時器造成誤導與干擾。
 
 **動畫效果組合：**
 
@@ -199,12 +199,12 @@ coupons
 
 **使用場景：**
 
-| 場景         | 元件                  | 動畫行為                   |
-| ------------ | --------------------- | -------------------------- |
-| 網站初次載入 | `<SplashScreen>`      | 全螢幕 Logo 動畫 + 進度條  |
-| 頁面切換     | `<PageTransition>`    | 小型 Logo 居中 + 發光脈動  |
-| 遊戲載入     | `<GameLoadingScreen>` | Logo + 遊戲名稱 + 進度提示 |
-| 資料載入中   | `<LogoLoader>`        | 小型 Logo 脈動效果         |
+| 場景               | 元件                  | 動畫行為 |
+| ------------------ | --------------------- | -------- |
+| 網站初次載入       | `<SplashScreen>`      | **接近全螢幕** Logo 動畫；由 auth/初始化狀態驅動，並提供「最短可見時間」避免一閃而過 |
+| 後續載入（非初次） | `<SplashScreen>`      | **只覆蓋 main 內容區**；Header/Sidebar/Footer 必須一直可見 |
+| 遊戲載入           | `<GameLoadingScreen>` | Logo + 遊戲名稱 + 提示文字；由各遊戲頁面自身 `isLoading` 狀態驅動 |
+| 局部資料載入       | `<LogoLoader>`        | 小型 Logo 脈動效果；用在按鈕/卡片等局部區塊 |
 
 **技術實現：**
 
@@ -212,16 +212,18 @@ coupons
 - CSS `filter: drop-shadow()` + `@keyframes` 做霓虹發光效果
 - 發光主色：青色 (#00ffff) 配合深色主題
 - 建立 `components/loading/` 資料夾統一管理
+- **禁止假進度條**：除非有真實 progress 來源，否則只顯示 Logo + 文案提示
+- **防閃爍策略**：提供 `minVisibleMs`（例如 300–600ms）改善載入很快時一閃而過
+- **精簡原則**：不做頁面切換過場（移除 `PageTransition`），避免過度 loading 干擾
 
 **元件檔案結構：**
 
 ```
 client-portal/src/components/loading/
-├── SplashScreen.tsx      # 初次載入全螢幕
-├── PageTransition.tsx    # 頁面切換過渡
+├── SplashScreen.tsx      # 初次載入接近全螢幕 / 後續載入只覆蓋 main
+├── NeonLogoWrapper.tsx   # 霓虹動畫容器（共用）
 ├── GameLoadingScreen.tsx # 遊戲載入畫面
-├── LogoLoader.tsx        # 小型載入指示器
-└── useLoading.ts         # 載入狀態 hook
+└── LogoLoader.tsx        # 小型載入指示器
 ```
 
 ### 2.3 主要頁面路由
@@ -243,7 +245,48 @@ client-portal/src/components/loading/
 /profile/orders      # 訂單歷史
 /profile/achievements # 成就
 /wallet              # 錢包
+/auth/callback       # Google OAuth 回跳：兌換 code → session → 導回 next
 ```
+
+**落地實作補充（Next.js App Router / Route Groups）：**
+
+- **主站殼（Header/Sidebar/Footer）只套在 `(lobby)`**：避免 `/auth/callback` 這種純流程頁面出現 UI 抖動。
+- **Auth callback 放在 `(auth)`**：URL 仍是 `/auth/callback`，但不會套主站殼。
+- **Profile 使用 nested layout**：`/profile/*` 共用 `profile/layout.tsx` 來提供 tabs（總覽/歷史/訂單/成就）。
+
+**實際檔案結構（對照 2.3 路由）：**
+
+```
+client-portal/src/app/
+├── layout.tsx                     # Root layout：AuthProvider / AuthModal / globals.css
+├── (auth)/
+│   └── auth/callback/page.tsx     # /auth/callback（不套主站殼）
+└── (lobby)/
+    ├── layout.tsx                 # 主站殼：ClientLayoutShell（Header/Sidebar/Footer）
+    ├── page.tsx                   # /
+    ├── games/
+    │   ├── page.tsx               # /games
+    │   ├── slots/
+    │   │   ├── page.tsx           # /games/slots
+    │   │   └── [id]/page.tsx      # /games/slots/[id]
+    │   ├── blackjack/page.tsx     # /games/blackjack
+    │   ├── baccarat/page.tsx      # /games/baccarat
+    │   └── lottery/page.tsx       # /games/lottery
+    ├── shop/
+    │   ├── page.tsx               # /shop
+    │   └── [id]/page.tsx          # /shop/[id]
+    ├── cart/page.tsx              # /cart
+    ├── checkout/page.tsx          # /checkout
+    ├── wallet/page.tsx            # /wallet
+    └── profile/
+        ├── layout.tsx             # /profile/* tabs 共用 layout
+        ├── page.tsx               # /profile
+        ├── history/page.tsx       # /profile/history
+        ├── orders/page.tsx        # /profile/orders
+        └── achievements/page.tsx  # /profile/achievements
+```
+
+> 註：目前 `/games/slots/[id]`、`/shop/[id]` 以 `params.id` 當作識別，先做 UI 殼與 placeholder；後續再串接真資料與狀態管理。
 
 ---
 
