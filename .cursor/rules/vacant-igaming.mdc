@@ -20,12 +20,17 @@ alwaysApply: false
   - 圖表使用 Recharts
 - **路由與模組結構**
   - 依計畫中的路由結構拆分頁面與模組（games、shop、wallet、profile 等）
+  - Next.js App Router 建議用 Route Groups 分層：
+    - `(lobby)`：主站頁面（套 `ClientLayoutShell`：Header/Sidebar/Footer）
+    - `(auth)`：純流程頁（例如 `/auth/callback`），**不套主站殼**
+  - `/profile/*` 採 nested layout：在 `profile/layout.tsx` 放 tabs/共用 UI
   - 共用元件（按鈕、卡片、Modal、Input、Avatar、Loading 等）集中在可重用的 `components` 資料夾
 
 ## 資料與 Supabase
 
 - 依 plan 內定義的資料表（users、wallets、transactions、game_history、achievements、products、orders 等）設計型別與 API
-- 優先透過 Supabase Client 存取資料，不在前端硬編假資料（除非特別標示 demo/mock）
+- 優先透過 Supabase Client 存取資料，不在前端硬編假資料
+  - 例外：在「路由骨架 / 版位確認」階段可用 placeholder/demo 資料，但要清楚標示，並規劃替換為真資料的下一步
 - 交易、遊戲紀錄、訂單等與金流相關資料要有清楚的型別與狀態（pending/success/failed 等）
 
 ## UI / UX 風格
@@ -35,8 +40,11 @@ alwaysApply: false
   - 在 Slots、Blackjack、Baccarat、Lottery 等遊戲中共用同一套角色設定與美術資產
   - 不同遊戲的 UI 顏色與插畫保持同一世界觀與視覺語言
 - Loading 與轉場：
-  - 使用計畫中定義的 `SplashScreen`、`PageTransition`、`GameLoadingScreen`、`LogoLoader` 統一 Logo 載入動畫
+  - 使用計畫中定義的 `SplashScreen`、`GameLoadingScreen`、`LogoLoader` 統一 Logo 載入動畫
   - 優先利用 Framer Motion 做淡入淡出、縮放與狀態過場
+  - 避免過度 loading 干擾：
+    - `SplashScreen` 以「首次進站」為主（可搭配 `minVisibleMs` 防閃爍）
+    - 後續短暫同步/載入優先用小型 `LogoLoader` 或 skeleton，不用整頁覆蓋
 
 ## 體驗與功能優先順序
 
