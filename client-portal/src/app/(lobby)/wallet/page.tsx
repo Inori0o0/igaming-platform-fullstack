@@ -1,6 +1,29 @@
-import { Card } from "@/src/components/ui/Card";
+"use client";
+
+import { useEffect } from "react";
+import { useAuthStore } from "@/src/store/authStore";
+import { useWalletStore } from "@/src/store/walletStore";
+import { BalanceCards } from "@/src/components/wallet/BalanceCards";
+import { UsdtRates } from "@/src/components/wallet/UsdtRates";
+import { WalletActionsCard } from "@/src/components/wallet/WalletActionsCard";
+import { TransactionsCard } from "@/src/components/wallet/TransactionsCard";
+import { useUsdtRates } from "@/src/components/wallet/useUsdtRates";
 
 export default function WalletPage() {
+  const userId = useAuthStore((s) => s.user?.id);
+  const balances = useWalletStore((s) => s.balances);
+  const transactions = useWalletStore((s) => s.transactions);
+  const hydrateForCurrentUser = useWalletStore((s) => s.hydrateForCurrentUser);
+  const deposit = useWalletStore((s) => s.deposit);
+  const submitWithdrawRequest = useWalletStore((s) => s.submitWithdrawRequest);
+  const claimFreeCoins = useWalletStore((s) => s.claimFreeCoins);
+  const { rates, isLoading: isRatesLoading, error: ratesError } = useUsdtRates();
+
+  useEffect(() => {
+    // 使用者身份變化時，切換到對應的本地錢包快照。
+    hydrateForCurrentUser();
+  }, [hydrateForCurrentUser, userId]);
+
   return (
     <main className="space-y-6">
       <div>
@@ -11,49 +34,26 @@ export default function WalletPage() {
           錢包
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-300">
-          目前是頁面殼。後續會接上 vAcAnt Coins + BTC/ETH 顯示、充值/提領 UI 與交易紀錄。
+          目前只使用 vAcAnt Coins，並提供 VAC 與 BTC/ETH 的即時換算參考。
         </p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card title="vAcAnt Coins" description="主要遊戲幣。">
-          <div className="rounded-2xl bg-neutral-950/70 p-4 text-sm text-neutral-200">
-            <p className="text-xs text-neutral-400">Balance</p>
-            <p className="mt-2 text-2xl font-semibold text-cyan-100">—</p>
-          </div>
-        </Card>
-        <Card title="BTC" description="展示用。">
-          <div className="rounded-2xl bg-neutral-950/70 p-4 text-sm text-neutral-200">
-            <p className="text-xs text-neutral-400">Balance</p>
-            <p className="mt-2 text-2xl font-semibold text-neutral-100">—</p>
-          </div>
-        </Card>
-        <Card title="ETH" description="展示用。">
-          <div className="rounded-2xl bg-neutral-950/70 p-4 text-sm text-neutral-200">
-            <p className="text-xs text-neutral-400">Balance</p>
-            <p className="mt-2 text-2xl font-semibold text-neutral-100">—</p>
-          </div>
-        </Card>
-      </div>
+      <UsdtRates
+        rates={rates}
+        isRatesLoading={isRatesLoading}
+        ratesError={ratesError}
+      />
+
+      <BalanceCards balances={balances} rates={rates} />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
-        <Card title="充值 / 提領（placeholder）" description="先把區塊放好。">
-          <div className="grid gap-3 text-xs text-neutral-300">
-            <div className="rounded-2xl border border-dashed border-cyan-500/25 bg-neutral-950/60 p-4 text-neutral-400">
-              Deposit UI
-            </div>
-            <div className="rounded-2xl border border-dashed border-cyan-500/25 bg-neutral-950/60 p-4 text-neutral-400">
-              Withdraw UI
-            </div>
-          </div>
-        </Card>
-        <Card title="交易紀錄（placeholder）" description="會支援篩選與分頁。">
-          <div className="rounded-2xl border border-dashed border-cyan-500/25 bg-neutral-950/60 p-6 text-center text-xs text-neutral-400">
-            Transactions table
-          </div>
-        </Card>
+        <WalletActionsCard
+          onDeposit={deposit}
+          onSubmitWithdrawRequest={submitWithdrawRequest}
+          onClaimFreeCoins={claimFreeCoins}
+        />
+        <TransactionsCard transactions={transactions} />
       </div>
     </main>
   );
 }
-
