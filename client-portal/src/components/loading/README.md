@@ -87,10 +87,8 @@
 - **`ClientLayoutShell.tsx`**
   - 全站載入體驗的掛載點（主站殼）：
     - `SplashScreen`：
-      - 第一次進站且 auth 初始化期間，以 `mode="fullscreen"` 顯示，形成開場動畫。
-      - 為避免 hydration mismatch，loading 判斷會在 client mount 後才成立（目前抽在 `useInitialSplash()`）。
-    - `LogoLoader`（右上角小提示）：
-      - 後續若 auth 再次 loading，只顯示右上角小型「同步中…」提示，不覆蓋整頁內容。
+      - 由 `isAuthLoading` 直接控制顯示，auth 初始化期間以 `mode="fullscreen"` 顯示。
+      - 目前已採簡化策略：不再區分首次進站/後續 inline loading。
   - 目前的路由結構是：Root `app/layout.tsx` 放 Provider，主站殼掛在 `app/(lobby)/layout.tsx`：
     ```tsx
     <AuthProvider>
@@ -118,10 +116,6 @@
 ---
 
 ### 5. Hook（狀態判斷）
-
-- **`useInitialSplash.ts`**
-  - 用途：集中管理「首次進站 Splash」與「後續 inline 同步提示」的判斷邏輯（含 `sessionStorage` 記錄）。
-  - 原則：避免 SSR/CSR 初始 render 不一致造成 hydration mismatch，因此判斷會在 client mount 後才生效。
 
 - **`useSplashVisibility.ts`**
   - 用途：提供 `SplashScreen` 的可見性狀態機（立刻可見 + `minVisibleMs` 防閃爍）。

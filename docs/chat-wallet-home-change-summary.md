@@ -5,8 +5,8 @@
 ## 一、Wallet 功能調整
 
 ### `client-portal/src/store/walletStore.ts`
-- 技術說明：新增 Wallet 的 Zustand 狀態管理，支援使用者分帳（`userId`）、本地持久化、充值、提領申請、免費領取與交易紀錄。
-- 白話文：這是你錢包的「大腦」，負責記住每個人的幣、交易歷史，還有點按鈕時要怎麼改資料。
+- 技術說明：Wallet 的 Zustand 狀態管理已升級成「訪客本地 + 登入落 Supabase」雙模式；登入後會讀寫 `users/wallets/transactions`，訪客維持 localStorage。
+- 白話文：這是你錢包的「大腦」，現在不只記在瀏覽器，登入後會真的寫進資料庫。
 
 ### `client-portal/src/components/layout/header/HeaderWalletSummary.tsx`
 - 技術說明：Header 右上角錢包摘要改為讀取 store 真實資料，不再固定顯示 `0 vAcAnt Coins`。
@@ -45,8 +45,8 @@
 - 白話文：專門管「領取免費 1000 coins」按鈕區塊。
 
 ### `client-portal/src/components/wallet/TransactionsCard.tsx`
-- 技術說明：保留狀態（篩選/分頁）並改為組裝子元件。
-- 白話文：交易列表這層只管邏輯，不直接塞滿 UI 細節。
+- 技術說明：保留狀態（篩選/分頁）並改為組裝子元件；後續已移除「幣別篩選」，只留類型篩選。
+- 白話文：交易列表這層只管邏輯，而且現在更符合 VAC-only 規則。
 
 ### `client-portal/src/components/wallet/TransactionFilters.tsx`
 - 技術說明：交易篩選 UI 拆出。
@@ -72,6 +72,10 @@
 - 技術說明：新增 server route 對外提供匯率資料；來源 CoinGecko、60 秒快取、失敗時回傳 stale 快取；VAC 固定 0.01 USDT。
 - 白話文：前端不直接打第三方 API，而是先打你自己的 API，比較穩定也好換來源。
 
+### `docs/sql/phase-3-wallet-vac-migration.sql`
+- 技術說明：新增錢包升級 migration，包含 `claim` enum、`transactions.status`、`balance_after`、VAC-only constraint、wallet 唯一約束與 RLS policy。
+- 白話文：這份 SQL 是把資料庫升級成「能正式支援 VAC 主幣真實儲存」的關鍵腳本。
+
 ### `client-portal/src/types/rates.ts`
 - 技術說明：抽共用型別 `UsdtRates`，供 API/Hook/UI 共用。
 - 白話文：匯率資料格式只定義一次，改起來不會漏。
@@ -83,8 +87,8 @@
 - 白話文：首頁右邊圖片下面直接看到大顆「免費領取」按鈕，動線更直覺。
 
 ### `client-portal/src/components/home/HomeClaimFreeCoinsOverlay.tsx`
-- 技術說明：改為精簡組裝層，負責外層高亮框與呼叫 hook + CTA button。
-- 白話文：這層現在只負責「包裝外觀」，不再塞滿邏輯。
+- 技術說明：改為精簡組裝層，負責外層高亮框與呼叫 hook + CTA button（大按鈕樣式與回饋提示已拆分）。
+- 白話文：這層現在只負責「包裝外觀」，按鈕行為與樣式分開維護。
 
 ### `client-portal/src/components/home/useClaimFreeCoinsOverlay.ts`
 - 技術說明：封裝首頁領取邏輯（hydrate、播放 `claim-click.mp3`、成功提示定時顯示）。
@@ -117,6 +121,14 @@
 ### `client-portal/src/components/wallet/WalletRatesBanner.tsx`
 - 技術說明：由 `UsdtRates.tsx` 取代。
 - 白話文：匯率區塊換成新的版本，命名也更直觀。
+
+### `client-portal/src/components/home/HomeSplashGate.tsx`
+- 技術說明：已移除；首頁不再單獨控制 Splash，改由主站殼統一控制。
+- 白話文：首頁不再自己管開場動畫，避免重疊與行為不一致。
+
+### `client-portal/src/components/loading/useInitialSplash.ts`
+- 技術說明：已移除；Splash 策略簡化為 `isAuthLoading` 直接控制。
+- 白話文：不再用 session 首次判斷，邏輯更直觀。
 
 ## 五、目前整體狀態（一句話）
 
