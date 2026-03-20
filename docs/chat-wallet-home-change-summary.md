@@ -5,8 +5,8 @@
 ## 一、Wallet 功能調整
 
 ### `client-portal/src/store/walletStore.ts`
-- 技術說明：Wallet 的 Zustand 狀態管理已升級成「訪客本地 + 登入落 Supabase」雙模式；登入後會讀寫 `users/wallets/transactions`，訪客維持 localStorage。
-- 白話文：這是你錢包的「大腦」，現在不只記在瀏覽器，登入後會真的寫進資料庫。
+- 技術說明：Wallet 的 Zustand 狀態管理已升級成「訪客本地 + 登入落 Supabase」雙模式；登入後會讀寫 `users/wallets/transactions`，訪客維持 localStorage，並加入 claim/deposit 防濫用限制（冷卻、次數、單筆與日上限）。
+- 白話文：這是你錢包的「大腦」，現在不只記在瀏覽器，登入後會真的寫進資料庫，而且有防狂點/防爆量機制。
 
 ### `client-portal/src/components/layout/header/HeaderWalletSummary.tsx`
 - 技術說明：Header 右上角錢包摘要改為讀取 store 真實資料，不再固定顯示 `0 vAcAnt Coins`。
@@ -33,16 +33,16 @@
 - 白話文：這張卡只負責把「充值、提領、免費領取」拼起來，並且都只操作 VAC。
 
 ### `client-portal/src/components/wallet/actions/DepositAction.tsx`
-- 技術說明：充值 UI 與輸入邏輯拆出。
-- 白話文：專門管「加錢」的區塊。
+- 技術說明：充值 UI 與輸入邏輯拆出，保留自訂輸入框並加上單筆 `200,000 VAC` 限制與提示。
+- 白話文：專門管「加錢」的區塊，現在超過上限不能送出。
 
 ### `client-portal/src/components/wallet/actions/WithdrawAction.tsx`
 - 技術說明：提領申請 UI 與輸入邏輯拆出。
 - 白話文：專門管「提領申請」的區塊。
 
 ### `client-portal/src/components/wallet/actions/ClaimAction.tsx`
-- 技術說明：免費領取 UI 區塊拆出。
-- 白話文：專門管「領取免費 1000 coins」按鈕區塊。
+- 技術說明：免費領取 UI 區塊拆出，文案同步為每次 `+6767 VAC`。
+- 白話文：專門管「領取免費 6767 coins」按鈕區塊。
 
 ### `client-portal/src/components/wallet/TransactionsCard.tsx`
 - 技術說明：保留狀態（篩選/分頁）並改為組裝子元件；後續已移除「幣別篩選」，只留類型篩選。

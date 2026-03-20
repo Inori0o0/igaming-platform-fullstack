@@ -22,6 +22,13 @@
   - `balance_after`
 - `transactions.currency` 限制為 `VAC`
 - `users` / `wallets` / `transactions` 啟用 RLS 並建立對應 policy
+- 交易限制 trigger：
+  - claim 必須 `6767 VAC`
+  - claim 冷卻 `1.5s`
+  - claim 每日最多 `677` 次
+  - deposit 單筆最多 `200,000 VAC`
+  - deposit 每分鐘最多 `10` 筆
+  - deposit 每日總額最多 `5,000,000 VAC`
 
 ## 功能驗證（前端）
 

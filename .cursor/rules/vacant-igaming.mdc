@@ -50,6 +50,9 @@ alwaysApply: false
 
 - 錢包主幣別為 **vAcAnt Coins (VAC)**，充值/提領/免費領取只操作 VAC
 - BTC / ETH / USDT 目前僅做匯率與估值展示，不作為可操作持有量
+- 防濫用限制（以目前專案設定為準）：
+  - `claim` 每次 `6767 VAC`、冷卻 `1.5s`、每日最多 `677` 次
+  - `deposit` 單筆最多 `200,000 VAC`、每分鐘最多 `10` 筆、每日總額最多 `5,000,000 VAC`
 - 資料持久化：
   - 訪客：存在瀏覽器 localStorage
   - 登入用戶：寫入 Supabase（`wallets`、`transactions`）
