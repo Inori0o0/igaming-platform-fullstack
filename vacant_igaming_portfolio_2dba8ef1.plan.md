@@ -106,16 +106,16 @@ wallets
 ├── id (uuid, PK)
 ├── user_id (FK -> users)
 ├── coin_balance (vAcAnt Coins)
-├── btc_balance
-├── eth_balance
 └── updated_at
 
 transactions
 ├── id (uuid, PK)
 ├── user_id (FK)
-├── type (deposit/withdraw/bet/win/purchase)
+├── type (deposit/withdraw/claim/bet/win/purchase)
 ├── currency
 ├── amount
+├── status (pending/completed/failed)
+├── balance_after
 ├── description
 └── created_at
 
@@ -199,12 +199,12 @@ coupons
 
 **使用場景：**
 
-| 場景               | 元件                  | 動畫行為 |
-| ------------------ | --------------------- | -------- |
+| 場景               | 元件                  | 動畫行為                                                                             |
+| ------------------ | --------------------- | ------------------------------------------------------------------------------------ |
 | 網站初次載入       | `<SplashScreen>`      | **接近全螢幕** Logo 動畫；由 auth/初始化狀態驅動，並提供「最短可見時間」避免一閃而過 |
-| 後續載入（非初次） | `<SplashScreen>`      | **只覆蓋 main 內容區**；Header/Sidebar/Footer 必須一直可見 |
-| 遊戲載入           | `<GameLoadingScreen>` | Logo + 遊戲名稱 + 提示文字；由各遊戲頁面自身 `isLoading` 狀態驅動 |
-| 局部資料載入       | `<LogoLoader>`        | 小型 Logo 脈動效果；用在按鈕/卡片等局部區塊 |
+| 後續載入（非初次） | `<SplashScreen>`      | **只覆蓋 main 內容區**；Header/Sidebar/Footer 必須一直可見                           |
+| 遊戲載入           | `<GameLoadingScreen>` | Logo + 遊戲名稱 + 提示文字；由各遊戲頁面自身 `isLoading` 狀態驅動                    |
+| 局部資料載入       | `<LogoLoader>`        | 小型 Logo 脈動效果；用在按鈕/卡片等局部區塊                                          |
 
 **技術實現：**
 
@@ -299,6 +299,7 @@ client-portal/src/app/
 - 模擬充值介面（點按鈕即可加 VAC）
 - 模擬提領介面（建立 pending 申請）
 - 交易紀錄列表（類型篩選、分頁）
+- 充值防濫用：單筆 200,000 VAC、每分鐘最多 10 筆、每日總額 5,000,000 VAC
 - **資料持久化策略**：
   - 訪客模式：資料存在瀏覽器（localStorage）
   - 登入用戶：寫入 Supabase（wallets + transactions）
@@ -306,9 +307,17 @@ client-portal/src/app/
 ### 3.2 免費領取系統
 
 - 「領取免費幣」按鈕（首頁高亮 CTA + 錢包頁入口）
-- 每次領取 1,000 vAcAnt Coins（無限制）
+- 每次領取 6,767 vAcAnt Coins
+- 冷卻 1.5 秒
+- 每日最多 677 次（約 4,581,259 VAC / 日）
 - 記錄到交易紀錄（`type=claim`）
 - 登入後同步寫入 Supabase；訪客模式維持本地紀錄
+
+### 3.3 防濫用限制（錢包）
+
+- 充值（deposit）單筆上限：200,000 VAC
+- 充值（deposit）每分鐘上限：10 筆
+- 充值（deposit）每日總額上限：5,000,000 VAC
 
 ---
 
@@ -318,11 +327,11 @@ client-portal/src/app/
 
 > 整體視覺走 **Italian Brainrot + vAcAnt 品牌** 混合風格：AI 生成怪物、霓虹賭場感、假義大利文角色名。
 
-| 主題                     | 說明                                                                 |
-| ------------------------ | -------------------------------------------------------------------- |
-| **vAcAnt Classic**       | 品牌主題，霓虹馬 + vAcAnt logo，轉輪圖案結合籌碼、馬頭與霓虹字       |
-| **Cyber Neon**           | 賽博龐克風格，夜城霓虹、故障特效、機械籌碼                          |
-| **Italian Brainrot Slots** | 以 Italian Brainrot 宇宙為主題，所有圖標皆為腦爛角色與其代表物件     |
+| 主題                       | 說明                                                             |
+| -------------------------- | ---------------------------------------------------------------- |
+| **vAcAnt Classic**         | 品牌主題，霓虹馬 + vAcAnt logo，轉輪圖案結合籌碼、馬頭與霓虹字   |
+| **Cyber Neon**             | 賽博龐克風格，夜城霓虹、故障特效、機械籌碼                       |
+| **Italian Brainrot Slots** | 以 Italian Brainrot 宇宙為主題，所有圖標皆為腦爛角色與其代表物件 |
 
 **Italian Brainrot Slots 主要角色與圖示：**
 
@@ -398,11 +407,11 @@ client-portal/src/app/
 
 > 彩票區同樣融入 Italian Brainrot 角色，每款遊戲都綁定 1-2 個代表角色或符號。
 
-| 遊戲             | 說明                                                                 |
-| ---------------- | -------------------------------------------------------------------- |
+| 遊戲                                 | 說明                                                                                                                                                               |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Tralalero Lucky Wheel** (轉盤抽獎) | 大型幸運轉盤，由 Tralalero Tralala 坐在中央；不同區塊以角色頭像與代表物件區分獎項，例如 Bombardiro Crocodilo 區塊對應高倍率獎勵、Elefanto Cactuso 區塊對應隨機加成 |
-| **Brainrot Scratch Cards** (刮刮樂) | 刮刮卡面印有 Tung Tung Tung Sahur、Brr Brr Patapim、Lirili Larila 等角色線稿，刮開後顯示對應角色與獎金倍率；特殊卡面可出現 Elephant Cactus 作為 Bonus 獎 |
-| **Cactuso Numbers** (數字彩票)      | 數字球造型為小型仙人掌大象頭（Elefanto Cactuso），開獎動畫由 Lirili Larila 拉小提琴，隨音符掉落數字球；特定組合可觸發 Bombardiro Crocodilo「爆擊獎池」效果 |
+| **Brainrot Scratch Cards** (刮刮樂)  | 刮刮卡面印有 Tung Tung Tung Sahur、Brr Brr Patapim、Lirili Larila 等角色線稿，刮開後顯示對應角色與獎金倍率；特殊卡面可出現 Elephant Cactus 作為 Bonus 獎           |
+| **Cactuso Numbers** (數字彩票)       | 數字球造型為小型仙人掌大象頭（Elefanto Cactuso），開獎動畫由 Lirili Larila 拉小提琴，隨音符掉落數字球；特定組合可觸發 Bombardiro Crocodilo「爆擊獎池」效果         |
 
 所有彩票遊戲的 **UI 色彩與插畫風格** 與 4.1 的 Italian Brainrot Slots 統一，確保角色與世界觀一致，方便後續在行銷頁與成就系統中重複利用這些角色。
 

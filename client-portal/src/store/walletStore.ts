@@ -32,6 +32,12 @@ const DEFAULT_BALANCES: WalletBalances = {
 };
 
 const STORAGE_KEY_PREFIX = "vacant_wallet_v1";
+const CLAIM_AMOUNT = 6767;
+const CLAIM_COOLDOWN_MS = 1500;
+const CLAIM_DAILY_LIMIT = 677;
+const DEPOSIT_SINGLE_LIMIT = 200000;
+const DEPOSIT_PER_MINUTE_LIMIT = 10;
+const DEPOSIT_DAILY_LIMIT = 5000000;
 
 type WalletState = {
   userId: string | null;
@@ -78,6 +84,16 @@ function toNumber(value: number | string | null | undefined): number {
     return Number.isFinite(parsed) ? parsed : 0;
   }
   return 0;
+}
+
+function getStartOfDayIso() {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return now.toISOString();
+}
+
+function getThresholdIso(ms: number) {
+  return new Date(Date.now() - ms).toISOString();
 }
 
 function buildStorageKey(identityId: string) {
@@ -244,6 +260,102 @@ async function insertTransaction(params: {
   }
 }
 
+async function getDbClaimStats(dbUserId: string) {
+  const { count, error: countError } = await supabase
+    .from("transactions")
+    .select("id", { head: true, count: "exact" })
+    .eq("user_id", dbUserId)
+    .eq("type", "claim")
+    .gte("created_at", getStartOfDayIso());
+  if (countError) {
+    throw new Error("讀取 claim 統計失敗");
+  }
+
+  const { data: latestRow, error: latestError } = await supabase
+    .from("transactions")
+    .select("created_at")
+    .eq("user_id", dbUserId)
+    .eq("type", "claim")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (latestError) {
+    throw new Error("讀取 claim 最新時間失敗");
+  }
+
+  return {
+    todayCount: count ?? 0,
+    lastClaimAtMs: latestRow?.created_at
+      ? new Date(latestRow.created_at).getTime()
+      : null,
+  };
+}
+
+async function getDbDepositStats(dbUserId: string) {
+  const { count, error: minuteCountError } = await supabase
+    .from("transactions")
+    .select("id", { head: true, count: "exact" })
+    .eq("user_id", dbUserId)
+    .eq("type", "deposit")
+    .gte("created_at", getThresholdIso(60_000));
+  if (minuteCountError) {
+    throw new Error("讀取 deposit 每分鐘統計失敗");
+  }
+
+  const { data: todayRows, error: todayError } = await supabase
+    .from("transactions")
+    .select("amount")
+    .eq("user_id", dbUserId)
+    .eq("type", "deposit")
+    .gte("created_at", getStartOfDayIso());
+  if (todayError) {
+    throw new Error("讀取 deposit 每日統計失敗");
+  }
+
+  const todayAmount = (todayRows ?? []).reduce(
+    (sum, row) => sum + toNumber(row.amount),
+    0,
+  );
+
+  return {
+    minuteCount: count ?? 0,
+    todayAmount,
+  };
+}
+
+function getLocalClaimStats(transactions: WalletTransaction[]) {
+  const startOfDayMs = new Date(getStartOfDayIso()).getTime();
+  let todayCount = 0;
+  let lastClaimAtMs: number | null = null;
+
+  for (const tx of transactions) {
+    if (tx.type !== "claim") continue;
+    const txMs = new Date(tx.createdAt).getTime();
+    if (txMs >= startOfDayMs) todayCount += 1;
+    if (lastClaimAtMs === null || txMs > lastClaimAtMs) {
+      lastClaimAtMs = txMs;
+    }
+  }
+
+  return { todayCount, lastClaimAtMs };
+}
+
+function getLocalDepositStats(transactions: WalletTransaction[]) {
+  const startOfDayMs = new Date(getStartOfDayIso()).getTime();
+  const thresholdMs = Date.now() - 60_000;
+  let minuteCount = 0;
+  let todayAmount = 0;
+
+  for (const tx of transactions) {
+    if (tx.type !== "deposit") continue;
+    const txMs = new Date(tx.createdAt).getTime();
+    if (txMs >= thresholdMs) minuteCount += 1;
+    if (txMs >= startOfDayMs) todayAmount += tx.amount;
+  }
+
+  return { minuteCount, todayAmount };
+}
+
 async function updateCoinBalance(dbUserId: string, nextBalance: number) {
   const { error } = await supabase
     .from("wallets")
@@ -308,13 +420,16 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   },
 
   deposit: async (currency, amount) => {
-    if (amount <= 0) return;
+    if (amount <= 0 || amount > DEPOSIT_SINGLE_LIMIT) return;
     const user = getCurrentUser();
     if (!user) return;
 
     if (user.is_guest) {
       const guestId = getCurrentGuestId();
       if (!guestId) return;
+      const localStats = getLocalDepositStats(get().transactions);
+      if (localStats.minuteCount >= DEPOSIT_PER_MINUTE_LIMIT) return;
+      if (localStats.todayAmount + amount > DEPOSIT_DAILY_LIMIT) return;
 
       const nextBalances: WalletBalances = {
         ...get().balances,
@@ -342,6 +457,10 @@ export const useWalletStore = create<WalletState>((set, get) => ({
 
     try {
       const dbUser = await getDbUserByAuthUserId(user.id);
+      const dbStats = await getDbDepositStats(dbUser.id);
+      if (dbStats.minuteCount >= DEPOSIT_PER_MINUTE_LIMIT) return;
+      if (dbStats.todayAmount + amount > DEPOSIT_DAILY_LIMIT) return;
+
       const wallet = await getOrCreateWallet(dbUser.id);
       const nextBalance = toNumber(wallet.coin_balance) + amount;
 
@@ -410,10 +529,18 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     const user = getCurrentUser();
     if (!user) return;
 
-    const amount = 1000;
+    const amount = CLAIM_AMOUNT;
     if (user.is_guest) {
       const guestId = getCurrentGuestId();
       if (!guestId) return;
+      const localStats = getLocalClaimStats(get().transactions);
+      if (localStats.todayCount >= CLAIM_DAILY_LIMIT) return;
+      if (
+        localStats.lastClaimAtMs !== null &&
+        Date.now() - localStats.lastClaimAtMs < CLAIM_COOLDOWN_MS
+      ) {
+        return;
+      }
 
       const nextBalances: WalletBalances = {
         ...get().balances,
@@ -438,6 +565,15 @@ export const useWalletStore = create<WalletState>((set, get) => ({
 
     try {
       const dbUser = await getDbUserByAuthUserId(user.id);
+      const claimStats = await getDbClaimStats(dbUser.id);
+      if (claimStats.todayCount >= CLAIM_DAILY_LIMIT) return;
+      if (
+        claimStats.lastClaimAtMs !== null &&
+        Date.now() - claimStats.lastClaimAtMs < CLAIM_COOLDOWN_MS
+      ) {
+        return;
+      }
+
       const wallet = await getOrCreateWallet(dbUser.id);
       const nextBalance = toNumber(wallet.coin_balance) + amount;
 

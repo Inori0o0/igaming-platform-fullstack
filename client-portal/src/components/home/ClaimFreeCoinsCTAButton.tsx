@@ -12,7 +12,7 @@ export function ClaimFreeCoinsCTAButton({
   return (
     <button
       type="button"
-      aria-label="領取 1,000 vAcAnt Coins"
+      aria-label="領取 6,767 vAcAnt Coins"
       onClick={onClaim}
       className={[
         "group relative flex w-full cursor-pointer flex-col items-start gap-2 rounded-3xl px-5 py-5 text-left",
@@ -30,14 +30,14 @@ export function ClaimFreeCoinsCTAButton({
         免費領取
       </p>
       <p className="text-xl font-extrabold tracking-tight text-cyan-50 sm:text-2xl">
-        點我立即領取 1,000 vAcAnt Coins
+        點我立即領取 6,767 vAcAnt Coins
       </p>
       <p className="text-xs text-neutral-300">
         每次點擊立即入帳，並自動寫入交易紀錄。
       </p>
       {claimedFeedback && (
         <span className="pointer-events-none absolute bottom-3 right-3 rounded-full border border-emerald-300/45 bg-emerald-400/20 px-2 py-1 text-[11px] font-semibold text-emerald-100 shadow-[0_0_20px_rgba(16,185,129,0.35)]">
-          已領取 +1000 Coins
+          已領取 +6767 Coins
         </span>
       )}
     </button>

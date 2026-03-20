@@ -10,12 +10,22 @@ type DepositActionProps = {
 
 export function DepositAction({ onDeposit }: DepositActionProps) {
   const [depositAmount, setDepositAmount] = useState("");
+  const [inputError, setInputError] = useState("");
+  const MAX_DEPOSIT_PER_TX = 200000;
 
   const onCustomDeposit = () => {
     const amount = Number(depositAmount);
-    if (!Number.isFinite(amount) || amount <= 0) return;
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setInputError("請輸入有效金額");
+      return;
+    }
+    if (amount > MAX_DEPOSIT_PER_TX) {
+      setInputError(`單筆上限為 ${MAX_DEPOSIT_PER_TX.toLocaleString()} VAC`);
+      return;
+    }
     onDeposit(amount);
     setDepositAmount("");
+    setInputError("");
   };
 
   return (
@@ -40,9 +50,14 @@ export function DepositAction({ onDeposit }: DepositActionProps) {
           <Input
             label="自訂充值金額"
             value={depositAmount}
-            onChange={(e) => setDepositAmount(e.target.value)}
+            onChange={(e) => {
+              setDepositAmount(e.target.value);
+              if (inputError) setInputError("");
+            }}
             inputMode="decimal"
             placeholder="輸入數字"
+            error={inputError || undefined}
+            helperText={`單筆上限 ${MAX_DEPOSIT_PER_TX.toLocaleString()} VAC`}
           />
         </div>
         <Button size="sm" onClick={onCustomDeposit}>

@@ -187,3 +187,88 @@ with check (
       and u.auth_user_id = auth.uid()
   )
 );
+
+-- 7) anti-abuse limits for VAC wallet operations
+-- claim:
+--   amount = 6767
+--   cooldown = 1.5s
+--   daily max count = 677
+-- deposit:
+--   single max = 200000
+--   max 10 deposits per minute
+--   daily total max = 5000000
+create or replace function public.enforce_transaction_limits()
+returns trigger as $$
+declare
+  recent_claim_at timestamptz;
+  today_claim_count integer;
+  minute_deposit_count integer;
+  today_deposit_amount numeric(18, 8);
+begin
+  if new.currency <> 'VAC' then
+    raise exception 'Only VAC currency is allowed.';
+  end if;
+
+  if new.type = 'claim' then
+    if new.amount <> 6767 then
+      raise exception 'Claim amount must be 6767 VAC.';
+    end if;
+
+    select max(t.created_at)
+      into recent_claim_at
+    from public.transactions t
+    where t.user_id = new.user_id
+      and t.type = 'claim';
+
+    if recent_claim_at is not null and (now() - recent_claim_at) < interval '1.5 seconds' then
+      raise exception 'Claim cooldown: wait at least 1.5 seconds.';
+    end if;
+
+    select count(*)
+      into today_claim_count
+    from public.transactions t
+    where t.user_id = new.user_id
+      and t.type = 'claim'
+      and t.created_at >= date_trunc('day', now());
+
+    if today_claim_count >= 677 then
+      raise exception 'Daily claim limit reached (677).';
+    end if;
+  end if;
+
+  if new.type = 'deposit' then
+    if new.amount > 200000 then
+      raise exception 'Single deposit limit exceeded (200000 VAC).';
+    end if;
+
+    select count(*)
+      into minute_deposit_count
+    from public.transactions t
+    where t.user_id = new.user_id
+      and t.type = 'deposit'
+      and t.created_at >= (now() - interval '1 minute');
+
+    if minute_deposit_count >= 10 then
+      raise exception 'Per-minute deposit limit reached (10).';
+    end if;
+
+    select coalesce(sum(t.amount), 0)
+      into today_deposit_amount
+    from public.transactions t
+    where t.user_id = new.user_id
+      and t.type = 'deposit'
+      and t.created_at >= date_trunc('day', now());
+
+    if (today_deposit_amount + new.amount) > 5000000 then
+      raise exception 'Daily deposit total limit exceeded (5000000 VAC).';
+    end if;
+  end if;
+
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trg_enforce_transaction_limits on public.transactions;
+create trigger trg_enforce_transaction_limits
+before insert on public.transactions
+for each row execute function public.enforce_transaction_limits();
