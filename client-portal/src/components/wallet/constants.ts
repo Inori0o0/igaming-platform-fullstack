@@ -17,5 +17,6 @@ export const typeLabels: Record<WalletTransaction["type"], string> = {
 export const statusLabels: Record<WalletTransaction["status"], string> = {
   completed: "完成",
   pending: "待處理",
+  failed: "失敗",
 };
 

@@ -2,10 +2,11 @@
 
 import { create } from "zustand";
 import { useAuthStore } from "@/src/store/authStore";
+import { supabase } from "@/src/lib/supabaseClient";
 
 export type WalletCurrency = "VAC" | "BTC" | "ETH";
 export type TransactionType = "deposit" | "withdraw" | "claim";
-export type TransactionStatus = "completed" | "pending";
+export type TransactionStatus = "completed" | "pending" | "failed";
 
 export type WalletBalances = {
   VAC: number;
@@ -37,20 +38,61 @@ type WalletState = {
   balances: WalletBalances;
   displayCurrency: WalletCurrency;
   transactions: WalletTransaction[];
-  hydrateForCurrentUser: () => void;
+  hydrateForCurrentUser: () => Promise<void>;
   setDisplayCurrency: (currency: WalletCurrency) => void;
-  deposit: (currency: WalletCurrency, amount: number) => void;
-  submitWithdrawRequest: (currency: WalletCurrency, amount: number) => void;
-  claimFreeCoins: () => void;
+  deposit: (currency: WalletCurrency, amount: number) => Promise<void>;
+  submitWithdrawRequest: (
+    currency: WalletCurrency,
+    amount: number,
+  ) => Promise<void>;
+  claimFreeCoins: () => Promise<void>;
 };
 
-function buildStorageKey(userId: string) {
-  // 以 userId 區分儲存 key，避免不同帳號（含訪客）互相覆蓋錢包資料。
-  return `${STORAGE_KEY_PREFIX}:${userId}`;
+type DbUserRow = {
+  id: string;
+  auth_user_id: string | null;
+};
+
+type DbWalletRow = {
+  user_id: string;
+  coin_balance: number | string | null;
+  btc_balance: number | string | null;
+  eth_balance: number | string | null;
+};
+
+type DbTransactionRow = {
+  id: string;
+  type: TransactionType;
+  currency: WalletCurrency;
+  amount: number | string;
+  description: string | null;
+  created_at: string;
+  status: string | null;
+  balance_after: number | string | null;
+};
+
+function toNumber(value: number | string | null | undefined): number {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
 }
 
-function getCurrentUserId() {
-  return useAuthStore.getState().user?.id ?? null;
+function buildStorageKey(identityId: string) {
+  // 以 userId 區分儲存 key，避免不同帳號（含訪客）互相覆蓋錢包資料。
+  return `${STORAGE_KEY_PREFIX}:${identityId}`;
+}
+
+function getCurrentUser() {
+  return useAuthStore.getState().user ?? null;
+}
+
+function getCurrentGuestId() {
+  const user = getCurrentUser();
+  if (!user || !user.is_guest) return null;
+  return user.id;
 }
 
 function createTransaction(
@@ -63,7 +105,7 @@ function createTransaction(
   };
 }
 
-function loadUserWallet(userId: string): {
+function loadLocalWallet(identityId: string): {
   balances: WalletBalances;
   transactions: WalletTransaction[];
 } {
@@ -71,7 +113,7 @@ function loadUserWallet(userId: string): {
     return { balances: DEFAULT_BALANCES, transactions: [] };
   }
 
-  const raw = window.localStorage.getItem(buildStorageKey(userId));
+  const raw = window.localStorage.getItem(buildStorageKey(identityId));
   if (!raw) {
     return { balances: DEFAULT_BALANCES, transactions: [] };
   }
@@ -90,16 +132,126 @@ function loadUserWallet(userId: string): {
   }
 }
 
-function persistUserWallet(
-  userId: string | null,
+function persistLocalWallet(
+  identityId: string | null,
   balances: WalletBalances,
   transactions: WalletTransaction[],
 ) {
-  if (!userId || typeof window === "undefined") return;
+  if (!identityId || typeof window === "undefined") return;
   window.localStorage.setItem(
-    buildStorageKey(userId),
+    buildStorageKey(identityId),
     JSON.stringify({ balances, transactions }),
   );
+}
+
+async function getDbUserByAuthUserId(authUserId: string): Promise<DbUserRow> {
+  const { data, error } = await supabase
+    .from("users")
+    .select("id, auth_user_id")
+    .eq("auth_user_id", authUserId)
+    .single();
+
+  if (error || !data) {
+    throw new Error("找不到對應的資料庫使用者，請確認 SQL trigger 已生效。");
+  }
+
+  return data as DbUserRow;
+}
+
+async function getOrCreateWallet(dbUserId: string): Promise<DbWalletRow> {
+  const { data, error } = await supabase
+    .from("wallets")
+    .select("user_id, coin_balance, btc_balance, eth_balance")
+    .eq("user_id", dbUserId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("讀取錢包失敗");
+  }
+
+  if (data) {
+    return data as DbWalletRow;
+  }
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("wallets")
+    .insert({
+      user_id: dbUserId,
+      coin_balance: 0,
+      btc_balance: 0,
+      eth_balance: 0,
+    })
+    .select("user_id, coin_balance, btc_balance, eth_balance")
+    .single();
+
+  if (insertError || !inserted) {
+    throw new Error("建立錢包失敗");
+  }
+
+  return inserted as DbWalletRow;
+}
+
+async function listTransactions(dbUserId: string): Promise<WalletTransaction[]> {
+  const { data, error } = await supabase
+    .from("transactions")
+    .select(
+      "id, type, currency, amount, description, created_at, status, balance_after",
+    )
+    .eq("user_id", dbUserId)
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  if (error || !data) {
+    throw new Error("讀取交易紀錄失敗");
+  }
+
+  return (data as DbTransactionRow[]).map((row) => ({
+    id: row.id,
+    createdAt: row.created_at,
+    type: row.type,
+    currency: row.currency,
+    amount: toNumber(row.amount),
+    status:
+      row.status === "pending" || row.status === "failed"
+        ? row.status
+        : "completed",
+    description: row.description ?? "",
+    balanceAfter:
+      row.balance_after === null ? null : toNumber(row.balance_after),
+  }));
+}
+
+async function insertTransaction(params: {
+  dbUserId: string;
+  type: TransactionType;
+  amount: number;
+  status: "pending" | "completed" | "failed";
+  description: string;
+  balanceAfter: number | null;
+}) {
+  const { error } = await supabase.from("transactions").insert({
+    user_id: params.dbUserId,
+    type: params.type,
+    currency: "VAC",
+    amount: params.amount,
+    status: params.status,
+    description: params.description,
+    balance_after: params.balanceAfter,
+  });
+
+  if (error) {
+    throw new Error("寫入交易紀錄失敗");
+  }
+}
+
+async function updateCoinBalance(dbUserId: string, nextBalance: number) {
+  const { error } = await supabase
+    .from("wallets")
+    .update({ coin_balance: nextBalance })
+    .eq("user_id", dbUserId);
+  if (error) {
+    throw new Error("更新錢包餘額失敗");
+  }
 }
 
 export const useWalletStore = create<WalletState>((set, get) => ({
@@ -108,9 +260,9 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   displayCurrency: "VAC",
   transactions: [],
 
-  hydrateForCurrentUser: () => {
-    const userId = getCurrentUserId();
-    if (!userId) {
+  hydrateForCurrentUser: async () => {
+    const user = getCurrentUser();
+    if (!user) {
       set({
         userId: null,
         balances: DEFAULT_BALANCES,
@@ -119,83 +271,188 @@ export const useWalletStore = create<WalletState>((set, get) => ({
       return;
     }
 
-    const { balances, transactions } = loadUserWallet(userId);
-    // 身份切換（訪客/已登入）時，重新載入對應身份的錢包快照。
-    set({ userId, balances, transactions });
+    // 訪客模式：僅保留瀏覽器本地資料，不落庫。
+    if (user.is_guest) {
+      const guestId = getCurrentGuestId();
+      if (!guestId) return;
+      const { balances, transactions } = loadLocalWallet(guestId);
+      set({ userId: guestId, balances, transactions });
+      return;
+    }
+
+    try {
+      const dbUser = await getDbUserByAuthUserId(user.id);
+      const wallet = await getOrCreateWallet(dbUser.id);
+      const transactions = await listTransactions(dbUser.id);
+      set({
+        userId: user.id,
+        balances: {
+          VAC: toNumber(wallet.coin_balance),
+          BTC: toNumber(wallet.btc_balance),
+          ETH: toNumber(wallet.eth_balance),
+        },
+        transactions,
+      });
+    } catch (e) {
+      console.warn("hydrate wallet from supabase failed:", e);
+      set({
+        userId: user.id,
+        balances: DEFAULT_BALANCES,
+        transactions: [],
+      });
+    }
   },
 
   setDisplayCurrency: (currency) => {
     set({ displayCurrency: currency });
   },
 
-  deposit: (currency, amount) => {
-    const userId = get().userId;
-    if (!userId || amount <= 0) return;
+  deposit: async (currency, amount) => {
+    if (amount <= 0) return;
+    const user = getCurrentUser();
+    if (!user) return;
 
-    const nextBalances: WalletBalances = {
-      ...get().balances,
-      [currency]: get().balances[currency] + amount,
-    };
-    const nextTransactions = [
-      createTransaction({
+    if (user.is_guest) {
+      const guestId = getCurrentGuestId();
+      if (!guestId) return;
+
+      const nextBalances: WalletBalances = {
+        ...get().balances,
+        [currency]: get().balances[currency] + amount,
+      };
+      const nextTransactions = [
+        createTransaction({
+          type: "deposit",
+          currency,
+          amount,
+          status: "completed",
+          description: `模擬充值 ${currency}`,
+          balanceAfter: nextBalances[currency],
+        }),
+        ...get().transactions,
+      ];
+
+      set({ balances: nextBalances, transactions: nextTransactions });
+      persistLocalWallet(guestId, nextBalances, nextTransactions);
+      return;
+    }
+
+    // VAC-first：登入後只將 VAC 寫入真實錢包。
+    if (currency !== "VAC") return;
+
+    try {
+      const dbUser = await getDbUserByAuthUserId(user.id);
+      const wallet = await getOrCreateWallet(dbUser.id);
+      const nextBalance = toNumber(wallet.coin_balance) + amount;
+
+      await updateCoinBalance(dbUser.id, nextBalance);
+      await insertTransaction({
+        dbUserId: dbUser.id,
         type: "deposit",
-        currency,
         amount,
         status: "completed",
-        description: `模擬充值 ${currency}`,
-        balanceAfter: nextBalances[currency],
-      }),
-      ...get().transactions,
-    ];
-
-    set({ balances: nextBalances, transactions: nextTransactions });
-    persistUserWallet(userId, nextBalances, nextTransactions);
+        description: "充值 vAcAnt Coins",
+        balanceAfter: nextBalance,
+      });
+      await get().hydrateForCurrentUser();
+    } catch (e) {
+      console.warn("deposit failed:", e);
+    }
   },
 
-  submitWithdrawRequest: (currency, amount) => {
-    const userId = get().userId;
-    if (!userId || amount <= 0) return;
+  submitWithdrawRequest: async (currency, amount) => {
+    if (amount <= 0) return;
+    const user = getCurrentUser();
+    if (!user) return;
 
-    const nextTransactions = [
-      createTransaction({
+    if (user.is_guest) {
+      const guestId = getCurrentGuestId();
+      if (!guestId) return;
+
+      const nextTransactions = [
+        createTransaction({
+          type: "withdraw",
+          currency,
+          amount,
+          // 目前規格為「提領申請」：先記 pending，不直接扣款。
+          status: "pending",
+          description: `模擬提領申請 ${currency}`,
+          // pending 階段尚無最終餘額，因此以 null 表示。
+          balanceAfter: null,
+        }),
+        ...get().transactions,
+      ];
+
+      set({ transactions: nextTransactions });
+      persistLocalWallet(guestId, get().balances, nextTransactions);
+      return;
+    }
+
+    if (currency !== "VAC") return;
+
+    try {
+      const dbUser = await getDbUserByAuthUserId(user.id);
+      await insertTransaction({
+        dbUserId: dbUser.id,
         type: "withdraw",
-        currency,
         amount,
-        // 目前規格為「提領申請」：先記 pending，不直接扣款。
         status: "pending",
-        description: `模擬提領申請 ${currency}`,
-        // pending 階段尚無最終餘額，因此以 null 表示。
+        description: "提領申請 vAcAnt Coins",
         balanceAfter: null,
-      }),
-      ...get().transactions,
-    ];
-
-    set({ transactions: nextTransactions });
-    persistUserWallet(userId, get().balances, nextTransactions);
+      });
+      await get().hydrateForCurrentUser();
+    } catch (e) {
+      console.warn("withdraw request failed:", e);
+    }
   },
 
-  claimFreeCoins: () => {
-    const userId = get().userId;
-    if (!userId) return;
+  claimFreeCoins: async () => {
+    const user = getCurrentUser();
+    if (!user) return;
 
     const amount = 1000;
-    const nextBalances: WalletBalances = {
-      ...get().balances,
-      VAC: get().balances.VAC + amount,
-    };
-    const nextTransactions = [
-      createTransaction({
+    if (user.is_guest) {
+      const guestId = getCurrentGuestId();
+      if (!guestId) return;
+
+      const nextBalances: WalletBalances = {
+        ...get().balances,
+        VAC: get().balances.VAC + amount,
+      };
+      const nextTransactions = [
+        createTransaction({
+          type: "claim",
+          currency: "VAC",
+          amount,
+          status: "completed",
+          description: "免費領取 vAcAnt Coins",
+          balanceAfter: nextBalances.VAC,
+        }),
+        ...get().transactions,
+      ];
+
+      set({ balances: nextBalances, transactions: nextTransactions });
+      persistLocalWallet(guestId, nextBalances, nextTransactions);
+      return;
+    }
+
+    try {
+      const dbUser = await getDbUserByAuthUserId(user.id);
+      const wallet = await getOrCreateWallet(dbUser.id);
+      const nextBalance = toNumber(wallet.coin_balance) + amount;
+
+      await updateCoinBalance(dbUser.id, nextBalance);
+      await insertTransaction({
+        dbUserId: dbUser.id,
         type: "claim",
-        currency: "VAC",
         amount,
         status: "completed",
         description: "免費領取 vAcAnt Coins",
-        balanceAfter: nextBalances.VAC,
-      }),
-      ...get().transactions,
-    ];
-
-    set({ balances: nextBalances, transactions: nextTransactions });
-    persistUserWallet(userId, nextBalances, nextTransactions);
+        balanceAfter: nextBalance,
+      });
+      await get().hydrateForCurrentUser();
+    } catch (e) {
+      console.warn("claim free coins failed:", e);
+    }
   },
 }));
