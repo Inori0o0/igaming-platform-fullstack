@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Button } from "@/src/components/ui/Button";
+import { HomeClaimFreeCoinsOverlay } from "@/src/components/home/HomeClaimFreeCoinsOverlay";
 
 type HomeHeroSectionProps = {
   onOpenAuthModal: () => void;
@@ -18,8 +19,8 @@ export function HomeHeroSection({ onOpenAuthModal }: HomeHeroSectionProps) {
           連線，走進霓虹腦爛賭場宇宙。
         </h1>
         <p className="max-w-xl text-sm text-neutral-300 sm:text-base">
-          管理你的虛擬錢包、遊玩 Slots、Blackjack、Baccarat 與 Lottery， 並在 vAcAnt
-          商店解鎖收藏與限定造型。
+          管理你的虛擬錢包、遊玩 Slots、Blackjack、Baccarat 與 Lottery， 並在
+          vAcAnt 商店解鎖收藏與限定造型。
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <Button size="lg" onClick={onOpenAuthModal}>
@@ -34,26 +35,21 @@ export function HomeHeroSection({ onOpenAuthModal }: HomeHeroSectionProps) {
         </p>
       </div>
 
-      <div className="relative h-64 w-full overflow-hidden rounded-3xl border border-cyan-500/40 bg-neutral-950/80 shadow-[0_0_60px_rgba(34,211,238,0.45)]">
-        <Image
-          src="/horse-hero.png"
-          alt="vAcAnt Brainrot Hero"
-          fill
-          priority
-          className="object-cover"
-          sizes="(min-width: 1024px) 480px, 100vw"
-        />
-        <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/10 to-transparent" />
-        <div className="absolute inset-0 flex flex-col justify-end p-5">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-cyan-200/90">
-            vAcAnt Lobby Hero
-          </p>
-          <p className="mt-1 text-lg font-semibold text-white">
-            這裡之後會換成 Italian Brainrot 主視覺插畫。
-          </p>
+      <div className="flex flex-col gap-4">
+        <div className="relative h-64 w-full overflow-hidden rounded-3xl border border-cyan-500/40 bg-neutral-950/80 shadow-[0_0_60px_rgba(34,211,238,0.45)]">
+          <Image
+            src="/point_down.png"
+            alt="vAcAnt Brainrot Hero"
+            fill
+            priority
+            className="object-cover"
+            sizes="(min-width: 1024px) 480px, 100vw"
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/10 to-transparent" />
         </div>
+
+        <HomeClaimFreeCoinsOverlay />
       </div>
     </section>
   );
 }
-

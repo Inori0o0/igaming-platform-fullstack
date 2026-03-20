@@ -2,10 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Card } from "@/src/components/ui/Card";
-import type {
-  WalletCurrency,
-  WalletTransaction,
-} from "@/src/store/walletStore";
+import type { WalletTransaction } from "@/src/store/walletStore";
 import { TRANSACTIONS_PER_PAGE } from "@/src/components/wallet/constants";
 import { TransactionFilters } from "@/src/components/wallet/TransactionFilters";
 import { TransactionTable } from "@/src/components/wallet/TransactionTable";
@@ -20,19 +17,13 @@ export function TransactionsCard({ transactions }: TransactionsCardProps) {
   const [txTypeFilter, setTxTypeFilter] = useState<
     "all" | WalletTransaction["type"]
   >("all");
-  const [txCurrencyFilter, setTxCurrencyFilter] = useState<
-    "all" | WalletCurrency
-  >("all");
   const [currentPage, setCurrentPage] = useState(1);
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((tx) => {
-      const typeMatches = txTypeFilter === "all" || tx.type === txTypeFilter;
-      const currencyMatches =
-        txCurrencyFilter === "all" || tx.currency === txCurrencyFilter;
-      return typeMatches && currencyMatches;
+      return txTypeFilter === "all" || tx.type === txTypeFilter;
     });
-  }, [transactions, txTypeFilter, txCurrencyFilter]);
+  }, [transactions, txTypeFilter]);
 
   const totalPages = Math.max(
     1,
@@ -49,13 +40,8 @@ export function TransactionsCard({ transactions }: TransactionsCardProps) {
       <div className="space-y-3">
         <TransactionFilters
           txTypeFilter={txTypeFilter}
-          txCurrencyFilter={txCurrencyFilter}
           onTypeFilterChange={(next) => {
             setTxTypeFilter(next);
-            setCurrentPage(1);
-          }}
-          onCurrencyFilterChange={(next) => {
-            setTxCurrencyFilter(next);
             setCurrentPage(1);
           }}
         />
