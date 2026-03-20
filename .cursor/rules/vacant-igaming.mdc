@@ -43,8 +43,16 @@ alwaysApply: false
   - 使用計畫中定義的 `SplashScreen`、`GameLoadingScreen`、`LogoLoader` 統一 Logo 載入動畫
   - 優先利用 Framer Motion 做淡入淡出、縮放與狀態過場
   - 避免過度 loading 干擾：
-    - `SplashScreen` 以「首次進站」為主（可搭配 `minVisibleMs` 防閃爍）
+    - 目前主站殼採簡化策略：`SplashScreen` 由 `isAuthLoading` 直接控制
     - 後續短暫同步/載入優先用小型 `LogoLoader` 或 skeleton，不用整頁覆蓋
+
+## 錢包（目前專案決策）
+
+- 錢包主幣別為 **vAcAnt Coins (VAC)**，充值/提領/免費領取只操作 VAC
+- BTC / ETH / USDT 目前僅做匯率與估值展示，不作為可操作持有量
+- 資料持久化：
+  - 訪客：存在瀏覽器 localStorage
+  - 登入用戶：寫入 Supabase（`wallets`、`transactions`）
 
 ## 體驗與功能優先順序
 
