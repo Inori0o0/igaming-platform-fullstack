@@ -36,7 +36,7 @@ export function TransactionsCard({ transactions }: TransactionsCardProps) {
   );
 
   return (
-    <Card title="交易紀錄" description="支援類型/幣別篩選與前端分頁。">
+    <Card title="交易紀錄" description="支援類型篩選與前端分頁。">
       <div className="space-y-3">
         <TransactionFilters
           txTypeFilter={txTypeFilter}
