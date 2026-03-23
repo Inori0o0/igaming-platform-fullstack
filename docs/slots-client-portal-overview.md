@@ -62,7 +62,8 @@
 | **`components/ui/GameThemeCard.tsx`** | **遊戲圖卡**：4:5、底圖、底部漸層、標題；可標**遊戲類型**（如 Slots）；非開放時灰階 + 不可點。 |
 | **`components/home/HomeHighlightsSection.tsx`** | 首頁「熱門遊戲」：其中一張卡連到 Italian Brainrot。 |
 | **`app/(lobby)/games/slots/page.tsx`** | **老虎機列表頁**：用靜態陣列畫多張 `GameThemeCard`，並帶入可用性。 |
-| **`app/(lobby)/games/slots/[id]/page.tsx`** | **單一主題頁路由**：有 config 且可玩 → 玩；只有 placeholder → 即將開放；有 config 不可玩 → 維護／即將開放；都沒有 → 找不到主題。 |
+| **`app/(lobby)/games/slots/[id]/page.tsx`** | **單一主題頁路由（薄）**：`await params` → 查 config／placeholder／可用性 → 交給對應的 view。 |
+| **`app/(lobby)/games/slots/[id]/slot-game-page-views.tsx`** | **同一路由的四種畫面**：僅圖卡 placeholder、找不到 id、有主題但不可玩、可玩（轉輪 + 開發備註）。與 `page.tsx` 分檔避免一支檔案塞滿分支。 |
 
 ---
 
