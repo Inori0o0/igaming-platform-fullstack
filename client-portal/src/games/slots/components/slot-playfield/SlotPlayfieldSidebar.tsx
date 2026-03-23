@@ -6,33 +6,49 @@ import type { SlotThemeConfig } from "@/src/games/slots/config";
 
 type SlotPlayfieldSidebarProps = {
   theme: SlotThemeConfig;
+  totalBet: number;
 };
 
-export function SlotPlayfieldSidebar({ theme }: SlotPlayfieldSidebarProps) {
+export function SlotPlayfieldSidebar({
+  theme,
+  totalBet,
+}: SlotPlayfieldSidebarProps) {
+  const MIN_TOTAL_BET = 100;
+  const MAX_TOTAL_BET = 100000;
+  const BET_STEP_OPTIONS = "100 / 1000 / 10000";
+
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <Card
-        title="下注區（自 config）"
-        description="數值來自 theme.betting，僅展示。"
+        title="下注區（config + UI）"
+        description="主題提供 default，下注範圍與跳額依目前前端規則。"
       >
         <div className="grid gap-2 text-xs text-neutral-300">
           <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
-            <span>Default bet</span>
+            <span>Theme default bet</span>
             <span className={theme.visual.accentText}>
               {theme.betting.defaultBet}
             </span>
           </div>
           <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
-            <span>Step / Min / Max</span>
+            <span>總下注範圍（目前）</span>
             <span className={theme.visual.accentText}>
-              {theme.betting.step} / {theme.betting.min} / {theme.betting.max}
+              {MIN_TOTAL_BET} / {MAX_TOTAL_BET}
             </span>
+          </div>
+          <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
+            <span>跳額選項（目前）</span>
+            <span className={theme.visual.accentText}>{BET_STEP_OPTIONS}</span>
           </div>
           <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
             <span>Paylines</span>
             <span className={theme.visual.accentText}>
               {theme.paylines.length}
             </span>
+          </div>
+          <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
+            <span>目前總下注</span>
+            <span className={theme.visual.accentText}>{Math.round(totalBet)}</span>
           </div>
           <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
             <span>Features</span>

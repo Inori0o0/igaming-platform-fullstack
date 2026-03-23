@@ -17,6 +17,11 @@ export type SpinEvaluation = {
   lineWins: LineWin[];
   totalCredits: number;
   betPerLine: number;
+  totalBet: number;
+};
+
+export type SpinBetConfig = {
+  totalBet: number;
 };
 
 /** 從該 payline 上五顆符號，數「從最左邊開始連續幾顆相同」（中斷即停）。 */
@@ -45,20 +50,22 @@ function multiplierFor(
 
 /**
  * 由左至右連續相同符號；3/4/5 連線對照 paytable。
- * 每線下注 = defaultBet / paylines.length（之後可改為可調 lines / 每線注）。
+ * `betConfig` 可由 UI 控制總下注（`totalBet`），線數固定使用主題 payline 全部條目。
  */
 export function evaluateLineWins(
   columns: readonly (readonly SlotSymbol[])[],
   theme: SlotThemeConfig,
+  betConfig?: Partial<SpinBetConfig>,
 ): SpinEvaluation {
-  const betPerLine =
-    theme.paylines.length > 0
-      ? theme.betting.defaultBet / theme.paylines.length
-      : theme.betting.defaultBet;
+  // lines 固定採用主題全部 paylines；本版僅允許外部控制 totalBet。
+  const activePaylineCount = Math.max(1, theme.paylines.length);
+  const totalBetInput = betConfig?.totalBet ?? theme.betting.defaultBet;
+  const totalBet = Math.max(theme.betting.min, Math.min(totalBetInput, theme.betting.max));
+  const betPerLine = totalBet / activePaylineCount;
 
   const lineWins: LineWin[] = [];
 
-  theme.paylines.forEach((line, paylineIndex) => {
+  theme.paylines.slice(0, activePaylineCount).forEach((line, paylineIndex) => {
     const symbols = line.map((row, col) => columns[col]![row]!);
     const run = leftRunFromLine(symbols);
     if (run.length < 3) return;
@@ -78,7 +85,7 @@ export function evaluateLineWins(
 
   const totalCredits = lineWins.reduce((s, w) => s + w.lineWinCredits, 0);
 
-  return { lineWins, totalCredits, betPerLine };
+  return { lineWins, totalCredits, betPerLine, totalBet };
 }
 
 /**

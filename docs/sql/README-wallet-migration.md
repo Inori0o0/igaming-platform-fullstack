@@ -3,6 +3,7 @@
 ## 檔案位置
 
 - Migration 檔：`docs/sql/phase-3-wallet-vac-migration.sql`
+- Slots 結算擴充：`docs/sql/phase-5-slots-wallet-rounds-migration.sql`
 
 ## 使用步驟
 
@@ -12,6 +13,7 @@
 4. 執行 SQL
 
 > 建議：不要刪掉既有 schema 直接覆蓋；請在既有基礎上執行 migration。
+> 新增 slots 錢包結算欄位時，請在 phase-3 後再執行 phase-5。
 
 ## 執行後應該看到的變化
 

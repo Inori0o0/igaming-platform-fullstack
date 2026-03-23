@@ -31,7 +31,8 @@
 
 | 檔案 | 做什麼 |
 |------|--------|
-| **`evaluateLineWins.ts`** | **核心數學**：每條 payline 從**左到右**數連續幾個**相同符號**，滿 3／4／5 就去 paytable 找倍率；總分 = 各線加總。另提供 `winningCellKeys` 給畫面**亮哪幾格**。 |
+| **`evaluateLineWins.ts`** | **核心數學**：每條 payline 從**左到右**數連續幾個**相同符號**，滿 3／4／5 就去 paytable 找倍率；總分 = 各線加總。這版只吃 `totalBet`，並固定用主題全部 paylines 分攤每線注。另提供 `winningCellKeys` 給畫面**亮哪幾格**。 |
+| **`evaluateLineWins.test.ts`** | 連線規則單測：固定盤面驗證「多線結算」「左起連續才算」「`totalBet` 會平均分攤到全部 paylines」。 |
 
 ---
 
@@ -39,7 +40,7 @@
 
 | 檔案 | 做什麼 |
 |------|--------|
-| **`SlotThemedPlayfield.tsx`** | **一個主題的整張遊戲畫面**：記盤面、按轉、叫結算、排背景／橫幅／外框、塞五個 `ReelColumn`、結果與按鈕、側欄。 |
+| **`SlotThemedPlayfield.tsx`** | **一個主題的整張遊戲畫面**：記盤面、按轉、叫結算、排背景／橫幅／外框、塞五個 `ReelColumn`、結果與按鈕、側欄。已接錢包：下注成功先寫 `wager` 扣 VAC，停輪後寫 `payout` 加回獎勵；按鈕點下後動畫先啟動，下注失敗會回滾並提示。 |
 | **`slot-playfield/constants.ts`** | 幾列幾欄、預設單格高度；以及每欄「滾動條要拉多長」的公式（讓五欄停輪時間錯開）。 |
 | **`slot-playfield/reelStrip.ts`** | 生出**隨機結果欄**、**第一次載入可重現的盤面**、以及動畫用**長條符號帶**（上面假滾動、最後三格是真結果）。 |
 | **`slot-playfield/highlightRows.ts`** | 把「中獎格子的座標字串」拆成**某一欄要亮哪幾列**，給 `ReelColumn` 畫圈。 |
@@ -50,7 +51,7 @@
 | **`slot-playfield/SlotPlayfieldReelFrame.tsx`** | 機台**外框 PNG**，中間用 `inset` 挖洞塞轉輪。 |
 | **`slot-playfield/SlotPlayfieldShellHeader.tsx`** | 轉輪區上方一行小資訊（有無橫幅時版面略不同）。 |
 | **`slot-playfield/SlotSpinResult.tsx`** | 顯示本局連線結果列表與**展示用**總分。 |
-| **`slot-playfield/SlotPlayfieldSpinControls.tsx`** | **轉一下**按鈕，樣式吃主題的 button class。 |
+| **`slot-playfield/SlotPlayfieldSpinControls.tsx`** | 下注控制 + 轉動按鈕：`totalBet` 範圍固定 `100~100000`，用 `+/-` 與跳額按鈕（100/1000/10000）調整。 |
 | **`slot-playfield/SlotPlayfieldSidebar.tsx`** | 下方兩張卡：下注參數摘要 + paytable 唯讀列表。 |
 
 ---
