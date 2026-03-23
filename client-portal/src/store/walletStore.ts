@@ -5,7 +5,12 @@ import { useAuthStore } from "@/src/store/authStore";
 import { supabase } from "@/src/lib/supabaseClient";
 
 export type WalletCurrency = "VAC" | "BTC" | "ETH";
-export type TransactionType = "deposit" | "withdraw" | "claim";
+export type TransactionType =
+  | "deposit"
+  | "withdraw"
+  | "claim"
+  | "wager"
+  | "payout";
 export type TransactionStatus = "completed" | "pending" | "failed";
 
 export type WalletBalances = {
@@ -52,6 +57,17 @@ type WalletState = {
     amount: number,
   ) => Promise<void>;
   claimFreeCoins: () => Promise<void>;
+  placeSlotWager: (params: {
+    themeId: string;
+    totalBet: number;
+    roundId: string;
+  }) => Promise<boolean>;
+  applySlotPayout: (params: {
+    themeId: string;
+    payout: number;
+    totalBet: number;
+    roundId: string;
+  }) => Promise<void>;
 };
 
 type DbUserRow = {
@@ -244,8 +260,13 @@ async function insertTransaction(params: {
   status: "pending" | "completed" | "failed";
   description: string;
   balanceAfter: number | null;
+  gameId?: string;
+  themeId?: string;
+  roundId?: string;
+  metadata?: Record<string, unknown>;
 }) {
-  const { error } = await supabase.from("transactions").insert({
+  // phase-5: 遊戲交易可附帶 round/game/theme，舊交易流程（deposit/claim/withdraw）不受影響。
+  const payload: Record<string, unknown> = {
     user_id: params.dbUserId,
     type: params.type,
     currency: "VAC",
@@ -253,7 +274,12 @@ async function insertTransaction(params: {
     status: params.status,
     description: params.description,
     balance_after: params.balanceAfter,
-  });
+  };
+  if (params.gameId) payload.game_id = params.gameId;
+  if (params.themeId) payload.theme_id = params.themeId;
+  if (params.roundId) payload.round_id = params.roundId;
+  if (params.metadata) payload.metadata = params.metadata;
+  const { error } = await supabase.from("transactions").insert(payload);
 
   if (error) {
     throw new Error("寫入交易紀錄失敗");
@@ -589,6 +615,118 @@ export const useWalletStore = create<WalletState>((set, get) => ({
       await get().hydrateForCurrentUser();
     } catch (e) {
       console.warn("claim free coins failed:", e);
+    }
+  },
+
+  // Slots: 扣款交易（wager）。前端先做餘額預檢，再寫入 DB/local。
+  placeSlotWager: async ({ themeId, totalBet, roundId }) => {
+    const user = getCurrentUser();
+    if (!user || totalBet <= 0) return false;
+    const amount = Math.round(totalBet);
+
+    if (user.is_guest) {
+      const guestId = getCurrentGuestId();
+      if (!guestId) return false;
+      const currentVac = get().balances.VAC;
+      if (currentVac < amount) return false;
+      const nextVac = currentVac - amount;
+      const nextBalances: WalletBalances = { ...get().balances, VAC: nextVac };
+      const nextTransactions = [
+        createTransaction({
+          type: "wager",
+          currency: "VAC",
+          amount,
+          status: "completed",
+          description: `Slots 下注（${themeId}）`,
+          balanceAfter: nextVac,
+        }),
+        ...get().transactions,
+      ];
+      set({ balances: nextBalances, transactions: nextTransactions });
+      persistLocalWallet(guestId, nextBalances, nextTransactions);
+      return true;
+    }
+
+    try {
+      const dbUser = await getDbUserByAuthUserId(user.id);
+      const wallet = await getOrCreateWallet(dbUser.id);
+      const currentVac = toNumber(wallet.coin_balance);
+      if (currentVac < amount) return false;
+      const nextBalance = currentVac - amount;
+
+      await updateCoinBalance(dbUser.id, nextBalance);
+      await insertTransaction({
+        dbUserId: dbUser.id,
+        type: "wager",
+        amount,
+        status: "completed",
+        description: `Slots 下注（${themeId}）`,
+        balanceAfter: nextBalance,
+        gameId: "slots",
+        themeId,
+        roundId,
+        metadata: { totalBet: amount },
+      });
+      await get().hydrateForCurrentUser();
+      return true;
+    } catch (e) {
+      console.warn("place slot wager failed:", e);
+      return false;
+    }
+  },
+
+  // Slots: 派彩交易（payout）。金額可為 0，仍寫交易方便之後對帳 round。
+  applySlotPayout: async ({
+    themeId,
+    payout,
+    totalBet,
+    roundId,
+  }) => {
+    const user = getCurrentUser();
+    if (!user) return;
+    const amount = Math.max(0, Math.round(payout));
+
+    if (user.is_guest) {
+      const guestId = getCurrentGuestId();
+      if (!guestId) return;
+      const nextVac = get().balances.VAC + amount;
+      const nextBalances: WalletBalances = { ...get().balances, VAC: nextVac };
+      const nextTransactions = [
+        createTransaction({
+          type: "payout",
+          currency: "VAC",
+          amount,
+          status: "completed",
+          description: `Slots 派彩（${themeId}）`,
+          balanceAfter: nextVac,
+        }),
+        ...get().transactions,
+      ];
+      set({ balances: nextBalances, transactions: nextTransactions });
+      persistLocalWallet(guestId, nextBalances, nextTransactions);
+      return;
+    }
+
+    try {
+      const dbUser = await getDbUserByAuthUserId(user.id);
+      const wallet = await getOrCreateWallet(dbUser.id);
+      const nextBalance = toNumber(wallet.coin_balance) + amount;
+      await updateCoinBalance(dbUser.id, nextBalance);
+      await insertTransaction({
+        dbUserId: dbUser.id,
+        type: "payout",
+        amount,
+        status: "completed",
+        description: `Slots 派彩（${themeId}）`,
+        balanceAfter: nextBalance,
+        gameId: "slots",
+        themeId,
+        roundId,
+        metadata: { totalBet: Math.round(totalBet), totalCredits: amount },
+      });
+      await get().hydrateForCurrentUser();
+    } catch (e) {
+      console.warn("apply slot payout failed:", e);
     }
   },
 }));

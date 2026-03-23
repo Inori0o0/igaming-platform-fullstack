@@ -349,7 +349,9 @@ client-portal/src/app/
 - 轉動動畫 (Framer Motion)
 - 連線判定與獎勵計算
 - 自動轉/快速轉模式
-- 下注金額調整
+- 下注金額調整（**只用 totalBet**，不提供選線）
+- 錢包結算流程：下注成立先扣款（wager），停輪後依 `totalCredits` 派彩（payout）
+- 交易紀錄保留 `game_id/theme_id/round_id`，可對帳每一局 slots
 
 ### 4.2 二十一點 (Blackjack)
 

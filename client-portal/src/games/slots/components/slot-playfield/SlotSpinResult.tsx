@@ -26,7 +26,7 @@ export function SlotSpinResult({
           連線結果
         </span>
         <span className={`text-[11px] ${theme.visual.mutedText}`}>
-          每線下注 {Math.round(betPerLine)}（default ÷ 線數）
+          總下注 {Math.round(evaluation.totalBet)} · 每線 {Math.round(betPerLine)}
         </span>
       </div>
 
