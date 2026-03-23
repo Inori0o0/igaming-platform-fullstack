@@ -1,0 +1,100 @@
+import type { SlotThemeConfig } from "../types";
+import { SLOT_GRID } from "../types";
+
+/** 品牌主題：轉輪符號圖於 `public/games/slots/vacant-classic/vc-symbol/`。 */
+export const vacantClassicTheme = {
+  id: "vacant-classic",
+  headline: "vAcAnt Classic",
+  tagline: "霓虹馬、vAc 幣面與品牌字樣符號。",
+  grid: SLOT_GRID,
+  symbols: [
+    {
+      id: "vc_a",
+      display: "vAc",
+      name: "vAc",
+      imageSrc: "/games/slots/vacant-classic/vc-symbol/vac.png",
+    },
+    {
+      id: "vc_b",
+      display: "67",
+      name: "67 kid",
+      imageSrc: "/games/slots/vacant-classic/vc-symbol/67kid.png",
+    },
+    {
+      id: "vc_c",
+      display: "🐴",
+      name: "horse",
+      imageSrc: "/games/slots/vacant-classic/vc-symbol/horse_head.png",
+    },
+    {
+      id: "vc_d",
+      display: "⚛",
+      name: "react logo",
+      imageSrc: "/games/slots/vacant-classic/vc-symbol/react_logo.png",
+    },
+    {
+      id: "vc_e",
+      display: "V",
+      name: "V",
+      imageSrc: "/games/slots/vacant-classic/vc-symbol/char_V.png",
+    },
+    {
+      id: "vc_f",
+      display: "A",
+      name: "A",
+      imageSrc: "/games/slots/vacant-classic/vc-symbol/char_A.png",
+    },
+  ],
+  paylines: [
+    [1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 0],
+    [2, 2, 2, 2, 2],
+    [0, 1, 2, 1, 0],
+    [2, 1, 0, 1, 2],
+  ],
+  paytable: [
+    { symbolId: "vc_a", count: 5, multiplier: 100 },
+    { symbolId: "vc_a", count: 4, multiplier: 40 },
+    { symbolId: "vc_a", count: 3, multiplier: 10 },
+    { symbolId: "vc_b", count: 5, multiplier: 60 },
+    { symbolId: "vc_b", count: 4, multiplier: 24 },
+    { symbolId: "vc_b", count: 3, multiplier: 6 },
+    { symbolId: "vc_c", count: 5, multiplier: 40 },
+    { symbolId: "vc_c", count: 4, multiplier: 16 },
+    { symbolId: "vc_c", count: 3, multiplier: 4 },
+    { symbolId: "vc_d", count: 5, multiplier: 25 },
+    { symbolId: "vc_d", count: 4, multiplier: 10 },
+    { symbolId: "vc_d", count: 3, multiplier: 2 },
+    { symbolId: "vc_e", count: 5, multiplier: 15 },
+    { symbolId: "vc_e", count: 4, multiplier: 6 },
+    { symbolId: "vc_e", count: 3, multiplier: 1 },
+    { symbolId: "vc_f", count: 5, multiplier: 10 },
+    { symbolId: "vc_f", count: 4, multiplier: 4 },
+    { symbolId: "vc_f", count: 3, multiplier: 1 },
+  ],
+  visual: {
+    shellGradient: "from-neutral-950 via-neutral-900 to-neutral-950",
+    shellBorder: "border-cyan-500/20",
+    reelFrame: "border-cyan-500/20 bg-neutral-950/60",
+    cellSurface: "bg-neutral-950/70 border-cyan-500/10",
+    symbolText: "text-cyan-100",
+    accentText: "text-cyan-300",
+    mutedText: "text-neutral-400",
+    buttonPrimary:
+      "group relative min-w-[10rem] overflow-hidden rounded-full border-2 border-cyan-400/55 bg-linear-to-b from-cyan-500/45 via-cyan-600/25 to-fuchsia-900/35 px-8 py-3.5 text-sm font-bold tracking-wide text-cyan-50 shadow-[0_0_22px_rgba(34,211,238,0.5),0_0_1px_rgba(255,255,255,0.35)_inset,0_1px_0_rgba(255,255,255,0.12)_inset] ring-1 ring-fuchsia-500/20 transition-all duration-200 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-400/45 disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100 sm:min-w-[11rem] sm:px-10 sm:py-4 sm:text-base",
+    buttonPrimaryHover:
+      "hover:scale-[1.05] hover:border-cyan-200/75 hover:from-cyan-400/55 hover:shadow-[0_0_36px_rgba(34,211,238,0.65),0_0_64px_rgba(232,121,249,0.22)] hover:brightness-110 disabled:hover:scale-100 disabled:hover:brightness-100",
+    glitchIntensity: 0,
+    pageBackgroundSrc: "/games/slots/vacant-classic/vc_bg.png",
+    machineFrameSrc: "/games/slots/vacant-classic/vc_slot_machine_frame.png",
+    titleBannerSrc: "/games/slots/vacant-classic/vc_banner.png",
+  },
+  betting: {
+    defaultBet: 100,
+    step: 25,
+    min: 25,
+    max: 500,
+  },
+  featureIds: [],
+  meta: { status: "active" },
+} as const satisfies SlotThemeConfig;

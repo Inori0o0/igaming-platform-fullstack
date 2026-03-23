@@ -1,5 +1,16 @@
+/**
+ * 動態路由 `/games/slots/[id]`：有註冊主題且可玩 → 渲染 SlotThemedPlayfield；
+ * 僅圖卡／placeholder → 即將開放頁；有主題但非 open → 維護或即將開放說明；否則 404 提示。
+ */
 import Link from "next/link";
 import { Card } from "@/src/components/ui/Card";
+import { SlotThemedPlayfield } from "@/src/games/slots/components/SlotThemedPlayfield";
+import {
+  getSlotComingSoonPlaceholder,
+  getSlotThemeAvailability,
+  getSlotThemeConfig,
+  isSlotThemePlayable,
+} from "@/src/games/slots/config";
 
 type SlotsGamePageProps = {
   params: Promise<{ id: string }>;
@@ -7,6 +18,94 @@ type SlotsGamePageProps = {
 
 export default async function SlotsGamePage({ params }: SlotsGamePageProps) {
   const { id } = await params;
+  const theme = getSlotThemeConfig(id);
+  const comingSoonOnly = !theme ? getSlotComingSoonPlaceholder(id) : undefined;
+
+  if (!theme) {
+    if (comingSoonOnly) {
+      return (
+        <main className="space-y-6">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
+              Slots Game
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
+              {comingSoonOnly.headline}
+            </h1>
+            <p className="mt-2 inline-flex rounded-full border border-amber-500/35 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-100">
+              即將開放
+            </p>
+            <p className="mt-3 max-w-2xl text-sm text-neutral-300">
+              {comingSoonOnly.tagline ?? "此主題尚未開放，敬請期待。"}
+            </p>
+          </div>
+          <Link
+            href="/games/slots"
+            className="inline-flex rounded-full border border-cyan-500/20 bg-neutral-950/70 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-cyan-400/40 hover:bg-neutral-950/90"
+          >
+            ← 回列表
+          </Link>
+        </main>
+      );
+    }
+
+    return (
+      <main className="space-y-6">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
+            Slots Game
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
+            找不到主題：{id}
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-neutral-300">
+            請從列表選擇已知主題，或到{" "}
+            <code className="text-cyan-200/90">src/games/slots/config</code>{" "}
+            註冊新 id。
+          </p>
+        </div>
+        <Link
+          href="/games/slots"
+          className="inline-flex rounded-full border border-cyan-500/20 bg-neutral-950/70 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-cyan-400/40 hover:bg-neutral-950/90"
+        >
+          ← 回列表
+        </Link>
+      </main>
+    );
+  }
+
+  const availability = getSlotThemeAvailability(theme.id);
+  if (!isSlotThemePlayable(theme.id)) {
+    const headline =
+      availability === "maintenance" ? "維護中" : "即將開放";
+    const body =
+      availability === "maintenance"
+        ? "此主題暫停服務，請稍後再試。"
+        : "此主題尚未開放，敬請期待。";
+
+    return (
+      <main className="space-y-6">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
+            Slots Game
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
+            {theme.headline}
+          </h1>
+          <p className="mt-2 inline-flex rounded-full border border-amber-500/35 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-100">
+            {headline}
+          </p>
+          <p className="mt-3 max-w-2xl text-sm text-neutral-300">{body}</p>
+        </div>
+        <Link
+          href="/games/slots"
+          className="inline-flex rounded-full border border-cyan-500/20 bg-neutral-950/70 px-4 py-2 text-xs font-semibold text-neutral-200 transition hover:border-cyan-400/40 hover:bg-neutral-950/90"
+        >
+          ← 回列表
+        </Link>
+      </main>
+    );
+  }
 
   return (
     <main className="space-y-6">
@@ -16,11 +115,16 @@ export default async function SlotsGamePage({ params }: SlotsGamePageProps) {
             Slots Game
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
-            老虎機：{id}
+            {theme.headline}
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-neutral-300">
-            這頁是 /games/slots/[id] 的殼。接下來會在這裡放 3x5 轉輪與下注區。
+            {theme.tagline}
           </p>
+          {theme.meta.status === "stub" ? (
+            <p className="mt-2 text-xs font-medium text-amber-200/90">
+              此主題仍為 schema 占位（stub），視覺與符號之後會替換。
+            </p>
+          ) : null}
         </div>
         <Link
           href="/games/slots"
@@ -30,69 +134,18 @@ export default async function SlotsGamePage({ params }: SlotsGamePageProps) {
         </Link>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <div className="rounded-3xl border border-cyan-500/20 bg-neutral-950/70 p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-400">
-              Reels (placeholder)
-            </p>
-            <span className="text-[11px] text-neutral-500">
-              3x5 grid + spin animation
-            </span>
-          </div>
-          <div className="mt-4 grid aspect-5/3 grid-cols-5 gap-2 rounded-2xl border border-dashed border-cyan-500/25 bg-black/20 p-3">
-            {Array.from({ length: 15 }).map((_, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-center rounded-xl border border-cyan-500/10 bg-neutral-950/60 text-[10px] font-semibold text-neutral-500"
-              >
-                {idx + 1}
-              </div>
-            ))}
-          </div>
-        </div>
+      <SlotThemedPlayfield theme={theme} />
 
-        <div className="space-y-4">
-          <Card
-            title="下注區（placeholder）"
-            description="之後會接 wallet 餘額與 bet 金額。"
-          >
-            <div className="grid gap-2 text-xs text-neutral-300">
-              <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
-                <span>Bet</span>
-                <span className="text-cyan-200">100 Coins</span>
-              </div>
-              <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
-                <span>Lines</span>
-                <span className="text-cyan-200">20</span>
-              </div>
-              <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
-                <span>Mode</span>
-                <span className="text-cyan-200">Normal</span>
-              </div>
-              <div className="mt-2 rounded-2xl border border-cyan-500/15 bg-neutral-950/70 p-3 text-[11px] text-neutral-400">
-                這裡會放「Spin / Auto / Turbo」按鈕與結果顯示。
-              </div>
-            </div>
-          </Card>
-
-          <Card
-            title="獎勵表（placeholder）"
-            description="各符號賠率之後會從 config 讀取。"
-          >
-            <div className="space-y-2 text-[11px] text-neutral-300">
-              <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
-                <span>Wild</span>
-                <span className="text-neutral-400">x ???</span>
-              </div>
-              <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
-                <span>Scatter</span>
-                <span className="text-neutral-400">Free Spin</span>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
+      <Card
+        title="開發備註"
+        description="Wallet、真實連線判定與交易紀錄將在後續 phase 接上。"
+      >
+        <p className="text-xs text-neutral-400">
+          目前轉輪符號、paylines、paytable、betting 與主題視覺 token 皆來自{" "}
+          <span className="text-cyan-200/90">SlotThemeConfig</span>（
+          {theme.id}）。
+        </p>
+      </Card>
     </main>
   );
 }

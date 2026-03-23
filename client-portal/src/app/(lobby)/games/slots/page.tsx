@@ -1,26 +1,54 @@
-import Link from "next/link";
+/**
+ * 老虎機大廳列表：靜態 `slots` 陣列驅動圖卡；`getSlotThemeAvailability` 控制維護／即將開放顯示。
+ */
 import { Card } from "@/src/components/ui/Card";
+import { GameThemeCard } from "@/src/components/ui/GameThemeCard";
+import { getSlotThemeAvailability } from "@/src/games/slots/config";
 
-const slots = [
+type SlotListItem = {
+  id: string;
+  name: string;
+  description: string;
+  /** 圖卡右上角：遊戲類型（此列表皆為老虎機） */
+  tag: string;
+  cardTitle: string;
+  imageSrc?: string;
+};
+
+const slots: SlotListItem[] = [
   {
     id: "italian-brainrot",
     name: "Italian Brainrot Slots",
     description: "Tralalero、Bombardiro、Elefanto Cactuso 等角色主題。",
-    tag: "Brainrot",
+    tag: "Slots",
+    cardTitle: "ITALIAN\nBRAINROT",
+    imageSrc: "/games/slots/italian-brainrot/ib_card.png",
   },
   {
     id: "vacant-classic",
     name: "vAcAnt Classic",
     description: "霓虹馬 + vAcAnt 品牌主題。",
-    tag: "Brand",
+    tag: "Slots",
+    cardTitle: "VACANT\nCLASSIC",
+    imageSrc: "/games/slots/vacant-classic/vc_card.png",
   },
   {
     id: "cyber-neon",
     name: "Cyber Neon",
     description: "賽博龐克夜城霓虹、故障特效。",
-    tag: "Cyber",
+    tag: "Slots",
+    cardTitle: "CYBER\nNEON",
+    imageSrc: "/games/slots/cyber-neon/cn_card.png",
   },
-] as const;
+  {
+    id: "john-pork",
+    name: "John Pork",
+    description: "來電梗圖風格；即將開放。",
+    tag: "Slots",
+    cardTitle: "JOHN\nPORK",
+    imageSrc: "/games/slots/john-pork/jp_card.png",
+  },
+];
 
 export default function SlotsListPage() {
   return (
@@ -33,34 +61,23 @@ export default function SlotsListPage() {
           老虎機列表
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-300">
-          先把三個主題入口鋪好，後續再把共用的 slot engine 抽出來。
+          主題入口與圖卡陸續上架；共用的 slot engine 將於後續抽出。
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {slots.map((slot) => (
-          <Link
-            key={slot.id}
-            href={`/games/slots/${slot.id}`}
-            className="group rounded-2xl border border-cyan-500/15 bg-neutral-950/70 p-4 transition hover:border-cyan-400/35 hover:bg-neutral-950/85"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-neutral-50">
-                  {slot.name}
-                </p>
-                <p className="mt-1 text-xs text-neutral-400">
-                  {slot.description}
-                </p>
-              </div>
-              <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.14em] text-cyan-100">
-                {slot.tag}
-              </span>
-            </div>
-            <p className="mt-4 text-[11px] font-semibold text-cyan-200/90 group-hover:text-cyan-100">
-              開始遊玩 →
-            </p>
-          </Link>
+          <div key={slot.id} className="space-y-2">
+            <GameThemeCard
+              href={`/games/slots/${slot.id}`}
+              imageSrc={slot.imageSrc}
+              imageAlt={slot.name}
+              title={slot.cardTitle}
+              tag={slot.tag}
+              availability={getSlotThemeAvailability(slot.id)}
+            />
+            <p className="px-1 text-xs text-neutral-400">{slot.description}</p>
+          </div>
         ))}
       </div>
 
@@ -77,4 +94,3 @@ export default function SlotsListPage() {
     </main>
   );
 }
-
