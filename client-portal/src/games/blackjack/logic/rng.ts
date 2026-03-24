@@ -1,3 +1,7 @@
+/**
+ * 洗牌與種子：以 roundId 經 xmur3 產生確定性 seed，再用 Fisher–Yates 洗牌。
+ * `server-seeded` 模式預留接 API；目前預設 pseudo 於前端完成整局。
+ */
 import type { BlackjackCard, Rank, Suit } from "./types";
 
 const SUITS: Suit[] = ["S", "H", "D", "C"];

@@ -1,5 +1,15 @@
+/**
+ * `game.ts` 規則單元測試：點數、莊家補牌、分牌／雙倍條件、結算與過五關階級。
+ */
 import { describe, expect, it } from "vitest";
-import { canDoubleDown, canSplit, handValue, settleHands, shouldDealerHit } from "./game";
+import {
+  canDoubleDown,
+  canSplit,
+  classifyHandTier,
+  handValue,
+  settleHands,
+  shouldDealerHit,
+} from "./game";
 import type { BlackjackCard, PlayerHand } from "./types";
 
 function card(rank: BlackjackCard["rank"], suit: BlackjackCard["suit"]): BlackjackCard {
@@ -113,6 +123,40 @@ describe("blackjack settlement", () => {
     expect(result.settlements[0]?.didDouble).toBe(true);
     expect(result.settlements[0]?.didSplit).toBe(true);
     expect(result.settlements[1]?.outcome).toBe("lose");
+  });
+
+  it("treats five-card 21 as highest tier win", () => {
+    const hands = [
+      makeHand({
+        cards: [
+          card("A", "S"),
+          card("3", "H"),
+          card("4", "D"),
+          card("5", "C"),
+          card("8", "H"),
+        ],
+        wager: 200,
+        finished: true,
+        result: "stand",
+      }),
+    ];
+    const result = settleHands({
+      hands,
+      dealerCards: [card("A", "D"), card("K", "S")],
+    });
+    expect(result.settlements[0]?.handTier).toBe("big-five-21");
+    expect(result.settlements[0]?.outcome).toBe("win");
+  });
+
+  it("classifies five-card under 21 correctly", () => {
+    const tier = classifyHandTier([
+      card("2", "S"),
+      card("3", "H"),
+      card("4", "D"),
+      card("5", "C"),
+      card("6", "H"),
+    ]);
+    expect(tier).toBe("small-five");
   });
 });
 

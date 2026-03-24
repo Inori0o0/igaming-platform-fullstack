@@ -1,32 +1,118 @@
-import Link from "next/link";
-import { Card } from "@/src/components/ui/Card";
+/**
+ * 遊戲大廳：單一圖卡網格（與 /games/slots 列表版型一致），不區分遊戲分類區塊。
+ * 資料：老虎機 4、二十一點 1、百家樂 1、彩票 3；缺圖主題以無圖占位，仍顯示類型標籤。
+ */
+import { GameThemeCard } from "@/src/components/ui/GameThemeCard";
+import {
+  getSlotThemeAvailability,
+  type SlotGameAvailabilityStatus,
+} from "@/src/games/slots/config";
 
-const gameCards = [
+type LobbyCardItem = {
+  id: string;
+  href: string;
+  name: string;
+  description: string;
+  /** 圖卡右上角：遊戲類型 */
+  tag: string;
+  cardTitle: string;
+  imageSrc?: string;
+  /** 老虎機主題才走 slot 可用性；其餘固定 open */
+  availability: SlotGameAvailabilityStatus;
+};
+
+const lobbyCards: LobbyCardItem[] = [
+  // —— Slots（4）——
   {
-    title: "Slots",
-    description: "三大主題老虎機：先從 Italian Brainrot Slots 開始。",
-    href: "/games/slots",
-    badge: "Hot",
+    id: "slot-italian-brainrot",
+    href: "/games/slots/italian-brainrot",
+    name: "Italian Brainrot Slots",
+    description: "Tralalero、Bombardiro、Lirilì Larilà 等角色主題。",
+    tag: "老虎機",
+    cardTitle: "ITALIAN\nBRAINROT",
+    imageSrc: "/games/slots/italian-brainrot/ib_card.png",
+    availability: getSlotThemeAvailability("italian-brainrot"),
   },
   {
-    title: "Blackjack",
-    description: "霓虹腦爛牌桌，經典二十一點玩法。",
+    id: "slot-vacant-classic",
+    href: "/games/slots/vacant-classic",
+    name: "vAcAnt Classic",
+    description: "霓虹馬 + vAcAnt 品牌主題。",
+    tag: "老虎機",
+    cardTitle: "VACANT\nCLASSIC",
+    imageSrc: "/games/slots/vacant-classic/vc_card.png",
+    availability: getSlotThemeAvailability("vacant-classic"),
+  },
+  {
+    id: "slot-cyber-neon",
+    href: "/games/slots/cyber-neon",
+    name: "Cyber Neon",
+    description: "賽博龐克夜城霓虹、故障特效。",
+    tag: "老虎機",
+    cardTitle: "CYBER\nNEON",
+    imageSrc: "/games/slots/cyber-neon/cn_card.png",
+    availability: getSlotThemeAvailability("cyber-neon"),
+  },
+  {
+    id: "slot-john-pork",
+    href: "/games/slots/john-pork",
+    name: "John Pork",
+    description: "來電梗圖風格；即將開放。",
+    tag: "老虎機",
+    cardTitle: "JOHN\nPORK",
+    imageSrc: "/games/slots/john-pork/jp_card.png",
+    availability: getSlotThemeAvailability("john-pork"),
+  },
+  // —— 二十一點（1）——
+  {
+    id: "blackjack-main",
     href: "/games/blackjack",
-    badge: "Table",
+    name: "Blackjack 二十一點",
+    description: "Italian Brainrot 主題牌桌；標準玩法與過五關。",
+    tag: "二十一點",
+    cardTitle: "BLACKJACK\n二十一點",
+    imageSrc: "/games/blackjack/bj_card.png",
+    availability: "open",
   },
+  // —— 百家樂（1，圖卡待補）——
   {
-    title: "Baccarat",
-    description: "閒莊和，快速一局，簡化路單之後再補。",
+    id: "baccarat-main",
     href: "/games/baccarat",
-    badge: "Table",
+    name: "百家樂",
+    description: "閒莊和；路單與動畫之後再補。",
+    tag: "百家樂",
+    cardTitle: "BACCARAT\n百家樂",
+    availability: "open",
+  },
+  // —— 彩票（3，圖卡待補）——
+  {
+    id: "lottery-wheel",
+    href: "/games/lottery",
+    name: "彩票 · 轉盤",
+    description: "大廳入口；玩法細節之後接上。",
+    tag: "彩票",
+    cardTitle: "轉盤\nLOTTERY",
+    availability: "open",
   },
   {
-    title: "Lottery",
-    description: "轉盤、刮刮樂、數字彩：Brainrot 彩券宇宙。",
+    id: "lottery-scratch",
     href: "/games/lottery",
-    badge: "Luck",
+    name: "彩票 · 刮刮樂",
+    description: "大廳入口；玩法細節之後接上。",
+    tag: "彩票",
+    cardTitle: "刮刮樂\nLOTTERY",
+    availability: "open",
   },
-] as const;
+  {
+    id: "lottery-numbers",
+    href: "/games/lottery",
+    name: "彩票 · 數字彩",
+    description: "大廳入口；玩法細節之後接上。",
+    tag: "彩票",
+    cardTitle: "數字彩\nLOTTERY",
+    availability: "open",
+  },
+];
 
 export default function GamesLobbyPage() {
   return (
@@ -39,44 +125,25 @@ export default function GamesLobbyPage() {
           遊戲大廳
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-300">
-          先把主要路由與 UI 殼鋪好，後續再逐一接上玩法與狀態管理。
+          以圖卡進入各主題；右上角標籤為遊戲類型（老虎機、二十一點、百家樂、彩票）。
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {gameCards.map((game) => (
-          <Link
-            key={game.href}
-            href={game.href}
-            className="group rounded-2xl border border-cyan-500/15 bg-neutral-950/70 p-4 shadow-[0_0_60px_rgba(15,23,42,0.55)] transition hover:border-cyan-400/35 hover:bg-neutral-950/85"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <p className="text-sm font-semibold text-neutral-50">{game.title}</p>
-              <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.14em] text-cyan-100">
-                {game.badge}
-              </span>
-            </div>
-            <p className="mt-2 text-xs leading-relaxed text-neutral-400">
-              {game.description}
-            </p>
-            <p className="mt-4 text-[11px] font-semibold text-cyan-200/90 group-hover:text-cyan-100">
-              進入 →
-            </p>
-          </Link>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {lobbyCards.map((item) => (
+          <div key={item.id} className="space-y-2">
+            <GameThemeCard
+              href={item.href}
+              imageSrc={item.imageSrc}
+              imageAlt={item.name}
+              title={item.cardTitle}
+              tag={item.tag}
+              availability={item.availability}
+            />
+            <p className="px-1 text-xs text-neutral-400">{item.description}</p>
+          </div>
         ))}
       </div>
-
-      <Card
-        title="接下來會補的內容"
-        description="路由已到位，接下來就能把每個遊戲頁的狀態與互動逐步做進來。"
-      >
-        <ul className="list-disc space-y-1 pl-5 text-xs text-neutral-300">
-          <li>Slots：/games/slots/[id] 單一遊戲 + 下注/轉動/結算</li>
-          <li>Blackjack / Baccarat：發牌動畫 + 下注區 UI</li>
-          <li>Lottery：抽獎動畫 + 結果歷史</li>
-        </ul>
-      </Card>
     </main>
   );
 }
-
