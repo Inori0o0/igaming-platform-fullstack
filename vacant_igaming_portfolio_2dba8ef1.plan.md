@@ -357,25 +357,21 @@ client-portal/src/app/
 
 > 本桌採用 **Italian Brainrot 主題**，牌桌為霓虹腦爛賭場風格，視覺風格與 `Italian Brainrot Slots`、Lottery 統一。
 
-- 規則與操作：
-  - 標準玩法: 要牌 / 停牌 / 雙倍 / 分牌（機制與原計畫相同）
-  - 基本賠率顯示與下注區維持傳統二十一點佈局
-- 角色與 UI 對應：
-  - **莊家**：由 **Lirili Larila** 擔任（拉小提琴的詭異莊家），在發牌與結算時：
-    - 進行短暫拉琴動作或表情變化（贏時拉高音、輸時拉低沉音）
-    - 背景可出現音符飄動，與彩票遊戲開獎動畫呼應
-  - **玩家提示 / 特殊事件**：由 **Brr Brr Patapim** 擔任小惡魔提示員：
-    - 玩家拿到 Blackjack、爆牌或連勝達一定局數時，會在桌面邊緣跳出短動畫與文字提示
-    - 例如「Brr Brr！」+ 腦爛風格的破義大利文台詞
-  - **高額下注 / 高賠局面**：**Bombardiro Crocodilo** 在桌邊待機：
-    - 當玩家下注金額達到高額門檻，或本局可能產生大額贏錢時，鱷魚身上的炸彈會點亮或抖動
-    - 結算時若大贏，觸發小型爆炸特效（僅視覺動畫，不影響規則）
-  - **籌碼 / 桌邊裝飾**：**Elefanto Cactuso** 以小圖示形式出現在籌碼與桌角：
-    - 籌碼面可印上縮小版仙人掌大象頭像
-    - 桌面某角落擺放迷你 Cactuso 雕像，象徵保底、幸運或守護（可純視覺）
-- 牌面與籌碼視覺：
-  - 撲克牌卡背與籌碼圖案採用 **Tralalero Tralala** 等角色剪影和 Italian Brainrot 霓虹配色
-  - 保留清晰可讀的點數與花色，確保可玩性與 UX
+**client-portal 實作狀態（可玩原型）**
+
+- 路由：`/games/blackjack`；大廳 `/games` 以 `GameThemeCard` 展示；首頁熱門區含 Blackjack 圖卡。
+- 程式說明文件：`docs/blackjack-client-portal-overview.md`（檔案分工、錢包流程、白話對照）。
+- 錢包：`placeBlackjackWager`（先扣款）→ `applyBlackjackPayout`（結算派彩，含 0）；`game_id: blackjack`，帶 `theme_id` / `round_id`。
+- 規則（純函式於 `client-portal/src/games/blackjack/logic/game.ts`）：自然 Blackjack 3:2、莊家 **S17**、**DAS**、分牌最多 4 手、**分 A 僅再發一張**、五張牌階級（大／小過五關等）與結算比階。
+- 隨機：`roundId` 派生種子洗牌（`logic/rng.ts`），介面預留日後改伺服器 seed。
+
+**角色與 UI 對應（以現有實作與美術為準；與下方舊稿若有出入，以程式為主）**
+
+- **莊家**：**Tung Tung Tung Sahur**（平底鍋／鍾聲系），發牌與結算時切換 idle／win／lose 立繪（`dealer_triplet_*.png`）。
+- **桌邊吉祥物**：**Brr Brr Patapim**（輸局或受擊提示、受傷立繪）、**Bombardiro Crocodilo**（贏局時飛向 Brr 再飛回 idle，純視覺）。
+- 牌背／籌碼：沿用共用 chip card 資產與 Brainrot 霓虹配色；**Elefanto Cactuso** 桌角裝飾可後續補強。
+
+> 原計畫曾以 **Lirili Larila** 為莊家、Brr 為提示員；**目前畫面**改為 Tung 莊家 + Brr／Bombardiro 邊緣演出，仍屬同一宇宙，日後若要小提琴莊家可替換立繪與動畫層。
 
 > 本遊戲中的所有角色皆與 4.1 的 `Italian Brainrot Slots` 與 4.4 彩票遊戲共用同一宇宙與美術資產，方便後續行銷與成就系統整合。
 

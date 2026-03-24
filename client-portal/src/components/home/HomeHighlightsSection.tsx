@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 首頁「熱門遊戲」區：左欄突出一張 Slots 圖卡（目前連到 Italian Brainrot），右欄牌桌為占位。
+ * 首頁「熱門遊戲」區：左欄 Italian Brainrot Slots，右欄二十一點圖卡。
  */
 import { Card } from "@/src/components/ui/Card";
 import { GameThemeCard } from "@/src/components/ui/GameThemeCard";
@@ -29,13 +29,19 @@ export function HomeHighlightsSection() {
               Tralalero、Bombardiro、Lirilì 等角色主題；點擊進入遊戲。
             </p>
           </div>
-          <div className="rounded-xl border border-purple-400/30 bg-neutral-950/80 p-3 text-sm text-neutral-200">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-purple-300">
-              Table Games
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
+              二十一點
             </p>
-            <p className="mt-1 text-sm font-medium">Blackjack &amp; Baccarat</p>
-            <p className="mt-1 text-[11px] text-neutral-400">
-              之後在此放腦爛牌桌場景圖（Lirili Larila 等角色）。
+            <GameThemeCard
+              href="/games/blackjack"
+              imageSrc="/games/blackjack/bj_card.png"
+              imageAlt="Blackjack 二十一點"
+              title="BLACKJACK 二十一點"
+              tag="二十一點"
+            />
+            <p className="px-1 text-[11px] text-neutral-400">
+              Tung Tung Tung Sahur 莊家、過五關與標準玩法；點擊進入遊戲。
             </p>
           </div>
         </div>
