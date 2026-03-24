@@ -68,6 +68,18 @@ type WalletState = {
     totalBet: number;
     roundId: string;
   }) => Promise<void>;
+  placeBlackjackWager: (params: {
+    themeId: string;
+    totalBet: number;
+    roundId: string;
+  }) => Promise<boolean>;
+  applyBlackjackPayout: (params: {
+    themeId: string;
+    payout: number;
+    totalBet: number;
+    roundId: string;
+    metadata?: Record<string, unknown>;
+  }) => Promise<void>;
 };
 
 type DbUserRow = {
@@ -727,6 +739,117 @@ export const useWalletStore = create<WalletState>((set, get) => ({
       await get().hydrateForCurrentUser();
     } catch (e) {
       console.warn("apply slot payout failed:", e);
+    }
+  },
+
+  // Blackjack: 扣款交易（wager）。流程與 Slots 一致，先扣款再開局。
+  placeBlackjackWager: async ({ themeId, totalBet, roundId }) => {
+    const user = getCurrentUser();
+    if (!user || totalBet <= 0) return false;
+    const amount = Math.round(totalBet);
+
+    if (user.is_guest) {
+      const guestId = getCurrentGuestId();
+      if (!guestId) return false;
+      const currentVac = get().balances.VAC;
+      if (currentVac < amount) return false;
+      const nextVac = currentVac - amount;
+      const nextBalances: WalletBalances = { ...get().balances, VAC: nextVac };
+      const nextTransactions = [
+        createTransaction({
+          type: "wager",
+          currency: "VAC",
+          amount,
+          status: "completed",
+          description: `Blackjack 下注（${themeId}）`,
+          balanceAfter: nextVac,
+        }),
+        ...get().transactions,
+      ];
+      set({ balances: nextBalances, transactions: nextTransactions });
+      persistLocalWallet(guestId, nextBalances, nextTransactions);
+      return true;
+    }
+
+    try {
+      const dbUser = await getDbUserByAuthUserId(user.id);
+      const wallet = await getOrCreateWallet(dbUser.id);
+      const currentVac = toNumber(wallet.coin_balance);
+      if (currentVac < amount) return false;
+      const nextBalance = currentVac - amount;
+
+      await updateCoinBalance(dbUser.id, nextBalance);
+      await insertTransaction({
+        dbUserId: dbUser.id,
+        type: "wager",
+        amount,
+        status: "completed",
+        description: `Blackjack 下注（${themeId}）`,
+        balanceAfter: nextBalance,
+        gameId: "blackjack",
+        themeId,
+        roundId,
+        metadata: { totalBet: amount },
+      });
+      await get().hydrateForCurrentUser();
+      return true;
+    } catch (e) {
+      console.warn("place blackjack wager failed:", e);
+      return false;
+    }
+  },
+
+  // Blackjack: 派彩交易（payout）。就算 push 或輸局也寫入 0，方便 round 對帳。
+  applyBlackjackPayout: async ({ themeId, payout, totalBet, roundId, metadata }) => {
+    const user = getCurrentUser();
+    if (!user) return;
+    const amount = Math.max(0, Math.round(payout));
+
+    if (user.is_guest) {
+      const guestId = getCurrentGuestId();
+      if (!guestId) return;
+      const nextVac = get().balances.VAC + amount;
+      const nextBalances: WalletBalances = { ...get().balances, VAC: nextVac };
+      const nextTransactions = [
+        createTransaction({
+          type: "payout",
+          currency: "VAC",
+          amount,
+          status: "completed",
+          description: `Blackjack 派彩（${themeId}）`,
+          balanceAfter: nextVac,
+        }),
+        ...get().transactions,
+      ];
+      set({ balances: nextBalances, transactions: nextTransactions });
+      persistLocalWallet(guestId, nextBalances, nextTransactions);
+      return;
+    }
+
+    try {
+      const dbUser = await getDbUserByAuthUserId(user.id);
+      const wallet = await getOrCreateWallet(dbUser.id);
+      const nextBalance = toNumber(wallet.coin_balance) + amount;
+      await updateCoinBalance(dbUser.id, nextBalance);
+      await insertTransaction({
+        dbUserId: dbUser.id,
+        type: "payout",
+        amount,
+        status: "completed",
+        description: `Blackjack 派彩（${themeId}）`,
+        balanceAfter: nextBalance,
+        gameId: "blackjack",
+        themeId,
+        roundId,
+        metadata: {
+          totalBet: Math.round(totalBet),
+          totalPayout: amount,
+          ...metadata,
+        },
+      });
+      await get().hydrateForCurrentUser();
+    } catch (e) {
+      console.warn("apply blackjack payout failed:", e);
     }
   },
 }));
