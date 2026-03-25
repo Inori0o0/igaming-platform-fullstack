@@ -80,7 +80,6 @@ export function MascotLayer({ dealerMood, brrTriggered, bombardiroTriggered }: M
           src={BLACKJACK_ASSETS.dealer[dealerMood]}
           alt="Tung Tung Tung Sahur dealer"
           fill
-          unoptimized
           sizes="(min-width: 1280px) 256px, (min-width: 1024px) 224px, (min-width: 768px) 128px, (min-width: 640px) 112px, 96px"
           className="object-contain drop-shadow-[0_0_25px_rgba(56,189,248,0.45)]"
         />
@@ -95,7 +94,6 @@ export function MascotLayer({ dealerMood, brrTriggered, bombardiroTriggered }: M
           src={brrSrc}
           alt="Brr Brr Patapim mascot"
           fill
-          unoptimized
           sizes="(min-width: 1280px) 208px, (min-width: 1024px) 192px, (min-width: 768px) 112px, (min-width: 640px) 96px, 80px"
           className="object-contain drop-shadow-[0_0_16px_rgba(34,211,238,0.4)]"
         />
@@ -123,7 +121,6 @@ export function MascotLayer({ dealerMood, brrTriggered, bombardiroTriggered }: M
           }
           alt="Bombardiro Crocodilo mascot"
           fill
-          unoptimized
           sizes="(min-width: 1280px) 208px, (min-width: 1024px) 192px, (min-width: 768px) 112px, (min-width: 640px) 96px, 80px"
           className="object-contain drop-shadow-[0_0_18px_rgba(245,158,11,0.35)]"
         />

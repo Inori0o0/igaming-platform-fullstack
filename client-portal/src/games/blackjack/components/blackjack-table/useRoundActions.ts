@@ -84,6 +84,9 @@ export function useRoundActions({
       setEventTone("info");
       return;
     }
+    // 結算前先把 UI 狀態更新（例如 Double 發出的那張牌），避免結算訊息先出現，
+    // 但牌面還沒顯示到新發牌結果造成「卡住/不同步」的觀感。
+    setRound({ ...baseRound, hands: nextHands, deck: nextDeck });
     void settleRound(baseRound, nextHands, nextDeck);
   }
 

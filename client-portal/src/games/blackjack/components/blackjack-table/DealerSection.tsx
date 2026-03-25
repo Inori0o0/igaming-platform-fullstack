@@ -40,7 +40,6 @@ export function DealerSection({ round }: DealerSectionProps) {
                     src={CHIP_CARD_ASSETS.cardBack}
                     alt="card back"
                     fill
-                    unoptimized
                     sizes="(min-width: 1280px) 64px, (min-width: 1024px) 56px, (min-width: 768px) 48px, (min-width: 640px) 44px, 40px"
                     className="object-cover"
                   />
