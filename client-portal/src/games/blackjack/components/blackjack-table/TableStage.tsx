@@ -34,7 +34,7 @@ export function TableStage(props: TableStageProps) {
         bombardiroTriggered={bombardiroTriggered}
       />
 
-      <div className="relative z-10 pb-8 sm:pb-10 md:pb-12 lg:pb-16 xl:pb-20">
+      <div className="relative z-10 pb-2 sm:pb-3">
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-400">
             Tung Tung Tung Sahur Table

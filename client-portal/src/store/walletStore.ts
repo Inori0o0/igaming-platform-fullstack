@@ -80,6 +80,19 @@ type WalletState = {
     roundId: string;
     metadata?: Record<string, unknown>;
   }) => Promise<void>;
+  placeBaccaratWager: (params: {
+    themeId: string;
+    totalBet: number;
+    roundId: string;
+    metadata?: Record<string, unknown>;
+  }) => Promise<boolean>;
+  applyBaccaratPayout: (params: {
+    themeId: string;
+    payout: number;
+    totalBet: number;
+    roundId: string;
+    metadata?: Record<string, unknown>;
+  }) => Promise<void>;
 };
 
 type DbUserRow = {
@@ -850,6 +863,117 @@ export const useWalletStore = create<WalletState>((set, get) => ({
       await get().hydrateForCurrentUser();
     } catch (e) {
       console.warn("apply blackjack payout failed:", e);
+    }
+  },
+
+  // Baccarat: 扣款交易（wager）。流程與 Blackjack 一致，先扣款再開局。
+  placeBaccaratWager: async ({ themeId, totalBet, roundId, metadata }) => {
+    const user = getCurrentUser();
+    if (!user || totalBet <= 0) return false;
+    const amount = Math.round(totalBet);
+
+    if (user.is_guest) {
+      const guestId = getCurrentGuestId();
+      if (!guestId) return false;
+      const currentVac = get().balances.VAC;
+      if (currentVac < amount) return false;
+      const nextVac = currentVac - amount;
+      const nextBalances: WalletBalances = { ...get().balances, VAC: nextVac };
+      const nextTransactions = [
+        createTransaction({
+          type: "wager",
+          currency: "VAC",
+          amount,
+          status: "completed",
+          description: `Baccarat 下注（${themeId}）`,
+          balanceAfter: nextVac,
+        }),
+        ...get().transactions,
+      ];
+      set({ balances: nextBalances, transactions: nextTransactions });
+      persistLocalWallet(guestId, nextBalances, nextTransactions);
+      return true;
+    }
+
+    try {
+      const dbUser = await getDbUserByAuthUserId(user.id);
+      const wallet = await getOrCreateWallet(dbUser.id);
+      const currentVac = toNumber(wallet.coin_balance);
+      if (currentVac < amount) return false;
+      const nextBalance = currentVac - amount;
+
+      await updateCoinBalance(dbUser.id, nextBalance);
+      await insertTransaction({
+        dbUserId: dbUser.id,
+        type: "wager",
+        amount,
+        status: "completed",
+        description: `Baccarat 下注（${themeId}）`,
+        balanceAfter: nextBalance,
+        gameId: "baccarat",
+        themeId,
+        roundId,
+        metadata: { totalBet: amount, ...metadata },
+      });
+      await get().hydrateForCurrentUser();
+      return true;
+    } catch (e) {
+      console.warn("place baccarat wager failed:", e);
+      return false;
+    }
+  },
+
+  // Baccarat: 派彩交易（payout）。就算 push 或輸局也寫入 0，方便 round 對帳。
+  applyBaccaratPayout: async ({ themeId, payout, totalBet, roundId, metadata }) => {
+    const user = getCurrentUser();
+    if (!user) return;
+    const amount = Math.max(0, Math.round(payout));
+
+    if (user.is_guest) {
+      const guestId = getCurrentGuestId();
+      if (!guestId) return;
+      const nextVac = get().balances.VAC + amount;
+      const nextBalances: WalletBalances = { ...get().balances, VAC: nextVac };
+      const nextTransactions = [
+        createTransaction({
+          type: "payout",
+          currency: "VAC",
+          amount,
+          status: "completed",
+          description: `Baccarat 派彩（${themeId}）`,
+          balanceAfter: nextVac,
+        }),
+        ...get().transactions,
+      ];
+      set({ balances: nextBalances, transactions: nextTransactions });
+      persistLocalWallet(guestId, nextBalances, nextTransactions);
+      return;
+    }
+
+    try {
+      const dbUser = await getDbUserByAuthUserId(user.id);
+      const wallet = await getOrCreateWallet(dbUser.id);
+      const nextBalance = toNumber(wallet.coin_balance) + amount;
+      await updateCoinBalance(dbUser.id, nextBalance);
+      await insertTransaction({
+        dbUserId: dbUser.id,
+        type: "payout",
+        amount,
+        status: "completed",
+        description: `Baccarat 派彩（${themeId}）`,
+        balanceAfter: nextBalance,
+        gameId: "baccarat",
+        themeId,
+        roundId,
+        metadata: {
+          totalBet: Math.round(totalBet),
+          totalPayout: amount,
+          ...metadata,
+        },
+      });
+      await get().hydrateForCurrentUser();
+    } catch (e) {
+      console.warn("apply baccarat payout failed:", e);
     }
   },
 }));
