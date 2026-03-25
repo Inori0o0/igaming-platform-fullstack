@@ -87,12 +87,11 @@ export function ControlPanel(props: ControlPanelProps) {
                       src={CHIP_CARD_ASSETS.chips[option]}
                       alt={`chip ${option}`}
                       fill
-                      unoptimized
                       sizes="36px"
                       className="object-contain"
                     />
                   </span>
-                  <span className="text-xs font-semibold text-cyan-100">Step {option}</span>
+                  <span className="text-xs font-semibold text-cyan-100">{option}</span>
                 </button>
               ))}
             </div>
@@ -104,22 +103,6 @@ export function ControlPanel(props: ControlPanelProps) {
               <Button size="sm" variant="ghost" disabled={inRound || isBusy} onClick={onIncreaseBet}>
                 +
               </Button>
-              <span className="rounded-full border border-cyan-500/20 px-2 py-0.5 text-[10px] text-cyan-200">
-                目前 step: {betStep}
-              </span>
-              <span className="ml-auto inline-flex items-center gap-1 rounded-full border border-cyan-500/25 bg-cyan-500/10 px-2 py-1 text-[10px] text-cyan-100">
-                <span className="relative h-3.5 w-3.5">
-                  <Image
-                    src={CHIP_CARD_ASSETS.cardBack}
-                    alt="deck"
-                    fill
-                    unoptimized
-                    sizes="14px"
-                    className="rounded-sm object-cover"
-                  />
-                </span>
-                Card Back Enabled
-              </span>
             </div>
           </div>
 
