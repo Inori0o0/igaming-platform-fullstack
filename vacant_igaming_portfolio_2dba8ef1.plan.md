@@ -379,6 +379,16 @@ client-portal/src/app/
 
 > 本桌使用 **Italian Brainrot 宇宙角色** 作為「閒 / 莊 / 和」的象徵，保留原本百家樂玩法與下注選項。
 
+**client-portal 實作狀態（可玩原型，以程式為準）**
+
+- 路由：`/games/baccarat`；大廳 `/games` 以 `GameThemeCard` 展示（圖卡 `public/games/baccarat/bc_card_v2.png` 等）。
+- 程式說明文件：`docs/baccarat-client-portal-overview.md`（檔案分工、錢包流程、白話對照）。
+- 錢包：`placeBaccaratWager`（先扣款）→ `applyBaccaratPayout`（結算派彩，含 0）；`game_id: baccarat`，帶 `theme_id` / `round_id`。
+- 規則（純函式於 `client-portal/src/games/baccarat/logic/game.ts`）：計點 mod 10、標準第三張表、派彩閒 1:1／莊 0.95／和 8:1；非和下注遇和局 Push。
+- 隨機：與 Blackjack 共用牌組與 `roundId` 種子洗牌（`blackjack/logic/rng`），介面預留日後改伺服器 seed。
+- UI：左側桌布 + 牌區 + `MascotLayer`（Tralalero／Lirili 常駐，Tung 依贏錢或和局）；右側下注與**單一主按鈕**逐步翻牌／補牌／結算；簡化路單 24 格。
+- 單元測試：`client-portal/src/games/baccarat/logic/game.test.ts`。
+
 - 規則與核心功能：
   - 閒 / 莊 / 和 下注（可支援基本的投注區域）
   - 發牌動畫：牌從桌面中央洗出並分配到「閒」、「莊」區

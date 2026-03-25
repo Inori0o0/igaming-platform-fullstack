@@ -74,7 +74,7 @@ const lobbyCards: LobbyCardItem[] = [
     imageSrc: "/games/blackjack/bj_card.png",
     availability: "open",
   },
-  // —— 百家樂（1，圖卡待補）——
+  // —— 百家樂（1）——
   {
     id: "baccarat-main",
     href: "/games/baccarat",
@@ -82,6 +82,7 @@ const lobbyCards: LobbyCardItem[] = [
     description: "閒莊和；路單與動畫之後再補。",
     tag: "百家樂",
     cardTitle: "BACCARAT\n百家樂",
+    imageSrc: "/games/baccarat/bc_card_v2.png",
     availability: "open",
   },
   // —— 彩票（3，圖卡待補）——
