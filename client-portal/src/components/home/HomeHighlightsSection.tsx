@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 首頁「熱門遊戲」區：左欄 Italian Brainrot Slots，右欄二十一點圖卡。
+ * 首頁「熱門遊戲」區：左欄百家樂，右欄二十一點圖卡。
  */
 import { Card } from "@/src/components/ui/Card";
 import { GameThemeCard } from "@/src/components/ui/GameThemeCard";
@@ -16,17 +16,17 @@ export function HomeHighlightsSection() {
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
-              Slots
+              百家樂
             </p>
             <GameThemeCard
-              href="/games/slots/italian-brainrot"
-              imageSrc="/games/slots/italian-brainrot/ib_card.png"
-              imageAlt="Italian Brainrot Slots"
-              title="ITALIAN BRAINROT"
-              tag="Slots"
+              href="/games/baccarat"
+              imageSrc="/games/baccarat/bc_card_v2.png"
+              imageAlt="百家樂"
+              title="BACCARAT 百家樂"
+              tag="百家樂"
             />
             <p className="px-1 text-[11px] text-neutral-400">
-              Tralalero、Bombardiro、Lirilì 等角色主題；點擊進入遊戲。
+              閒莊和經典玩法與主題牌桌；點擊進入遊戲。
             </p>
           </div>
           <div className="space-y-2">

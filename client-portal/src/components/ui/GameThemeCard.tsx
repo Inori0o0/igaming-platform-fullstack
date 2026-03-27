@@ -54,7 +54,7 @@ export function GameThemeCard({
           className={clsx(
             "object-cover transition duration-500 ease-out",
             playable && "group-hover:scale-[1.04]",
-            !playable && "grayscale",
+            !playable && "grayscale-65",
           )}
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
         />
@@ -65,13 +65,18 @@ export function GameThemeCard({
       )}
 
       <div
-        className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/88 via-black/45 to-transparent"
+        className={clsx(
+          "pointer-events-none absolute inset-0 bg-linear-to-t",
+          playable
+            ? "from-black/88 via-black/45 to-transparent"
+            : "from-black/84 via-black/45 to-transparent",
+        )}
         aria-hidden
       />
 
       {!playable ? (
         <div
-          className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/35 p-4"
+          className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/36 p-4"
           aria-hidden
         >
           <span className="rounded-lg border border-white/25 bg-black/75 px-4 py-2 text-sm font-bold uppercase tracking-wider text-white shadow-lg backdrop-blur-sm">
