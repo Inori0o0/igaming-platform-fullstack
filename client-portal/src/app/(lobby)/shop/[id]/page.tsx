@@ -1,5 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Button } from "@/src/components/ui/Button";
 import { Card } from "@/src/components/ui/Card";
+import { getProductById } from "@/src/shop/products";
+import { productCategoryLabels } from "@/src/shop/types";
 
 type ProductDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -9,6 +14,11 @@ export default async function ProductDetailPage({
   params,
 }: ProductDetailPageProps) {
   const { id } = await params;
+  const product = getProductById(id);
+
+  if (!product) {
+    notFound();
+  }
 
   return (
     <main className="space-y-6">
@@ -18,10 +28,10 @@ export default async function ProductDetailPage({
             Product
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
-            商品詳情：{id}
+            {product.name}
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-neutral-300">
-            這頁是 /shop/[id] 的殼。後續會接上商品圖片、描述、加入購物車。
+            {product.description}
           </p>
         </div>
         <Link
@@ -33,33 +43,63 @@ export default async function ProductDetailPage({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <div className="rounded-3xl border border-cyan-500/20 bg-neutral-950/70 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-400">
-            Image (placeholder)
-          </p>
-          <div className="mt-3 aspect-video rounded-2xl border border-dashed border-cyan-500/25 bg-black/20" />
+        <div className="overflow-hidden rounded-3xl border border-cyan-500/20 bg-neutral-950/70">
+          <div className="relative aspect-square">
+            <Image
+              src={product.imageSrc}
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="(min-width: 1024px) 60vw, 100vw"
+            />
+          </div>
         </div>
 
         <div className="space-y-4">
-          <Card title="資訊（placeholder）" description="價格/庫存/分類等。">
+          <Card title="商品資訊" description="價格 / 分類 / 庫存">
             <div className="grid gap-2 text-[11px] text-neutral-300">
               <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
                 <span>Price</span>
-                <span className="text-cyan-200">— Coins</span>
+                <span className="text-cyan-200">
+                  {product.priceVac.toLocaleString()} VAC
+                </span>
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
+                <span>Category</span>
+                <span className="text-cyan-200">
+                  {productCategoryLabels[product.category]}
+                </span>
               </div>
               <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
                 <span>Stock</span>
-                <span className="text-cyan-200">—</span>
+                <span className="text-cyan-200">
+                  {product.stock === null ? "不限量（數位）" : `${product.stock} 件`}
+                </span>
               </div>
-              <div className="rounded-2xl border border-cyan-500/15 bg-neutral-950/70 p-3 text-neutral-400">
-                這裡會放「數量選擇」與「加入購物車」按鈕。
+              <div className="space-y-3 rounded-2xl border border-cyan-500/15 bg-neutral-950/70 p-3">
+                <label className="block text-[11px] text-neutral-400" htmlFor="quantity">
+                  數量
+                </label>
+                <select
+                  id="quantity"
+                  name="quantity"
+                  className="w-full rounded-lg border border-cyan-500/25 bg-black/30 px-3 py-2 text-xs text-neutral-100 outline-none focus:border-cyan-400/60"
+                  defaultValue="1"
+                >
+                  {[1, 2, 3, 4, 5].map((qty) => (
+                    <option key={qty} value={qty}>
+                      {qty}
+                    </option>
+                  ))}
+                </select>
+                <Button className="w-full">加入購物車（下一階段串接）</Button>
               </div>
             </div>
           </Card>
 
-          <Card title="描述（placeholder）" description="之後接上真實內容。">
+          <Card title="商品描述" description="可於 products 資料表直接調整">
             <p className="text-xs leading-relaxed text-neutral-300">
-              這是示意頁面。後續你可以把 products 資料表接到 Supabase，並在這裡做 SSR/ISR。
+              目前為 Phase 5.1 / 5.2 可用版本，資料源為本地 mock。待 Phase 5.3 會把按鈕串接到 cart state。
             </p>
           </Card>
         </div>

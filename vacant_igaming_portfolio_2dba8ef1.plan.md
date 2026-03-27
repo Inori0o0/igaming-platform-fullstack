@@ -413,15 +413,21 @@ client-portal/src/app/
 
 ### 4.4 彩票遊戲 (Lottery) - Italian Brainrot 設定
 
-> 彩票區同樣融入 Italian Brainrot 角色，每款遊戲都綁定 1-2 個代表角色或符號。
+> 彩票區延續 Italian Brainrot 世界觀；目前 `client-portal` 已上架 3 張主題圖卡，玩法入口先標示「即將開放」。
 
-| 遊戲                                 | 說明                                                                                                                                                               |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Tralalero Lucky Wheel** (轉盤抽獎) | 大型幸運轉盤，由 Tralalero Tralala 坐在中央；不同區塊以角色頭像與代表物件區分獎項，例如 Bombardiro Crocodilo 區塊對應高倍率獎勵、Elefanto Cactuso 區塊對應隨機加成 |
-| **Brainrot Scratch Cards** (刮刮樂)  | 刮刮卡面印有 Tung Tung Tung Sahur、Brr Brr Patapim、Lirili Larila 等角色線稿，刮開後顯示對應角色與獎金倍率；特殊卡面可出現 Elephant Cactus 作為 Bonus 獎           |
-| **Cactuso Numbers** (數字彩票)       | 數字球造型為小型仙人掌大象頭（Elefanto Cactuso），開獎動畫由 Lirili Larila 拉小提琴，隨音符掉落數字球；特定組合可觸發 Bombardiro Crocodilo「爆擊獎池」效果         |
+**client-portal 目前狀態（以程式為準）**
 
-所有彩票遊戲的 **UI 色彩與插畫風格** 與 4.1 的 Italian Brainrot Slots 統一，確保角色與世界觀一致，方便後續在行銷頁與成就系統中重複利用這些角色。
+- 路由：`/games/lottery` 為彩票列表頁（3 張 `GameThemeCard`），由 sidebar 的 `Lottery 彩票` 進入。
+- 大廳：`/games` 已顯示 3 張彩票主題卡，皆為 `coming_soon`（不可點入遊玩）。
+- 圖卡資產：`client-portal/public/games/lottery/`（`lucky_wheel_card.png`、`scratch_card_card.png`、`number_lottery_card.png`）。
+
+| 遊戲 | 主角與視覺方向 |
+| --- | --- |
+| **Lucky Wheel 轉盤** | 以 **Brr Brr Patapim** 為主角，站在茂密樹林中的幸運轉盤旁；畫面包含輪盤、籌碼、骰子、撲克牌等賭場元素。 |
+| **Scratch Card 刮刮樂** | 以 Italian Brainrot 五角（Tralalero Tralala、Bombardiro Crocodilo、Tung Tung Tung Sahur、Lirilì Larilà、Brr Brr Patapim）為主；呈現角色與鈔票由刮刮樂面中衝出的動態感。 |
+| **Number Lottery 數字彩** | 以 **Bombardiro Crocodilo** 為主角，在天空主題場景中轟炸出數字彩票；視覺重點數字統一為 **67**，搭配數字球與彩票抽獎元素。 |
+
+> 三款彩票主題的色彩與插畫語言持續與 4.1 的 Italian Brainrot Slots 對齊，方便後續共用素材到行銷頁、活動 banner 與成就系統。
 
 ---
 

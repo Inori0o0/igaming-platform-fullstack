@@ -12,7 +12,7 @@ const sections: { title: string; items: SidebarItem[] }[] = [
       { href: "/games/slots", label: "老虎機 Slots" },
       { href: "/games/blackjack", label: "二十一點" },
       { href: "/games/baccarat", label: "百家樂" },
-      { href: "/games/lottery", label: "彩票 Lottery" },
+      { href: "/games/lottery", label: "Lottery 彩票" },
     ],
   },
   {

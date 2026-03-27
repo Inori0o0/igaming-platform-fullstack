@@ -10,7 +10,7 @@ type HomeHeroSectionProps = {
 
 export function HomeHeroSection({ onOpenAuthModal }: HomeHeroSectionProps) {
   return (
-    <section className="grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-center">
+    <section className="relative z-10 grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-center">
       <div className="space-y-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-cyan-300/80">
           vAcAnt · Italian Brainrot Casino
@@ -38,7 +38,7 @@ export function HomeHeroSection({ onOpenAuthModal }: HomeHeroSectionProps) {
       <div className="flex flex-col gap-4">
         <div className="relative h-64 w-full overflow-hidden rounded-3xl border border-cyan-500/40 bg-neutral-950/80 shadow-[0_0_60px_rgba(34,211,238,0.45)]">
           <Image
-            src="/point_down.png"
+            src="/home/point_down.png"
             alt="vAcAnt Brainrot Hero"
             fill
             priority
