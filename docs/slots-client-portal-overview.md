@@ -1,7 +1,8 @@
 # Slots 功能（client-portal）說明
 
 本文件用**白話**說明老虎機相關程式怎麼分工；細節以程式註解為準。  
-**不含** `docs/sql/phase-4-game-availability-stub.sql`（僅為未來 DB 參考）。
+**不含** `docs/sql/phase-4-game-availability-stub.sql`（僅為未來 DB 參考）。  
+錢包／slots 相關 SQL 檔名與執行順序見 `docs/sql/README.md`（含 `phase-0-schema-bootstrap.sql`、`phase-3-wallet-vac-migration.sql`、`phase-5-slots-wallet-rounds-migration.sql`）。
 
 ---
 

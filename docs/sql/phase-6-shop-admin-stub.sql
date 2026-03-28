@@ -1,6 +1,7 @@
--- Phase 6 (stub): shop + admin readiness
--- This is a planning stub (NOT applied by default).
--- Apply when backend/admin starts implementation.
+-- Phase 6 (stub): shop + admin readiness — superseded by applied migration:
+--   docs/sql/phase-6-shop-orders-migration.sql
+-- Full migration order: docs/sql/README.md
+-- Keep this file for quick reference only, or delete once comfortable with the real migration.
 
 -- Goals:
 -- 1) Admin can create/update products and toggle listing state

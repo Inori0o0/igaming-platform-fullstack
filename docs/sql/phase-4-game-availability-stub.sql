@@ -1,4 +1,5 @@
 -- Phase 4 (stub): slot theme availability — NOT applied by default.
+-- See docs/sql/README.md for other migration file names and order.
 -- When the admin backend is ready, run a migration similar to below and
 -- replace the static map in client-portal/src/games/slots/config/gameAvailability.ts
 -- with a Supabase/API fetch (or read replica).
