@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Button } from "@/src/components/ui/Button";
+import { AddToCartPanel } from "@/src/components/shop/AddToCartPanel";
 import { Card } from "@/src/components/ui/Card";
 import { getProductById } from "@/src/shop/products";
 import { productCategoryLabels } from "@/src/shop/types";
@@ -56,7 +56,7 @@ export default async function ProductDetailPage({
         </div>
 
         <div className="space-y-4">
-          <Card title="商品資訊" description="價格 / 分類 / 庫存">
+          <Card title="商品資訊" description="價格 / 分類">
             <div className="grid gap-2 text-[11px] text-neutral-300">
               <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
                 <span>Price</span>
@@ -70,36 +70,14 @@ export default async function ProductDetailPage({
                   {productCategoryLabels[product.category]}
                 </span>
               </div>
-              <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
-                <span>Stock</span>
-                <span className="text-cyan-200">
-                  {product.stock === null ? "不限量（數位）" : `${product.stock} 件`}
-                </span>
-              </div>
-              <div className="space-y-3 rounded-2xl border border-cyan-500/15 bg-neutral-950/70 p-3">
-                <label className="block text-[11px] text-neutral-400" htmlFor="quantity">
-                  數量
-                </label>
-                <select
-                  id="quantity"
-                  name="quantity"
-                  className="w-full rounded-lg border border-cyan-500/25 bg-black/30 px-3 py-2 text-xs text-neutral-100 outline-none focus:border-cyan-400/60"
-                  defaultValue="1"
-                >
-                  {[1, 2, 3, 4, 5].map((qty) => (
-                    <option key={qty} value={qty}>
-                      {qty}
-                    </option>
-                  ))}
-                </select>
-                <Button className="w-full">加入購物車（下一階段串接）</Button>
-              </div>
+              <AddToCartPanel key={product.id} product={product} />
             </div>
           </Card>
 
           <Card title="商品描述" description="可於 products 資料表直接調整">
             <p className="text-xs leading-relaxed text-neutral-300">
-              目前為 Phase 5.1 / 5.2 可用版本，資料源為本地 mock。待 Phase 5.3 會把按鈕串接到 cart state。
+              目前為 Phase 5.1 / 5.2 可用版本，資料源為本地 mock。待 Phase 5.3
+              會把按鈕串接到 cart state。
             </p>
           </Card>
         </div>
@@ -107,4 +85,3 @@ export default async function ProductDetailPage({
     </main>
   );
 }
-
