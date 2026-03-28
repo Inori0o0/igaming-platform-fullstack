@@ -1,5 +1,7 @@
 -- Phase 3 wallet migration (VAC-first + real persistence)
 -- Apply this in Supabase SQL Editor before using DB-backed wallet store.
+-- Prerequisite: public.users / public.wallets / public.transactions exist (e.g. run
+--   docs/sql/phase-0-schema-bootstrap.sql on a greenfield project, or equivalent tables).
 
 create extension if not exists "pgcrypto";
 

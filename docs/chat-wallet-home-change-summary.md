@@ -72,6 +72,10 @@
 - 技術說明：新增 server route 對外提供匯率資料；來源 CoinGecko、60 秒快取、失敗時回傳 stale 快取；VAC 固定 0.01 USDT。
 - 白話文：前端不直接打第三方 API，而是先打你自己的 API，比較穩定也好換來源。
 
+### `docs/sql/phase-0-schema-bootstrap.sql`
+- 技術說明：新庫用的基礎 schema（users、wallets、舊版 products/orders 等）；與錢包／商店後續 migration 的順序見 `docs/sql/README.md`。
+- 白話文：從零建資料庫時先跑這包，後面 phase-3 才有表可以改。
+
 ### `docs/sql/phase-3-wallet-vac-migration.sql`
 - 技術說明：新增錢包升級 migration，包含 `claim` enum、`transactions.status`、`balance_after`、VAC-only constraint、wallet 唯一約束與 RLS policy。
 - 白話文：這份 SQL 是把資料庫升級成「能正式支援 VAC 主幣真實儲存」的關鍵腳本。

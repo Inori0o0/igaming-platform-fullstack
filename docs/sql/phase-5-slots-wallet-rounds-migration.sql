@@ -1,5 +1,6 @@
 -- Phase 5 slots wallet settlement migration (wager + payout + round metadata)
--- Apply this after phase-3-wallet-vac-migration.sql.
+-- Apply after docs/sql/phase-3-wallet-vac-migration.sql (and after
+-- docs/sql/phase-0-schema-bootstrap.sql if you started from an empty database).
 
 -- 1) transaction_type: add wager / payout
 do $$

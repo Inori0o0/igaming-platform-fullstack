@@ -2,18 +2,20 @@
 
 ## 檔案位置
 
-- Migration 檔：`docs/sql/phase-3-wallet-vac-migration.sql`
+- **新庫／完整順序**：見 `docs/sql/README.md`（含 `phase-0-schema-bootstrap.sql` → phase-3 → phase-5 → phase-6 等）。
+- Migration 檔（錢包本體）：`docs/sql/phase-3-wallet-vac-migration.sql`
 - Slots 結算擴充：`docs/sql/phase-5-slots-wallet-rounds-migration.sql`
 
 ## 使用步驟
 
 1. 打開 Supabase SQL Editor
 2. 新增一個 Query
-3. 貼上 `phase-3-wallet-vac-migration.sql` 全部內容
-4. 執行 SQL
+3. **空庫**：先執行 `docs/sql/phase-0-schema-bootstrap.sql`（若尚未建立 users / wallets 等基礎表）。
+4. 貼上 `docs/sql/phase-3-wallet-vac-migration.sql` 全部內容並執行。
 
-> 建議：不要刪掉既有 schema 直接覆蓋；請在既有基礎上執行 migration。
-> 新增 slots 錢包結算欄位時，請在 phase-3 後再執行 phase-5。
+> 建議：不要刪掉既有 schema 直接覆蓋；請在既有基礎上執行 migration。  
+> 已有表時可略過 phase-0，直接跑 phase-3。  
+> 新增 slots 錢包結算欄位時，請在 phase-3 後再執行 `phase-5-slots-wallet-rounds-migration.sql`。
 
 ## 執行後應該看到的變化
 
