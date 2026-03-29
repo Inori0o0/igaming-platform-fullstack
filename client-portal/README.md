@@ -18,6 +18,12 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Shop, cart, checkout
+
+- **Supabase migrations**（商店、結帳 RPC、優惠券）執行順序：repo 根目錄 [`docs/sql/README.md`](../docs/sql/README.md)。
+- **Phase 5 前端／檔案對照**（白話）：[`docs/phase-5-shop-client-changes.md`](../docs/phase-5-shop-client-changes.md)。
+- 單元測試：`npm test`（含 `stock`、`shopCheckout`、`calculateCartSummary` 等）。
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More

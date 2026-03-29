@@ -15,10 +15,10 @@ todos:
     content: "Phase 4: 博弈遊戲 - 老虎機(3個)、二十一點、百家樂、彩票遊戲"
     status: pending
   - id: phase-5
-    content: "Phase 5: 購物車與商品系統 - 商品展示、購物車、結帳流程"
+    content: "Phase 5: 購物車與商品系統 - 商品展示、購物車、結帳流程、訂單歷史"
     status: pending
   - id: phase-6
-    content: "Phase 6: 用戶個人中心 - 資料編輯、遊戲歷史、成就、訂單歷史"
+    content: "Phase 6: 用戶個人中心 - 資料編輯、遊戲歷史、成就"
     status: pending
   - id: phase-7
     content: "Phase 7: 管理後台 - 儀表板、用戶/遊戲/商品/訂單管理"
@@ -242,7 +242,7 @@ client-portal/src/components/loading/
 /checkout            # 結帳
 /profile             # 個人中心
 /profile/history     # 遊戲歷史
-/profile/orders      # 訂單歷史
+/profile/orders      # 訂單歷史（Phase 5.5）
 /profile/achievements # 成就
 /wallet              # 錢包
 /auth/callback       # Google OAuth 回跳：兌換 code → session → 導回 next
@@ -453,7 +453,6 @@ client-portal/src/app/
 - 調整數量
 - 優惠券輸入與驗證
 - 計算總價 (含折扣)
-- 願望清單
 
 ### 5.4 結帳流程
 
@@ -462,6 +461,17 @@ client-portal/src/app/
 3. 確認訂單
 4. 扣除 vAcAnt Coins
 5. 訂單完成頁面
+
+### 5.5 訂單歷史
+
+- 訂單列表
+- 訂單詳情 (商品、金額、狀態)
+
+### 實作狀態（本 repo）
+
+- **Client**：購物車／結帳／成功頁、個人中心訂單列表與詳情、錢包交易類型、`dbProductId` 與 `checkout_shop_order` RPC 串接已完成；金額試算與 payload 組裝有單元測試（`cartSummary`、`shopCheckout`、`stock`）。
+- **資料庫**：依賴 `docs/sql/phase-6-shop-orders-migration.sql` 與 `phase-6-shop-checkout-rpc-migration.sql`（及優惠券相關 migration），執行順序見 **`docs/sql/README.md`**。
+- **變更檔案白話說明**：見 **`docs/phase-5-shop-client-changes.md`**。
 
 ---
 
@@ -488,11 +498,6 @@ client-portal/src/app/
 | 購物狂   | 完成第一筆訂單    |
 | 收藏家   | 擁有 3 個以上商品 |
 | VIP 玩家 | 總遊戲次數達 67   |
-
-### 6.4 訂單歷史
-
-- 訂單列表
-- 訂單詳情 (商品、金額、狀態)
 
 ---
 

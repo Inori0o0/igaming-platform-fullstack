@@ -1,33 +1,36 @@
 "use client";
 
+/**
+ * 購物車狀態（localStorage 持久化、加車規則、優惠券）。
+ * 金額試算請用 `calculateCartSummary`（見 cartSummary）；型別見 cartTypes。
+ */
+
 import { create } from "zustand";
-import { shopProducts } from "@/src/shop/products";
 import type { ApparelSize } from "@/src/shop/types";
+import { stockAvailableForLine } from "@/src/shop/stock";
+import { couponAppliesToMode, deriveMode } from "@/src/store/cartSummary";
+import type { CartLineItem, CartMode, CouponState } from "@/src/store/cartTypes";
 import { useAuthStore } from "@/src/store/authStore";
+import { getShopCatalogSnapshot } from "@/src/store/shopCatalogStore";
+
+export type { CartLineItem, CouponState, CouponFulfillmentScope } from "@/src/store/cartTypes";
+export { calculateCartSummary } from "@/src/store/cartSummary";
 
 const CART_STORAGE_KEY = "vacant_cart_v1";
 const AVATAR_OWNERSHIP_KEY = "vacant_avatar_owned_v1";
-const PHYSICAL_SHIPPING_FEE = 60;
-
-type CartMode = "physical" | "digital" | null;
-type CouponCode = "VAC10" | "SHIP60";
-
-export type CartLineItem = {
-  productId: string;
-  quantity: number;
-  /** 有 sizeOptions 的商品必填（由 UI 預設 M） */
-  size?: ApparelSize;
-};
-
-type CouponState = {
-  code: CouponCode;
-  discountVac: number;
-  description: string;
-};
 
 type AddResult =
   | { ok: true; message: string }
-  | { ok: false; reason: "mixed_fulfillment" | "avatar_already_owned"; message: string };
+  | {
+      ok: false;
+      reason:
+        | "mixed_fulfillment"
+        | "avatar_already_owned"
+        | "avatar_max_one_per_cart"
+        | "out_of_stock"
+        | "insufficient_stock";
+      message: string;
+    };
 
 type CartState = {
   items: CartLineItem[];
@@ -55,7 +58,7 @@ function lineMatches(
   size?: ApparelSize,
 ): boolean {
   if (item.productId !== productId) return false;
-  const product = shopProducts.find((p) => p.id === productId);
+  const product = getShopCatalogSnapshot().find((p) => p.id === productId);
   if (product?.sizeOptions?.length) {
     return (item.size ?? "M") === (size ?? "M");
   }
@@ -69,9 +72,10 @@ function normalizeStoredItems(raw: unknown): CartLineItem[] {
     if (!entry || typeof entry !== "object") continue;
     const rec = entry as Partial<CartLineItem>;
     if (typeof rec.productId !== "string" || typeof rec.quantity !== "number") continue;
-    const product = shopProducts.find((p) => p.id === rec.productId);
+    const product = getShopCatalogSnapshot().find((p) => p.id === rec.productId);
     if (!product) continue;
-    const qty = Math.max(1, Math.min(99, Math.floor(rec.quantity)));
+    const cap = product.isAvatar ? 1 : 99;
+    const qty = Math.max(1, Math.min(cap, Math.floor(rec.quantity)));
     if (product.sizeOptions?.length) {
       const s = rec.size;
       const size: ApparelSize =
@@ -102,6 +106,17 @@ function saveCart(identityId: string, payload: StoredCart) {
   window.localStorage.setItem(getCartStorageKey(identityId), JSON.stringify(payload));
 }
 
+function sanitizeCoupon(raw: unknown): CouponState | null {
+  if (!raw || typeof raw !== "object") return null;
+  const rec = raw as { code?: unknown };
+  if (typeof rec.code !== "string") return null;
+  const built = buildCoupon(rec.code);
+  if (built) return built;
+  const legacy = rec.code.trim().toUpperCase();
+  if (legacy === "SHIP60") return buildCoupon("SHIPFREE");
+  return null;
+}
+
 function loadCart(identityId: string): StoredCart {
   if (typeof window === "undefined") {
     return { items: [], coupon: null };
@@ -112,10 +127,13 @@ function loadCart(identityId: string): StoredCart {
   }
   try {
     const parsed = JSON.parse(raw) as Partial<StoredCart>;
-    return {
-      items: normalizeStoredItems(parsed.items),
-      coupon: parsed.coupon ?? null,
-    };
+    const items = normalizeStoredItems(parsed.items);
+    let coupon = sanitizeCoupon(parsed.coupon);
+    const mode = deriveMode(items, getShopCatalogSnapshot());
+    if (coupon && mode && !couponAppliesToMode(coupon, mode)) {
+      coupon = null;
+    }
+    return { items, coupon };
   } catch {
     return { items: [], coupon: null };
   }
@@ -143,48 +161,36 @@ function markAvatarAsOwned(identityId: string, avatarIds: string[]) {
   );
 }
 
-function deriveMode(items: CartLineItem[]): CartMode {
-  if (items.length === 0) return null;
-  const first = shopProducts.find((product) => product.id === items[0]?.productId);
-  return first?.fulfillmentType ?? null;
-}
-
 function buildCoupon(rawCode: string): CouponState | null {
   const code = rawCode.trim().toUpperCase();
-  if (code === "VAC10") {
-    return { code: "VAC10", discountVac: 0, description: "結帳 9 折" };
+  if (code === "SHIPFREE") {
+    return {
+      code: "SHIPFREE",
+      discountType: "free_shipping",
+      percentOffPoints: 0,
+      description: "免運",
+      appliesFulfillment: "physical",
+    };
   }
-  if (code === "SHIP60") {
-    return { code: "SHIP60", discountVac: 0, description: "免運優惠" };
+  if (code === "DIGI97") {
+    return {
+      code: "DIGI97",
+      discountType: "percentage",
+      percentOffPoints: 3,
+      description: "97 折",
+      appliesFulfillment: "digital",
+    };
+  }
+  if (code === "ALL95") {
+    return {
+      code: "ALL95",
+      discountType: "percentage",
+      percentOffPoints: 5,
+      description: "95 折",
+      appliesFulfillment: "any",
+    };
   }
   return null;
-}
-
-export function calculateCartSummary(
-  items: CartLineItem[],
-  coupon: CouponState | null,
-): {
-  subtotalVac: number;
-  shippingVac: number;
-  discountVac: number;
-  totalVac: number;
-  mode: CartMode;
-} {
-  const mode = deriveMode(items);
-  const subtotalVac = items.reduce((sum, item) => {
-    const product = shopProducts.find((p) => p.id === item.productId);
-    if (!product) return sum;
-    return sum + product.priceVac * item.quantity;
-  }, 0);
-
-  const baseShipping = mode === "physical" && subtotalVac > 0 ? PHYSICAL_SHIPPING_FEE : 0;
-  const percentDiscount = coupon?.code === "VAC10" ? Math.floor(subtotalVac * 0.1) : 0;
-  const shippingDiscount = coupon?.code === "SHIP60" ? Math.min(baseShipping, 60) : 0;
-  const discountVac = percentDiscount + shippingDiscount;
-  const shippingVac = Math.max(0, baseShipping - shippingDiscount);
-  const totalVac = Math.max(0, subtotalVac + shippingVac - percentDiscount);
-
-  return { subtotalVac, shippingVac, discountVac, totalVac, mode };
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -198,12 +204,12 @@ export const useCartStore = create<CartState>((set, get) => ({
     set({
       items: stored.items,
       coupon: stored.coupon,
-      mode: deriveMode(stored.items),
+      mode: deriveMode(stored.items, getShopCatalogSnapshot()),
     });
   },
 
   addItem: (productId, quantity, size) => {
-    const target = shopProducts.find((product) => product.id === productId);
+    const target = getShopCatalogSnapshot().find((product) => product.id === productId);
     if (!target) {
       return { ok: false, reason: "mixed_fulfillment", message: "找不到商品" };
     }
@@ -214,14 +220,24 @@ export const useCartStore = create<CartState>((set, get) => ({
         ? size
         : "M"
       : undefined;
-    const currentItems = get().items;
-    const nextMode = deriveMode(currentItems);
 
-    if (nextMode && nextMode !== target.fulfillmentType) {
+    const lineCap = stockAvailableForLine(target, resolvedSize);
+    if (lineCap <= 0) {
+      return {
+        ok: false,
+        reason: "out_of_stock",
+        message: needsSize ? "此尺寸缺貨" : "缺貨",
+      };
+    }
+
+    const currentItems = get().items;
+    const currentMode = deriveMode(currentItems, getShopCatalogSnapshot());
+
+    if (currentMode && currentMode !== target.fulfillmentType) {
       return {
         ok: false,
         reason: "mixed_fulfillment",
-        message: "虛擬商品與實體商品需分開結帳，請先清空購物車。",
+        message: "請先清空購物車",
       };
     }
 
@@ -232,7 +248,7 @@ export const useCartStore = create<CartState>((set, get) => ({
         return {
           ok: false,
           reason: "avatar_already_owned",
-          message: "此頭像你已擁有，無法重複購買。",
+          message: "您已擁有此商品",
         };
       }
     }
@@ -240,21 +256,60 @@ export const useCartStore = create<CartState>((set, get) => ({
     const existing = currentItems.find((item) =>
       lineMatches(item, productId, resolvedSize),
     );
+    const inCartQty = existing?.quantity ?? 0;
+
+    if (target.isAvatar) {
+      if (inCartQty >= 1) {
+        return {
+          ok: false,
+          reason: "avatar_max_one_per_cart",
+          message: "已在購物車",
+        };
+      }
+      if (safeQuantity > 1) {
+        return {
+          ok: false,
+          reason: "avatar_max_one_per_cart",
+          message: "每款限 1 件",
+        };
+      }
+    }
+
+    const nextTotalQty = inCartQty + safeQuantity;
+    if (nextTotalQty > lineCap) {
+      const canAdd = Math.max(0, lineCap - inCartQty);
+      return {
+        ok: false,
+        reason: "insufficient_stock",
+        message:
+          canAdd <= 0 ? "已達可購數量" : `尚可加入 ${canAdd} 件`,
+      };
+    }
+
+    const qtyCap = target.isAvatar ? 1 : 99;
     const newLine: CartLineItem = needsSize
-      ? { productId, quantity: Math.min(99, safeQuantity), size: resolvedSize }
-      : { productId, quantity: Math.min(99, safeQuantity) };
+      ? { productId, quantity: Math.min(qtyCap, safeQuantity), size: resolvedSize }
+      : { productId, quantity: Math.min(qtyCap, safeQuantity) };
 
     const nextItems = existing
       ? currentItems.map((item) =>
           lineMatches(item, productId, resolvedSize)
-            ? { ...item, quantity: Math.min(99, item.quantity + safeQuantity) }
+            ? {
+                ...item,
+                quantity: Math.min(qtyCap, item.quantity + safeQuantity),
+              }
             : item,
         )
       : [...currentItems, newLine];
 
     const identityId = getCurrentIdentityId();
-    saveCart(identityId, { items: nextItems, coupon: get().coupon });
-    set({ items: nextItems, mode: deriveMode(nextItems) });
+    const nextMode = deriveMode(nextItems, getShopCatalogSnapshot());
+    let nextCoupon = get().coupon;
+    if (nextCoupon && nextMode && !couponAppliesToMode(nextCoupon, nextMode)) {
+      nextCoupon = null;
+    }
+    saveCart(identityId, { items: nextItems, coupon: nextCoupon });
+    set({ items: nextItems, mode: nextMode, coupon: nextCoupon });
     return { ok: true, message: "已加入購物車" };
   },
 
@@ -267,15 +322,25 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   removeItem: (productId, size) => {
     const nextItems = get().items.filter((item) => !lineMatches(item, productId, size));
-    const nextMode = deriveMode(nextItems);
-    const nextCoupon = nextItems.length === 0 ? null : get().coupon;
+    const nextMode = deriveMode(nextItems, getShopCatalogSnapshot());
+    let nextCoupon = get().coupon;
+    if (nextItems.length === 0) {
+      nextCoupon = null;
+    } else if (nextCoupon && nextMode && !couponAppliesToMode(nextCoupon, nextMode)) {
+      nextCoupon = null;
+    }
     const identityId = getCurrentIdentityId();
     saveCart(identityId, { items: nextItems, coupon: nextCoupon });
     set({ items: nextItems, mode: nextMode, coupon: nextCoupon });
   },
 
   updateItemQuantity: (productId, quantity, size) => {
-    const safeQuantity = Math.max(1, Math.floor(quantity));
+    const product = getShopCatalogSnapshot().find((p) => p.id === productId);
+    const maxQty = product?.isAvatar ? 1 : 99;
+    const safeQuantity = Math.min(
+      maxQty,
+      Math.max(1, Math.floor(quantity)),
+    );
     const nextItems = get().items.map((item) =>
       lineMatches(item, productId, size) ? { ...item, quantity: safeQuantity } : item,
     );
@@ -295,10 +360,15 @@ export const useCartStore = create<CartState>((set, get) => ({
     if (!coupon) {
       return { ok: false, message: "無效優惠碼" };
     }
+    const items = get().items;
+    const mode = deriveMode(items, getShopCatalogSnapshot());
+    if (items.length > 0 && mode && !couponAppliesToMode(coupon, mode)) {
+      return { ok: false, message: "此優惠不適用目前購物車" };
+    }
     const identityId = getCurrentIdentityId();
     saveCart(identityId, { items: get().items, coupon });
     set({ coupon });
-    return { ok: true, message: `已套用優惠：${coupon.description}` };
+    return { ok: true, message: `已套用 ${coupon.description}` };
   },
 
   clearCoupon: () => {
@@ -310,7 +380,9 @@ export const useCartStore = create<CartState>((set, get) => ({
   checkoutSuccess: () => {
     const identityId = getCurrentIdentityId();
     const avatarIds = get().items
-      .map((item) => shopProducts.find((product) => product.id === item.productId))
+      .map((item) =>
+        getShopCatalogSnapshot().find((product) => product.id === item.productId),
+      )
       .filter((product) => product?.isAvatar)
       .map((product) => product!.id);
 

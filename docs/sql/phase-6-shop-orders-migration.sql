@@ -175,6 +175,8 @@ alter table public.orders add column if not exists subtotal_vac numeric(18, 2);
 alter table public.orders add column if not exists shipping_fee_vac numeric(18, 2) default 0;
 alter table public.orders add column if not exists discount_vac numeric(18, 2) default 0;
 alter table public.orders add column if not exists total_vac numeric(18, 2);
+-- phase-0 bootstrap 已有 total_amount NOT NULL；僅 phase-6 新建表時補上，與 total_vac 同義
+alter table public.orders add column if not exists total_amount numeric(18, 2);
 alter table public.orders add column if not exists coupon_code text;
 alter table public.orders add column if not exists shipping_snapshot jsonb;
 alter table public.orders add column if not exists updated_at timestamptz default now();
@@ -188,6 +190,9 @@ begin
     update public.orders o
     set total_vac = o.total_amount
     where o.total_vac is null and o.total_amount is not null;
+    update public.orders o
+    set total_amount = o.total_vac
+    where o.total_amount is null and o.total_vac is not null;
   end if;
 
   if exists (
@@ -227,6 +232,8 @@ alter table public.order_items add column if not exists unit_price_vac numeric(1
 alter table public.order_items add column if not exists line_total_vac numeric(18, 2);
 alter table public.order_items add column if not exists size_snapshot text;
 alter table public.order_items add column if not exists created_at timestamptz default now();
+-- phase-0：price_at_purchase NOT NULL；僅 phase-6 新建表時補欄，語意同單價 unit_price_vac
+alter table public.order_items add column if not exists price_at_purchase numeric(18, 2);
 
 do $$
 begin
@@ -241,6 +248,10 @@ begin
     update public.order_items i
     set line_total_vac = i.price_at_purchase * i.quantity
     where i.line_total_vac is null and i.price_at_purchase is not null;
+
+    update public.order_items i
+    set price_at_purchase = i.unit_price_vac
+    where i.price_at_purchase is null and i.unit_price_vac is not null;
   end if;
 end
 $$;
@@ -458,19 +469,29 @@ on conflict (id) do update set
   force_sold_out = excluded.force_sold_out,
   updated_at = now();
 
--- Variants: per-size for tee / shorts / beanie (20000 each size); single null-size for others
+-- Variants: per-size for tee / shorts / hoodie (20000 each size); single null-size for beanie + others
+-- （若曾跑過舊版 seed：毛帽誤為分尺寸、連帽誤為無尺寸，先刪這兩款的 variants 再重插）
+-- 若此 DELETE 因 order_items 仍參照舊 variant 而失敗，請先清空／調整測試訂單後再執行。
+delete from public.product_variants
+where product_id in (
+  select id from public.products
+  where slug in ('vacant-beanie', 'vacant-hoodie')
+);
+
+-- Per-size: tee、短褲、連帽上衣
 insert into public.product_variants (product_id, size, stock_quantity)
 select p.id, v.size::text, 20000
 from public.products p
 cross join (values ('XS'), ('S'), ('M'), ('L'), ('XL')) as v(size)
-where p.slug in ('vacant-tee', 'vacant-shorts', 'vacant-beanie')
+where p.slug in ('vacant-tee', 'vacant-shorts', 'vacant-hoodie')
   and not exists (
     select 1 from public.product_variants x
     where x.product_id = p.id and x.size = v.size::text
   );
 
+-- 單一規格（size null）：毛帽、托特包、數位／雕像等
 insert into public.product_variants (product_id, size, stock_quantity)
 select p.id, null, 100000
 from public.products p
-where p.slug in ('vacant-hoodie', 'vacant-tote-bag', 'triplet-golden-avatar-skin', 'triplet-diamond-avatar-skin', 'triplet-devil-avatar-skin', 'triplet-god-avatar-skin', 'triplet-golden-statue')
+where p.slug in ('vacant-beanie', 'vacant-tote-bag', 'triplet-golden-avatar-skin', 'triplet-diamond-avatar-skin', 'triplet-devil-avatar-skin', 'triplet-god-avatar-skin', 'triplet-golden-statue')
   and not exists (select 1 from public.product_variants x where x.product_id = p.id);

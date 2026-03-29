@@ -1,10 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCartPanel } from "@/src/components/shop/AddToCartPanel";
+import { ProductDetailImage } from "@/src/components/shop/ProductDetailImage";
 import { Card } from "@/src/components/ui/Card";
-import { getProductById } from "@/src/shop/products";
+import { fetchProductBySlug } from "@/src/shop/fetchShopCatalog";
 import { productCategoryLabels } from "@/src/shop/types";
+
+export const dynamic = "force-dynamic";
 
 type ProductDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -14,7 +16,7 @@ export default async function ProductDetailPage({
   params,
 }: ProductDetailPageProps) {
   const { id } = await params;
-  const product = getProductById(id);
+  const product = await fetchProductBySlug(id);
 
   if (!product) {
     notFound();
@@ -33,6 +35,9 @@ export default async function ProductDetailPage({
           <p className="mt-2 max-w-2xl text-sm text-neutral-300">
             {product.description}
           </p>
+          <p className="mt-2 text-[11px] text-neutral-500">
+            規格與庫存以本頁為準
+          </p>
         </div>
         <Link
           href="/shop"
@@ -44,15 +49,7 @@ export default async function ProductDetailPage({
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <div className="overflow-hidden rounded-3xl border border-cyan-500/20 bg-neutral-950/70">
-          <div className="relative aspect-square">
-            <Image
-              src={product.imageSrc}
-              alt={product.name}
-              fill
-              className="object-cover"
-              sizes="(min-width: 1024px) 60vw, 100vw"
-            />
-          </div>
+          <ProductDetailImage src={product.imageSrc} alt={product.name} />
         </div>
 
         <div className="space-y-4">
@@ -72,13 +69,6 @@ export default async function ProductDetailPage({
               </div>
               <AddToCartPanel key={product.id} product={product} />
             </div>
-          </Card>
-
-          <Card title="商品描述" description="可於 products 資料表直接調整">
-            <p className="text-xs leading-relaxed text-neutral-300">
-              目前為 Phase 5.1 / 5.2 可用版本，資料源為本地 mock。待 Phase 5.3
-              會把按鈕串接到 cart state。
-            </p>
           </Card>
         </div>
       </div>

@@ -10,7 +10,8 @@ export type TransactionType =
   | "withdraw"
   | "claim"
   | "wager"
-  | "payout";
+  | "payout"
+  | "purchase";
 export type TransactionStatus = "completed" | "pending" | "failed";
 
 export type WalletBalances = {

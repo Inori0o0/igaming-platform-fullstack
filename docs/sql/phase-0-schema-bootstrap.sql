@@ -9,6 +9,8 @@
 --   2) docs/sql/phase-3-wallet-vac-migration.sql
 --   3) docs/sql/phase-5-slots-wallet-rounds-migration.sql  (optional, if you use slots settlement)
 --   4) docs/sql/phase-6-shop-orders-migration.sql
+--   5a) docs/sql/phase-6-shop-coupons-enum-free-shipping.sql
+--   5b) docs/sql/phase-6-shop-coupons-fulfillment-migration.sql
 --
 -- Safe to re-run: uses IF NOT EXISTS / guarded constraints where practical.
 -- Shop note: public.products here is the older minimal shape; phase-6 ALTERs and seeds extend it.
@@ -171,6 +173,7 @@ create index if not exists idx_wishlists_user_id on public.wishlists(user_id);
 create index if not exists idx_wishlists_product_id on public.wishlists(product_id);
 
 -- === 10) coupons ===
+-- 後台列表／軟刪／審計欄位見 docs/sql/phase-6-shop-coupons-fulfillment-migration.sql
 
 create table if not exists public.coupons (
   id uuid primary key default gen_random_uuid(),
