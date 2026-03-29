@@ -26,6 +26,7 @@ export function TransactionFilters({
         <option value="claim">免費領取</option>
         <option value="wager">下注</option>
         <option value="payout">派彩</option>
+        <option value="purchase">商店消費</option>
       </select>
     </div>
   );

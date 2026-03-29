@@ -14,6 +14,7 @@ export const typeLabels: Record<WalletTransaction["type"], string> = {
   claim: "免費領取",
   wager: "下注",
   payout: "派彩",
+  purchase: "商店消費",
 };
 
 export const statusLabels: Record<WalletTransaction["status"], string> = {

@@ -1,19 +1,21 @@
 import Link from "next/link";
 import { Card } from "@/src/components/ui/Card";
-import type { Product } from "@/src/shop/types";
+import type { ApparelSize, Product } from "@/src/shop/types";
+import { cartLineReactKey } from "@/src/shop/cartLineKey";
 import { CartLineItem } from "@/src/components/shop/CartLineItem";
 
 type CartRow = {
   product: Product;
   quantity: number;
   lineTotal: number;
+  size?: ApparelSize;
 };
 
 type CartItemsCardProps = {
   cartRows: CartRow[];
   mode: "physical" | "digital" | null;
-  onQuantityChange: (productId: string, quantity: number) => void;
-  onRemove: (productId: string) => void;
+  onQuantityChange: (productId: string, quantity: number, size?: ApparelSize) => void;
+  onRemove: (productId: string, size?: ApparelSize) => void;
 };
 
 export function CartItemsCard({
@@ -23,10 +25,10 @@ export function CartItemsCard({
   onRemove,
 }: CartItemsCardProps) {
   return (
-    <Card title="商品列表" description="可調整數量與移除商品。">
+    <Card title="商品列表" description="調整數量或移除">
       {cartRows.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-cyan-500/25 bg-neutral-950/60 p-6 text-center text-xs text-neutral-400">
-          你的購物車目前是空的。
+          購物車是空的
           <div className="mt-3">
             <Link
               href="/shop"
@@ -43,12 +45,15 @@ export function CartItemsCard({
           </p>
           {cartRows.map((row) => (
             <CartLineItem
-              key={row.product.id}
+              key={cartLineReactKey(row.product, row.size)}
               product={row.product}
+              size={row.size}
               quantity={row.quantity}
               lineTotal={row.lineTotal}
-              onQuantityChange={(qty) => onQuantityChange(row.product.id, qty)}
-              onRemove={() => onRemove(row.product.id)}
+              onQuantityChange={(qty) =>
+                onQuantityChange(row.product.id, qty, row.size)
+              }
+              onRemove={() => onRemove(row.product.id, row.size)}
             />
           ))}
         </div>

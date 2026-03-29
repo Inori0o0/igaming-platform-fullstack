@@ -68,6 +68,14 @@ alwaysApply: false
   - 個人中心、成就、訂單歷史
   - 管理後台儀表板與管理功能
 
+## React 19：禁止用 useEffect 做「衍生狀態」同步
+
+- **不要在 `useEffect` 裡因為 props / 其他 state 變了，就同步呼叫 `setState`**（例如依 `maxSelectable` 去 `setQuantity`）。React 19 會警告 *cascading renders*，也違反 [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)。
+- **正確做法**：
+  - 能在 render 算出來的值，就用 **運算 / `useMemo`** 得到「有效值」（例如 `quantityForAdd = min(quantity, maxQty)`），表單 `value` 與提交邏輯都用這個衍生值。
+  - 若必須在「外部系統」更新後才改 state（訂閱、DOM、`fetch` 完成回呼），在**回呼裡** `setState`，不要 effect body 裡同步 `setState`。
+- **本專案預設**：新增或修改 client 元件時，完全避免「僅為了對齊另一個 state 而寫的 effect + setState」模式。
+
 ## 通用開發原則
 
 - 元件化與可重用性優先：遊戲卡片、商品卡片、列表、統計區塊等盡量抽成獨立元件

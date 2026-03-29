@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { shopProducts } from "@/src/shop/products";
 import { calculateCartSummary, useCartStore } from "@/src/store/cartStore";
+import { useShopCatalogStore } from "@/src/store/shopCatalogStore";
 
 export function useCartViewModel() {
   const hydrate = useCartStore((s) => s.hydrate);
+  const catalog = useShopCatalogStore((s) => s.products);
   const items = useCartStore((s) => s.items);
   const coupon = useCartStore((s) => s.coupon);
   const mode = useCartStore((s) => s.mode);
@@ -24,20 +25,24 @@ export function useCartViewModel() {
   const cartRows = useMemo(
     () =>
       items.flatMap((item) => {
-        const product = shopProducts.find((p) => p.id === item.productId);
+        const product = catalog.find((p) => p.id === item.productId);
         if (!product) return [];
         return [
           {
             product,
             quantity: item.quantity,
+            size: item.size,
             lineTotal: product.priceVac * item.quantity,
           },
         ];
       }),
-    [items],
+    [items, catalog],
   );
 
-  const summary = useMemo(() => calculateCartSummary(items, coupon), [items, coupon]);
+  const summary = useMemo(
+    () => calculateCartSummary(items, coupon, catalog),
+    [items, coupon, catalog],
+  );
 
   const handleApplyCoupon = () => {
     const result = applyCoupon(couponInput);

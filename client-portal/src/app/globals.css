@@ -39,3 +39,26 @@ body {
   animation: neon-pulse 1.5s ease-in-out infinite;
 }
 
+/* 商品詳情大圖載入前的 shimmer（見 ProductDetailImage） */
+@keyframes shop-detail-image-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.shop-detail-image-shimmer {
+  background: linear-gradient(
+    110deg,
+    rgb(12 12 18) 0%,
+    rgb(24 24 34) 38%,
+    rgba(34, 211, 238, 0.12) 50%,
+    rgb(24 24 34) 62%,
+    rgb(12 12 18) 100%
+  );
+  background-size: 200% 100%;
+  animation: shop-detail-image-shimmer 1.35s ease-in-out infinite;
+}
+
