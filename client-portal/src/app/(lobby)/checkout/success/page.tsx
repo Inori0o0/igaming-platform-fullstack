@@ -45,21 +45,21 @@ function CheckoutSuccessContent() {
           {orderId ? (
             <Link
               href={`/profile/orders/${orderId}`}
-              className="inline-flex flex-1 items-center justify-center rounded-xl border border-cyan-300/70 bg-cyan-400 px-4 py-3 text-center text-sm font-semibold text-neutral-950 shadow-[0_0_20px_rgba(34,211,238,0.35)] transition hover:border-cyan-200 hover:bg-cyan-300 sm:min-w-[10rem]"
+              className="inline-flex flex-1 items-center justify-center rounded-xl border border-cyan-300/70 bg-cyan-400 px-4 py-3 text-center text-sm font-semibold text-neutral-950 shadow-[0_0_20px_rgba(34,211,238,0.35)] transition hover:border-cyan-200 hover:bg-cyan-300 sm:min-w-40"
             >
               查看訂單詳情
             </Link>
           ) : (
             <Link
               href="/profile/orders"
-              className="inline-flex flex-1 items-center justify-center rounded-xl border border-cyan-300/70 bg-cyan-400 px-4 py-3 text-center text-sm font-semibold text-neutral-950 shadow-[0_0_20px_rgba(34,211,238,0.35)] transition hover:border-cyan-200 hover:bg-cyan-300 sm:min-w-[10rem]"
+              className="inline-flex flex-1 items-center justify-center rounded-xl border border-cyan-300/70 bg-cyan-400 px-4 py-3 text-center text-sm font-semibold text-neutral-950 shadow-[0_0_20px_rgba(34,211,238,0.35)] transition hover:border-cyan-200 hover:bg-cyan-300 sm:min-w-40"
             >
               前往訂單歷史
             </Link>
           )}
           <Link
             href="/shop"
-            className="inline-flex flex-1 items-center justify-center rounded-xl border border-cyan-500/30 bg-neutral-950/80 px-4 py-3 text-center text-sm font-semibold text-cyan-100/95 transition hover:border-cyan-400/45 hover:bg-neutral-900/90 sm:min-w-[10rem]"
+            className="inline-flex flex-1 items-center justify-center rounded-xl border border-cyan-500/30 bg-neutral-950/80 px-4 py-3 text-center text-sm font-semibold text-cyan-100/95 transition hover:border-cyan-400/45 hover:bg-neutral-900/90 sm:min-w-40"
           >
             繼續逛逛
           </Link>
