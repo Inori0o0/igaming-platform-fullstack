@@ -33,6 +33,12 @@ export function Avatar({
 
   const showImage = src && !hasError;
 
+  const defaultSizes =
+    size === "sm" ? "32px" : size === "md" ? "40px" : "48px";
+
+  // 允許外部覆蓋 sizes（例如 profile 頭像實際顯示 96/128px）
+  const { sizes: sizesOverride, ...restImgProps } = imgProps;
+
   // 從 fallback 字串取前兩段的首字大寫當縮寫，沒有則顯示 "?"
   const initials =
     fallback
@@ -56,10 +62,10 @@ export function Avatar({
           src={src ?? ""}
           alt={alt ?? fallback ?? "Avatar"}
           fill
-          sizes={size === "sm" ? "32px" : size === "md" ? "40px" : "48px"}
+          sizes={sizesOverride ?? defaultSizes}
           className="object-cover"
           onError={() => setHasError(true)}
-          {...imgProps}
+          {...restImgProps}
         />
       ) : (
         <span className="select-none font-semibold tracking-wide text-cyan-100">

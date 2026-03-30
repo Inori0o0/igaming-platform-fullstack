@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { supabase } from "@/src/lib/supabaseClient";
+import { publicObjectUrl } from "@/src/lib/supabaseStorage";
 
 // 訪客 ID 存在瀏覽器的 key、訪客顯示名稱
 const GUEST_STORAGE_KEY = "vacant_guest_id";
@@ -79,15 +80,67 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       // 有 session → 從 Supabase 使用者資料組出 user
       if (session?.user) {
+        const metaDisplayName =
+          session.user.user_metadata?.full_name ??
+          session.user.user_metadata?.name ??
+          session.user.email?.split("@")[0] ??
+          "User";
+
+        const metaAvatarUrl = session.user.user_metadata?.avatar_url ?? null;
+
+        let display_name = metaDisplayName;
+        let avatar_url: string | null = metaAvatarUrl;
+
+        // 額外同步 profile（需求優先順序：使用者上傳 > 商店頭像 > Google）
+        try {
+          const { data: dbUser } = await supabase
+            .from("users")
+            .select("id, display_name, avatar_url")
+            .eq("auth_user_id", session.user.id)
+            .maybeSingle();
+
+          if (dbUser) {
+            display_name = dbUser.display_name ?? metaDisplayName;
+
+            if (dbUser.avatar_url) {
+              avatar_url = dbUser.avatar_url;
+            } else {
+              const { data: selectionRow } = await supabase
+                .from("user_avatar_selection")
+                .select("avatar_product_id")
+                .eq("user_id", dbUser.id)
+                .maybeSingle();
+
+              const avatarProductId = selectionRow?.avatar_product_id;
+              if (avatarProductId) {
+                const { data: productRow } = await supabase
+                  .from("products")
+                  .select("image_bucket, image_object_path")
+                  .eq("id", avatarProductId)
+                  .maybeSingle();
+
+                if (
+                  productRow?.image_object_path &&
+                  typeof productRow.image_object_path === "string"
+                ) {
+                  const bucket = productRow.image_bucket ?? "shop-products";
+                  avatar_url = publicObjectUrl(
+                    bucket,
+                    productRow.image_object_path,
+                  );
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("initAuth profile sync error:", e);
+        }
+
         set({
           user: {
             id: session.user.id,
-            display_name:
-              session.user.user_metadata?.full_name ??
-              session.user.user_metadata?.name ??
-              session.user.email?.split("@")[0] ??
-              "User",
-            avatar_url: session.user.user_metadata?.avatar_url ?? null,
+            display_name,
+            avatar_url,
             email: session.user.email ?? null,
             is_guest: false,
           },

@@ -18,6 +18,9 @@ export function Card({
   children,
   ...props
 }: CardProps) {
+  // 有標題/描述時，children 只需要佔剩餘空間；無 meta 時讓 children 直接吃滿高度。
+  const hasMeta = Boolean(hero || title || description);
+
   return (
     <section
       className={cn(
@@ -27,10 +30,10 @@ export function Card({
       )}
       {...props}
     >
-      <div className="relative space-y-3">
-        {hero && <div className="overflow-hidden rounded-xl">{hero}</div>}
+      <div className="relative flex h-full flex-col">
+        {hero && <div className="mb-3 overflow-hidden rounded-xl">{hero}</div>}
         {(title || description) && (
-          <header className="space-y-1">
+          <header className="mb-3 space-y-1">
             {title && (
               <h2 className="text-lg font-semibold tracking-wide text-cyan-100">
                 {title}
@@ -41,7 +44,7 @@ export function Card({
             )}
           </header>
         )}
-        {children}
+        <div className={cn("flex-1", hasMeta ? "" : "h-full")}>{children}</div>
       </div>
     </section>
   );
