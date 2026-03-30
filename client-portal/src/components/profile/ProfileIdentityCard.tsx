@@ -18,6 +18,7 @@ type ProfileIdentityCardProps = {
   onSaveName: () => Promise<void>;
   onUploadFile: (file: File) => Promise<void>;
   onClearCustomAvatar: () => Promise<void>;
+  onRestoreGoogleAvatar: () => Promise<void>;
   hasCustomAvatar: boolean;
   avatarProducts: AvatarProductOption[];
   equippedAvatarProductId: string | null;
@@ -34,6 +35,7 @@ export function ProfileIdentityCard({
   onSaveName,
   onUploadFile,
   onClearCustomAvatar,
+  onRestoreGoogleAvatar,
   hasCustomAvatar,
   avatarProducts,
   equippedAvatarProductId,
@@ -55,6 +57,7 @@ export function ProfileIdentityCard({
             fallback={fallbackName}
             size="lg"
             sizes="128px"
+            loading="eager"
             className="h-32 w-32"
           />
           <Button
@@ -95,6 +98,8 @@ export function ProfileIdentityCard({
         remainingShopAvatars={remainingShopAvatars}
         onUploadFile={onUploadFile}
         onClearCustomAvatar={onClearCustomAvatar}
+        onRestoreGoogleAvatar={onRestoreGoogleAvatar}
+        hasEquippedShopAvatar={Boolean(equippedAvatarProductId)}
         onSelectShopAvatar={onSelectShopAvatar}
       />
     </Card>

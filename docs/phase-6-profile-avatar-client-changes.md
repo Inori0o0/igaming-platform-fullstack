@@ -29,7 +29,8 @@
     - `users`（display_name、avatar_url）
     - `user_avatar_selection`（目前商店頭像）
     - `user_entitlements`（哪些頭像已解鎖）
-  - 實作 `uploadCustomAvatar`、`clearCustomAvatar`、`selectShopAvatar`。
+  - 實作 `uploadCustomAvatar`、`clearCustomAvatar`、`selectShopAvatar`、`restoreGoogleAvatar`。
+  - 自傳頭像改為「每位使用者僅保留一張」：上傳新圖成功後會清理舊圖；清除自傳/改回 Google 也會刪除既有自傳檔案。
   - 計算預覽頭像 `previewAvatarUrl`（有明確優先序）。
 - **白話解釋**
   - 這支 hook 就是「頭像與名稱的總控台」。
@@ -48,8 +49,10 @@
 - **程式做了什麼**
   - `initAuth()` 增加 profile 同步，讓顯示名稱與頭像來源更一致。
   - 頭像來源邏輯：`users.avatar_url` > `user_avatar_selection` > Google metadata。
+  - 對 Google `avatar_url` 做解析度正規化（例如 `s96-c` 升為 `s512-c`），減少個人中心放大後模糊問題。
 - **白話解釋**
   - Header、Profile 等地方不會各自亂抓頭像，來源有統一規則。
+  - Google 原始圖常偏小，這裡會自動改抓較大尺寸。
 
 ### `client-portal/src/components/profile/ProfileIdentityCard.tsx`
 
@@ -57,8 +60,10 @@
   - 負責 profile 主區塊（大頭像、編輯按鈕、顯示名稱輸入與儲存）。
   - `editOpen` 控制頭像編輯 modal 的開關。
   - 傳遞 `remainingShopAvatars` 給 modal。
+  - 首屏主頭像加上 `loading="eager"`，避免被判定 LCP 時延後載入。
 - **白話解釋**
   - 這張卡現在只專心做「主畫面」，不再塞一大段 modal 內容。
+  - 使用者一打開頁面就會優先下載主頭像，體感更順。
 
 ### `client-portal/src/components/profile/ProfileAvatarEditorModal.tsx`（新增）
 
@@ -138,6 +143,8 @@
 - 頭像清晰度已改為可控：
   - 大頭像傳 `sizes="128px"`
   - modal 頭像傳 `sizes="96px"`
+- `user-avatars` bucket 以「每位使用者保留一張」為策略，避免同一帳號長期累積多張舊圖。
+- Google avatar URL 會自動升級到較高尺寸（目前設定 `s512`），改善 Google 頭像在大尺寸 UI 的清晰度。
 
 ---
 

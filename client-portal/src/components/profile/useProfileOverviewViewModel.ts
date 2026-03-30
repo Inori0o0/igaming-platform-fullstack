@@ -35,6 +35,7 @@ export function useProfileOverviewViewModel() {
     uploadCustomAvatar,
     clearCustomAvatar,
     selectShopAvatar,
+    restoreGoogleAvatar,
   } = useProfileAvatarEditor();
 
   const [nameDraft, setNameDraft] = useState("");
@@ -167,6 +168,18 @@ export function useProfileOverviewViewModel() {
     }
   };
 
+  const onRestoreGoogleAvatar = async () => {
+    try {
+      await restoreGoogleAvatar();
+      setToast({ tone: "success", message: "已切換回 Google 頭像。" });
+    } catch (e) {
+      setToast({
+        tone: "error",
+        message: e instanceof Error ? e.message : "切換 Google 頭像失敗。",
+      });
+    }
+  };
+
   return {
     user,
     authLoading,
@@ -204,6 +217,7 @@ export function useProfileOverviewViewModel() {
     onUploadFile,
     onClearCustomAvatar,
     onSelectShopAvatar,
+    onRestoreGoogleAvatar,
   };
 }
 

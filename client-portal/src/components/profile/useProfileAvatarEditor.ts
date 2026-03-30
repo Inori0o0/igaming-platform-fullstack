@@ -33,9 +33,23 @@ export type AvatarProductOption = {
 };
 
 const DEFAULT_AVATAR_BUCKET = "shop-products";
+const USER_AVATAR_BUCKET = "user-avatars";
 
 function sanitizeFileName(name: string) {
   return name.replace(/[^\w.-]+/g, "_");
+}
+
+function extractUserAvatarObjectPath(avatarUrl: string | null) {
+  if (!avatarUrl) return null;
+  const marker = `/storage/v1/object/public/${USER_AVATAR_BUCKET}/`;
+  const idx = avatarUrl.indexOf(marker);
+  if (idx < 0) return null;
+  const encodedPath = avatarUrl.slice(idx + marker.length);
+  if (!encodedPath) return null;
+  return encodedPath
+    .split("/")
+    .map((seg) => decodeURIComponent(seg))
+    .join("/");
 }
 
 export function useProfileAvatarEditor() {
@@ -53,6 +67,16 @@ export function useProfileAvatarEditor() {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const cleanupPreviousCustomAvatar = useCallback(async (avatarUrl: string | null) => {
+    const oldObjectPath = extractUserAvatarObjectPath(avatarUrl);
+    if (!oldObjectPath) return;
+    const { error: removeErr } = await supabase.storage
+      .from(USER_AVATAR_BUCKET)
+      .remove([oldObjectPath]);
+    // 清理失敗不阻斷主流程，避免「其實已成功更新頭像」卻被當作失敗。
+    if (removeErr) console.warn("cleanup old avatar failed:", removeErr.message);
+  }, []);
 
   const reload = useCallback(async () => {
     if (!user || user.is_guest) return;
@@ -182,6 +206,8 @@ export function useProfileAvatarEditor() {
         throw new Error("圖片太大（上限 5MB）");
       }
 
+      const previousCustomAvatarUrl = dbUser?.avatar_url ?? null;
+
       const ext = file.name.includes(".")
         ? file.name.split(".").pop()
         : "img";
@@ -202,7 +228,7 @@ export function useProfileAvatarEditor() {
         throw upErr;
       }
 
-      const url = publicObjectUrl("user-avatars", objectPath);
+      const url = publicObjectUrl(USER_AVATAR_BUCKET, objectPath);
       const { error: userUpErr } = await supabase
         .from("users")
         .update({ avatar_url: url })
@@ -210,23 +236,29 @@ export function useProfileAvatarEditor() {
 
       if (userUpErr) throw userUpErr;
 
+      // 成功切換新圖後，再清掉舊圖，確保每位使用者只保留一張自傳頭像。
+      await cleanupPreviousCustomAvatar(previousCustomAvatarUrl);
+
       await initAuth();
       await reload();
     },
-    [initAuth, reload, user],
+    [cleanupPreviousCustomAvatar, dbUser?.avatar_url, initAuth, reload, user],
   );
 
   const clearCustomAvatar = useCallback(async () => {
     if (!user || user.is_guest) return;
+    const previousCustomAvatarUrl = dbUser?.avatar_url ?? null;
     const { error } = await supabase
       .from("users")
       .update({ avatar_url: null })
       .eq("auth_user_id", user.id);
     if (error) throw error;
 
+    await cleanupPreviousCustomAvatar(previousCustomAvatarUrl);
+
     await initAuth();
     await reload();
-  }, [initAuth, reload, user]);
+  }, [cleanupPreviousCustomAvatar, dbUser?.avatar_url, initAuth, reload, user]);
 
   const selectShopAvatar = useCallback(
     async (productId: string) => {
@@ -258,6 +290,31 @@ export function useProfileAvatarEditor() {
     [avatarProducts, dbUser, initAuth, reload, user],
   );
 
+  const restoreGoogleAvatar = useCallback(async () => {
+    if (!user || user.is_guest) return;
+    if (!dbUser) throw new Error("尚未載入使用者資料");
+    const previousCustomAvatarUrl = dbUser.avatar_url;
+
+    // 清掉自傳頭像，先排除 custom avatar 優先權。
+    const { error: clearCustomErr } = await supabase
+      .from("users")
+      .update({ avatar_url: null })
+      .eq("auth_user_id", user.id);
+    if (clearCustomErr) throw clearCustomErr;
+
+    // 取消商店裝備，讓最終 fallback 回到 Google metadata avatar。
+    const { error: clearShopErr } = await supabase
+      .from("user_avatar_selection")
+      .update({ avatar_product_id: null })
+      .eq("user_id", dbUser.id);
+    if (clearShopErr) throw clearShopErr;
+
+    await cleanupPreviousCustomAvatar(previousCustomAvatarUrl);
+
+    await initAuth();
+    await reload();
+  }, [cleanupPreviousCustomAvatar, dbUser, initAuth, reload, user]);
+
   return {
     user,
     authLoading,
@@ -277,6 +334,7 @@ export function useProfileAvatarEditor() {
     uploadCustomAvatar,
     clearCustomAvatar,
     selectShopAvatar,
+    restoreGoogleAvatar,
   };
 }
 
