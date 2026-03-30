@@ -7,6 +7,22 @@ import { publicObjectUrl } from "@/src/lib/supabaseStorage";
 // 訪客 ID 存在瀏覽器的 key、訪客顯示名稱
 const GUEST_STORAGE_KEY = "vacant_guest_id";
 const GUEST_DISPLAY_NAME = "訪客";
+const GOOGLE_AVATAR_SIZE = 512;
+
+function normalizeGoogleAvatarUrl(url: string | null | undefined) {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    if (!parsed.hostname.includes("googleusercontent.com")) return url;
+
+    // Google avatar 常見尾碼如 `=s96-c`，放大為更高解析度避免在個人中心顯示模糊。
+    return url.match(/=s\d+(-[a-z0-9-]+)?$/i)
+      ? url.replace(/=s\d+(-[a-z0-9-]+)?$/i, `=s${GOOGLE_AVATAR_SIZE}-c`)
+      : `${url}=s${GOOGLE_AVATAR_SIZE}-c`;
+  } catch {
+    return url;
+  }
+}
 
 /** 目前使用者：訪客（只有 id + 顯示名）或已登入（含頭像、email） */
 export type AuthUser =
@@ -86,7 +102,9 @@ export const useAuthStore = create<AuthState>((set) => ({
           session.user.email?.split("@")[0] ??
           "User";
 
-        const metaAvatarUrl = session.user.user_metadata?.avatar_url ?? null;
+        const metaAvatarUrl = normalizeGoogleAvatarUrl(
+          session.user.user_metadata?.avatar_url ?? null,
+        );
 
         let display_name = metaDisplayName;
         let avatar_url: string | null = metaAvatarUrl;

@@ -11,10 +11,12 @@ type ProfileAvatarEditorModalProps = {
   previewAvatarUrl: string | null;
   fallbackName: string;
   hasCustomAvatar: boolean;
+  hasEquippedShopAvatar: boolean;
   uploading: boolean;
   remainingShopAvatars: AvatarProductOption[];
   onUploadFile: (file: File) => Promise<void>;
   onClearCustomAvatar: () => Promise<void>;
+  onRestoreGoogleAvatar: () => Promise<void>;
   onSelectShopAvatar: (productId: string, isUnlocked: boolean) => Promise<void>;
 };
 
@@ -24,10 +26,12 @@ export function ProfileAvatarEditorModal({
   previewAvatarUrl,
   fallbackName,
   hasCustomAvatar,
+  hasEquippedShopAvatar,
   uploading,
   remainingShopAvatars,
   onUploadFile,
   onClearCustomAvatar,
+  onRestoreGoogleAvatar,
   onSelectShopAvatar,
 }: ProfileAvatarEditorModalProps) {
   // 目前頭像 + 上傳頭像固定佔 2 格；超過兩排時才開捲動避免 modal 過高。
@@ -36,16 +40,26 @@ export function ProfileAvatarEditorModal({
   return (
     <Modal open={open} onClose={onClose} title="編輯頭像">
       <div className="space-y-4">
-        {hasCustomAvatar && (
-          <div className="flex justify-end">
+        {(hasCustomAvatar || hasEquippedShopAvatar) && (
+          <div className="flex flex-wrap justify-end gap-2">
             <Button
               variant="ghost"
               onClick={async () => {
                 await onClearCustomAvatar();
                 onClose();
               }}
+              disabled={!hasCustomAvatar}
             >
               刪除自傳（回退）
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={async () => {
+                await onRestoreGoogleAvatar();
+                onClose();
+              }}
+            >
+              改用 Google 頭像
             </Button>
           </div>
         )}

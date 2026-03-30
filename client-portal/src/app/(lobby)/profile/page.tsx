@@ -64,6 +64,7 @@ export default function ProfileOverviewPage() {
               onSaveName={vm.onSaveName}
               onUploadFile={vm.onUploadFile}
               onClearCustomAvatar={vm.onClearCustomAvatar}
+              onRestoreGoogleAvatar={vm.onRestoreGoogleAvatar}
               avatarProducts={vm.avatarProducts}
               equippedAvatarProductId={vm.equippedAvatarProductId}
               onSelectShopAvatar={vm.onSelectShopAvatar}
