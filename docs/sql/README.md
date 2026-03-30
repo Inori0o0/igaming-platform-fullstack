@@ -9,6 +9,7 @@
 | 3 | [`phase-5-slots-wallet-rounds-migration.sql`](./phase-5-slots-wallet-rounds-migration.sql) | 選用：老虎機 wager/payout 與 round 欄位（在 phase-3 之後） |
 | 4 | [`phase-6-shop-orders-migration.sql`](./phase-6-shop-orders-migration.sql) | 商店：商品擴充、variants、orders、entitlements、storage bucket、seed |
 | 4b | [`phase-6-user-avatars-upload-migration.sql`](./phase-6-user-avatars-upload-migration.sql) | 使用者上傳頭像：`user-avatars` bucket + upload policy |
+| 4c | [`phase-6-profile-achievements-migration.sql`](./phase-6-profile-achievements-migration.sql) | 成就系統：`achievements` RLS + `(user_id, achievement_type)` 唯一索引 |
 | 5a | [`phase-6-shop-coupons-enum-free-shipping.sql`](./phase-6-shop-coupons-enum-free-shipping.sql) | 優惠券：單獨新增 enum `free_shipping`（**須先跑並 commit**，再跑 5b，避免 55P04） |
 | 5b | [`phase-6-shop-coupons-fulfillment-migration.sql`](./phase-6-shop-coupons-fulfillment-migration.sql) | 優惠券：`applies_fulfillment`、後台 CRUD 預留、seed（依賴 5a） |
 | 6c | [`phase-6-shop-checkout-rpc-migration.sql`](./phase-6-shop-checkout-rpc-migration.sql) | 商店結帳：`checkout_shop_order` RPC（SECURITY DEFINER）、`GRANT authenticated`（依賴 4、5b、phase-3） |

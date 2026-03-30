@@ -489,6 +489,12 @@ client-portal/src/app/
 - 篩選 (依遊戲類型/日期)
 - 統計: 總遊戲次數、總贏取金額
 
+### 實作狀態（本 repo）
+
+- **Client**：`/profile/history` 已從 placeholder 改為可用頁面，含登入擋板、遊戲類型/日期篩選、RWD 表格、分頁、錯誤重試與統計卡。
+- **資料來源定義**：以 `transactions` 的 `payout`（`currency=VAC`、`status=completed`）作為每局結算紀錄；統計「總遊戲次數」為符合條件的 payout 筆數，「總贏取金額」為 payout 金額總和。
+- **測試**：`historyUtils` 已有單元測試覆蓋數值轉換、日期區間、row 映射與總額聚合。
+
 ### 6.3 成就系統
 
 | 成就     | 條件              |
@@ -496,8 +502,15 @@ client-portal/src/app/
 | 新手上路 | 完成第一場遊戲    |
 | 幸運之星 | 單次贏取 10,000+  |
 | 購物狂   | 完成第一筆訂單    |
-| 收藏家   | 擁有 3 個以上商品 |
+| 收藏家   | 擁有 3 個以上頭像 |
 | VIP 玩家 | 總遊戲次數達 67   |
+
+### 實作狀態（本 repo）
+
+- **Client**：`/profile/achievements` 已從 placeholder 改為可用頁面，含登入擋板、解鎖進度、Locked/Unlocked 狀態、解鎖時間與錯誤重試。
+- **解鎖策略**：採「進頁批次補發」；進入成就頁時計算是否達標，將尚未入庫但已達標的成就寫入 `public.achievements`。
+- **收藏家規則**：目前改為「擁有 3 個以上頭像」，只計 `user_entitlements.entitlement_type = 'avatar'`。
+- **資料庫**：新增 migration `docs/sql/phase-6-profile-achievements-migration.sql`（RLS + `(user_id, achievement_type)` 唯一索引，避免重複解鎖）。
 
 ---
 
