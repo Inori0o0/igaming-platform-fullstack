@@ -62,7 +62,7 @@ export const achievementDefinitions: AchievementDefinition[] = [
 
 export function sumNumeric(values: Array<number | string | null | undefined>) {
   // 將 Supabase numeric 字串安全相加，避免 NaN 汙染統計。
-  return values.reduce((sum, value) => {
+  return values.reduce<number>((sum, value) => {
     if (typeof value === "number") return sum + value;
     if (typeof value === "string") {
       const parsed = Number(value);
