@@ -17,13 +17,14 @@ export function SlotPlayfieldReelFrame({
   children,
 }: SlotPlayfieldReelFrameProps) {
   return (
-    <div className="relative mx-auto mt-4 w-full max-w-5xl">
+    // 固定 2:1 與 max 寬，讓不同主題框圖都落在同一尺寸規格。
+    <div className="relative mx-auto mt-4 w-full max-w-272 aspect-2/1">
       <Image
         src={frameSrc}
         alt=""
-        width={1600}
-        height={800}
-        className="block h-auto w-full select-none object-contain"
+        fill
+        sizes="(max-width: 1024px) 100vw, 80rem"
+        className="block select-none object-contain"
         priority
       />
       <div
