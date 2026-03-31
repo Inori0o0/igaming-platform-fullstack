@@ -21,9 +21,6 @@ export default function ProfileLayout({
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
           個人中心
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-neutral-300">
-          這裡採用 nested layout，後續加功能只要補子頁即可。
-        </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -42,4 +39,3 @@ export default function ProfileLayout({
     </div>
   );
 }
-

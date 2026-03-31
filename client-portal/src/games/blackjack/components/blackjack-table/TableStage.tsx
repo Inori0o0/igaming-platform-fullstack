@@ -21,7 +21,7 @@ export function TableStage(props: TableStageProps) {
   const { round, dealerTotal, dealerMood, brrTriggered, bombardiroTriggered } = props;
 
   return (
-    <div className="relative min-h-[260px] overflow-hidden rounded-3xl border border-cyan-500/30 bg-neutral-950/70 p-3 shadow-[0_0_60px_rgba(34,211,238,0.16)] sm:min-h-[300px]">
+    <div className="relative h-full min-h-[260px] overflow-hidden rounded-3xl border border-cyan-500/30 bg-neutral-950/70 p-3 shadow-[0_0_60px_rgba(34,211,238,0.16)] sm:min-h-[300px]">
       <div
         className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-40"
         style={{ backgroundImage: `url(${BLACKJACK_ASSETS.tableBackground})` }}

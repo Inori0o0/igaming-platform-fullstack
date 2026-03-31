@@ -13,7 +13,7 @@ export function ClaimAction({ onClaimFreeCoins }: ClaimActionProps) {
         免費領取
       </p>
       <p className="mt-1 text-xs text-neutral-300">
-        每次領取 6,767 vAcAnt Coins，並寫入交易紀錄。
+        每次領取 6,767 vAcAnt Coins
       </p>
       <Button className="mt-3" size="sm" onClick={onClaimFreeCoins}>
         領取 6,767 Coins
@@ -21,4 +21,3 @@ export function ClaimAction({ onClaimFreeCoins }: ClaimActionProps) {
     </div>
   );
 }
-

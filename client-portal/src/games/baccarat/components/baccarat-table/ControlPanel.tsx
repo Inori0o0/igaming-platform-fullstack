@@ -167,13 +167,17 @@ export function ControlPanel(props: any) {
         </div>
       </Card>
 
-      <Card title="路單（簡化）" description="最近 24 局：閒/莊/和（可收合）">
-        <details className="group">
+      <Card
+        title="路單（簡化）"
+        description="最近 24 局：閒/莊/和（可收合）"
+        className="overflow-visible"
+      >
+        <details className="group relative z-80">
           <summary className="cursor-pointer select-none rounded-xl bg-neutral-950/60 px-3 py-2 text-[11px] text-neutral-300 transition hover:bg-neutral-950/75">
             <span className="font-semibold text-cyan-100">展開 / 收合路單</span>
             <span className="ml-2 text-[10px] text-neutral-400">（預設收起，縮短頁面高度）</span>
           </summary>
-          <div className="mt-3">
+          <div className="absolute bottom-full left-0 right-0 mb-3 rounded-2xl border border-cyan-500/30 bg-neutral-950/95 p-3 shadow-[0_16px_44px_rgba(0,0,0,0.55)] backdrop-blur-md">
             <RoadPanel road={road} />
           </div>
         </details>

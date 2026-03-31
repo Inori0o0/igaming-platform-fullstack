@@ -148,22 +148,6 @@ export function ControlPanel(props: ControlPanelProps) {
         </div>
       </Card>
 
-      <Card title="角色演出（強化版）" description="（可收合）以輕動畫 + 事件提示對應 Brainrot 角色。">
-        <details className="group">
-          <summary className="cursor-pointer select-none rounded-xl bg-neutral-950/60 px-3 py-2 text-[11px] text-neutral-300 transition hover:bg-neutral-950/75">
-            <span className="font-semibold text-cyan-100">展開 / 收合角色說明</span>
-            <span className="ml-2 text-[10px] text-neutral-400">（預設收起，縮短頁面高度）</span>
-          </summary>
-          <div className="mt-3">
-            <ul className="list-disc space-y-1 pl-5 text-[11px] text-neutral-300">
-              <li>Tung Tung Tung Sahur：開局發牌、補牌與結算提示。</li>
-              <li>Brr Brr Patapim：Blackjack、爆牌、連勝提示。</li>
-              <li>Bombardiro Crocodilo：高額贏面事件提示。</li>
-              <li>Elefanto Cactuso：籌碼區與牌桌守護意象（文案預留）。</li>
-            </ul>
-          </div>
-        </details>
-      </Card>
     </div>
   );
 }

@@ -14,7 +14,7 @@ export default function BaccaratPage() {
           百家樂 Baccarat
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-300">
-          下注（閒/莊/和）+ 發牌動畫 + 簡化路單（24 格）。
+          體驗閒、莊、和三大下注選項，感受節奏明快的百家樂牌局。
         </p>
       </div>
 

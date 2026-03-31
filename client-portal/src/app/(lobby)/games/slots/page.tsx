@@ -1,7 +1,6 @@
 /**
  * 老虎機大廳列表：靜態 `slots` 陣列驅動圖卡；`getSlotThemeAvailability` 控制維護／即將開放顯示。
  */
-import { Card } from "@/src/components/ui/Card";
 import { GameThemeCard } from "@/src/components/ui/GameThemeCard";
 import { getSlotThemeAvailability } from "@/src/games/slots/config";
 
@@ -19,7 +18,7 @@ const slots: SlotListItem[] = [
   {
     id: "italian-brainrot",
     name: "Italian Brainrot Slots",
-    description: "Tralalero、Bombardiro、Elefanto Cactuso 等角色主題。",
+    description: "Tralalero、Bombardiro、Lirilì Larilà 等角色主題。",
     tag: "Slots",
     cardTitle: "ITALIAN\nBRAINROT",
     imageSrc: "/games/slots/italian-brainrot/ib_card.png",
@@ -61,7 +60,7 @@ export default function SlotsListPage() {
           老虎機列表
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-300">
-          主題入口與圖卡陸續上架；共用的 slot engine 將於後續抽出。
+          從這裡選擇不同風格的老虎機主題，體驗各種轉輪效果與獎項設計。
         </p>
       </div>
 
@@ -80,17 +79,6 @@ export default function SlotsListPage() {
           </div>
         ))}
       </div>
-
-      <Card
-        title="下一步"
-        description="當 /games/slots/[id] 實作完成後，這裡就能接上動態資料。"
-      >
-        <ul className="list-disc space-y-1 pl-5 text-xs text-neutral-300">
-          <li>建立 slot config（symbols、paylines、odds）</li>
-          <li>轉動動畫（Framer Motion）</li>
-          <li>結算與交易紀錄（wallet/transactions）</li>
-        </ul>
-      </Card>
     </main>
   );
 }

@@ -41,7 +41,7 @@ export function BlackjackTable() {
   const topTierGroup = topTier ? tierGroup(topTier) : "normal";
 
   return (
-    <div className="grid gap-2 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+    <div className="grid gap-2 xl:min-h-[620px] xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:items-stretch">
       <TableStage
         round={round}
         dealerTotal={dealerTotal}

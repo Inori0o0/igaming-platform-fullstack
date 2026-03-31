@@ -79,7 +79,7 @@ const lobbyCards: LobbyCardItem[] = [
     id: "baccarat-main",
     href: "/games/baccarat",
     name: "百家樂",
-    description: "閒莊和；路單與動畫之後再補。",
+    description: "閒莊和經典玩法，適合喜歡桌上遊戲節奏的玩家。",
     tag: "百家樂",
     cardTitle: "BACCARAT\n百家樂",
     imageSrc: "/games/baccarat/bc_card_v2.png",
@@ -129,7 +129,7 @@ export default function GamesLobbyPage() {
           遊戲大廳
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-300">
-          以圖卡進入各主題；右上角標籤為遊戲類型（老虎機、二十一點、百家樂、彩票）。
+          從圖卡進入各種遊戲主題，包含老虎機、二十一點、百家樂與彩票。
         </p>
       </div>
 

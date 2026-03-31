@@ -1,4 +1,3 @@
-import { Card } from "@/src/components/ui/Card";
 import { GameThemeCard } from "@/src/components/ui/GameThemeCard";
 
 type LotteryListItem = {
@@ -48,7 +47,7 @@ export default function LotteryPage() {
           Lottery 彩票
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-neutral-300">
-          目前是頁面殼。後續會加入轉盤抽獎、刮刮樂、數字彩三種玩法入口與動畫。
+          之後將陸續解鎖轉盤抽獎、刮刮樂與數字彩三種玩法入口。
         </p>
       </div>
 
@@ -68,16 +67,6 @@ export default function LotteryPage() {
         ))}
       </div>
 
-      <Card
-        title="整合點"
-        description="後續可以和成就/交易紀錄串起來。"
-      >
-        <ul className="list-disc space-y-1 pl-5 text-xs text-neutral-300">
-          <li>每次抽獎扣款與得獎入帳 → transactions</li>
-          <li>稀有結果 → achievements</li>
-          <li>歷史結果列表 → profile/history</li>
-        </ul>
-      </Card>
     </main>
   );
 }

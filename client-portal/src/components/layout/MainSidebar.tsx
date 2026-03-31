@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { SidebarSection, type SidebarItem } from "./sidebar/SidebarSection";
-import { SidebarBrainrotBanner } from "./sidebar/SidebarBrainrotBanner";
 
 const sections: { title: string; items: SidebarItem[] }[] = [
   {
@@ -54,7 +53,6 @@ export function MainSidebar() {
             />
           ))}
         </nav>
-        <SidebarBrainrotBanner />
       </div>
     </aside>
   );
