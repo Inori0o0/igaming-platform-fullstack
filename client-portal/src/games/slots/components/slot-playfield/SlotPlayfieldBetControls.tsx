@@ -1,45 +1,53 @@
-/**
- * 轉動按鈕：樣式來自 `theme.visual.buttonPrimary*`，與父層 `spinning` 連動鎖定。
- */
 import { useState } from "react";
 import type { SlotThemeConfig } from "@/src/games/slots/config";
 
-type SlotPlayfieldSpinControlsProps = {
+type SlotPlayfieldBetControlsProps = {
   theme: SlotThemeConfig;
   spinning: boolean;
-  onSpin: () => void;
   totalBet: number;
   vacBalance: number;
   onTotalBetChange: (next: number) => void;
-  spinError?: string;
 };
 
-export function SlotPlayfieldSpinControls({
+const MIN_TOTAL_BET = 100;
+const MAX_TOTAL_BET = 100000;
+const STEP_OPTIONS = [100, 1000, 10000] as const;
+
+export function SlotPlayfieldBetControls({
   theme,
   spinning,
-  onSpin,
   totalBet,
   vacBalance,
   onTotalBetChange,
-  spinError,
-}: SlotPlayfieldSpinControlsProps) {
+}: SlotPlayfieldBetControlsProps) {
   const v = theme.visual;
   const cannotAfford = vacBalance < totalBet;
-  const MIN_TOTAL_BET = 100;
-  const MAX_TOTAL_BET = 100000;
-  // 用戶可切換一次加減多少（快速調整下注），預設 100。
-  const STEP_OPTIONS = [100, 1000, 10000] as const;
   const [step, setStep] = useState<(typeof STEP_OPTIONS)[number]>(100);
+
   const decDisabled = spinning || totalBet <= MIN_TOTAL_BET;
   const incDisabled = spinning || totalBet >= MAX_TOTAL_BET;
+
   const applyDelta = (delta: number) => {
-    const next = Math.max(MIN_TOTAL_BET, Math.min(MAX_TOTAL_BET, totalBet + delta));
+    // 任何加減都先夾在同一組下注上下限，避免 UI/外部傳值把狀態推到非法範圍。
+    const next = Math.max(
+      MIN_TOTAL_BET,
+      Math.min(MAX_TOTAL_BET, totalBet + delta),
+    );
+    onTotalBetChange(next);
+  };
+
+  const applyAllIn = () => {
+    // 梭哈 = 目前可用餘額（VAC）再套同樣上下限規則。
+    const next = Math.max(
+      MIN_TOTAL_BET,
+      Math.min(MAX_TOTAL_BET, Math.floor(vacBalance)),
+    );
     onTotalBetChange(next);
   };
 
   return (
-    <div className="mt-4 space-y-3">
-      <div className="grid gap-3">
+    <div className="h-full">
+      <div className="grid gap-2">
         <label className="space-y-1">
           <span className={`text-[11px] font-semibold ${v.mutedText}`}>總下注（VAC）</span>
           <div className="flex flex-wrap gap-2">
@@ -57,6 +65,14 @@ export function SlotPlayfieldSpinControls({
                 +{option}
               </button>
             ))}
+            <button
+              type="button"
+              onClick={applyAllIn}
+              disabled={spinning || vacBalance < MIN_TOTAL_BET}
+              className="rounded-md border border-amber-300/40 bg-amber-500/15 px-2.5 py-1 text-[11px] font-bold tracking-wide text-amber-100 transition hover:border-amber-200/70 hover:bg-amber-500/25 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              梭哈
+            </button>
           </div>
           <div className="flex items-center gap-2 rounded-xl border border-cyan-400/35 bg-black/45 p-2 shadow-[0_0_22px_rgba(34,211,238,0.18)]">
             <button
@@ -69,7 +85,9 @@ export function SlotPlayfieldSpinControls({
               -
             </button>
             <div className="flex-1 rounded-lg border border-white/10 bg-neutral-950/75 px-3 py-2 text-center">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-cyan-300/80">Total Bet</p>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-cyan-300/80">
+                Total Bet
+              </p>
               <p className="mt-0.5 text-lg font-extrabold tabular-nums text-cyan-100">
                 {Math.round(totalBet)} VAC
               </p>
@@ -84,30 +102,13 @@ export function SlotPlayfieldSpinControls({
               +
             </button>
           </div>
-          <p className={`text-[11px] ${v.mutedText}`}>
-            範圍 {MIN_TOTAL_BET} ~ {MAX_TOTAL_BET} VAC（每次 {step}）
-          </p>
+          <div className="flex items-center justify-between gap-2">
+            <p className={`text-[11px] ${v.mutedText}`}>餘額 {Math.round(vacBalance)} VAC</p>
+            {cannotAfford ? (
+              <p className="text-[11px] font-semibold text-amber-200">餘額不足，無法下注。</p>
+            ) : null}
+          </div>
         </label>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={onSpin}
-          disabled={spinning || cannotAfford}
-          className={`rounded-full border px-5 py-2 text-xs font-semibold transition disabled:opacity-50 ${v.buttonPrimary} ${v.buttonPrimaryHover}`}
-        >
-          {spinning ? "轉動中…" : "轉動"}
-        </button>
-        <p className={`text-[11px] ${v.mutedText}`}>
-          餘額 {Math.round(vacBalance)} VAC
-        </p>
-        {cannotAfford ? (
-          <p className="text-[11px] font-semibold text-amber-200">餘額不足，無法下注。</p>
-        ) : null}
-        {spinError ? (
-          <p className="text-[11px] font-semibold text-rose-200">{spinError}</p>
-        ) : null}
       </div>
     </div>
   );

@@ -52,10 +52,10 @@ export function SlotReelGrid({
   const reelGrid = (
     <div
       className={clsx(
-        "grid min-h-0 min-w-0",
+        "grid min-h-0 min-w-0 w-full max-w-[min(100%,52rem)] gap-1 p-1 sm:gap-2.5 sm:p-2 md:p-3",
         frameSrc
-          ? "w-full max-w-[min(100%,52rem)] gap-1 bg-black/35 p-1 sm:max-w-4xl sm:gap-2.5 sm:p-2 md:p-3"
-          : clsx("mt-4 gap-2 rounded-2xl border p-3", visual.reelFrame),
+          ? "bg-black/35"
+          : clsx("mx-auto mt-4 rounded-2xl border", visual.reelFrame),
       )}
       style={gridStyle}
     >

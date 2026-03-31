@@ -61,6 +61,7 @@ export function useSlotPlayfieldState({ theme }: UseSlotPlayfieldStateArgs) {
     });
 
     let cancelled = false;
+    // 下注寫入如果失敗，回滾到轉動前盤面，避免玩家看到「有停輪但其實沒下注成功」。
     void wagerPromise.then((ok) => {
       if (ok) return;
       cancelled = true;
@@ -74,6 +75,7 @@ export function useSlotPlayfieldState({ theme }: UseSlotPlayfieldStateArgs) {
     setSpinToken((t) => t + 1);
     setSpinning(true);
 
+    // 以最慢一欄的動畫時間當結算時點，確保停輪後才更新結果。
     const maxMs = (1.05 + (SLOT_REEL_COLS - 1) * 0.18) * 1000 + 120;
     window.setTimeout(async () => {
       if (cancelled) return;

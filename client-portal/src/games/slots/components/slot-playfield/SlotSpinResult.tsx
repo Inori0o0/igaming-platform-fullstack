@@ -8,18 +8,21 @@ type SlotSpinResultProps = {
   theme: SlotThemeConfig;
   evaluation: SpinEvaluation;
   spinning: boolean;
+  compact?: boolean;
 };
 
 export function SlotSpinResult({
   theme,
   evaluation,
   spinning,
+  compact = false,
 }: SlotSpinResultProps) {
   const { lineWins, totalCredits, betPerLine } = evaluation;
+  const visibleLineWins = compact ? lineWins.slice(0, 2) : lineWins;
 
   return (
     <div
-      className={`rounded-2xl border px-3 py-3 text-xs ${theme.visual.reelFrame}`}
+      className={`h-full rounded-2xl border px-3 py-3 text-xs ${theme.visual.reelFrame}`}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <span className={`font-semibold ${theme.visual.mutedText}`}>
@@ -41,7 +44,7 @@ export function SlotSpinResult({
             <span className="tabular-nums">{Math.round(totalCredits)}</span> VAC
           </p>
           <ul className={`mt-2 space-y-1.5 ${theme.visual.mutedText}`}>
-            {lineWins.map((w) => {
+            {visibleLineWins.map((w) => {
               const sym = theme.symbols.find((s) => s.id === w.symbolId);
               return (
                 <li
@@ -63,6 +66,11 @@ export function SlotSpinResult({
               );
             })}
           </ul>
+          {compact && lineWins.length > visibleLineWins.length ? (
+            <p className={`mt-1 text-[11px] ${theme.visual.mutedText}`}>
+              還有 {lineWins.length - visibleLineWins.length} 條連線...
+            </p>
+          ) : null}
         </>
       )}
     </div>

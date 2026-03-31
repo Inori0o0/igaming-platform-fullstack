@@ -1,80 +1,99 @@
 # Slots 功能（client-portal）說明
 
-本文件用**白話**說明老虎機相關程式怎麼分工；細節以程式註解為準。  
-**不含** `docs/sql/phase-4-game-availability-stub.sql`（僅為未來 DB 參考）。  
-錢包／slots 相關 SQL 檔名與執行順序見 `docs/sql/README.md`（含 `phase-0-schema-bootstrap.sql`、`phase-3-wallet-vac-migration.sql`、`phase-5-slots-wallet-rounds-migration.sql`）。
+本文件整理目前 `client-portal` 的 Slots 實作現況（2026-03）。  
+重點是：**頁面排版固定為一套**，主題差異只靠 config/資產注入。
 
 ---
 
-## 整體在幹嘛？
+## 目前產品行為
 
-玩家從**大廳列表**點一張遊戲卡 → 進 **`/games/slots/[主題id]`** → 若主題**開放**，就看到**轉輪、轉一下、算有沒有連線、顯示分數**（目前是示範用 VAC，沒接真錢包）。  
-主題長什麼樣（符號、賠率、背景圖）全部寫在 **`SlotThemeConfig`** 裡。
+玩家從列表進入 `/games/slots/[id]`，頁面會：
 
----
-
-## 檔案對照表（白話）
-
-### 設定與型別（`src/games/slots/config/`）
-
-| 檔案 | 做什麼 |
-|------|--------|
-| **`types.ts`** | 約定「一個主題要有什麼欄位」：符號、賠付線、賠率表、視覺 class 字串、下注範圍等。像一份 JSON schema 的 TypeScript 版。 |
-| **`index.ts`** | 對外出口：用主題 **id** 查 `getSlotThemeConfig`；順便匯出**營運狀態**（開放／維護／即將開放）。 |
-| **`gameAvailability.ts`** | 現在誰能玩、誰維修、誰還沒開：靜態表 + 之後可換成後台／API。另有「只有圖卡、還沒註冊主題」的 placeholder（例如 John Pork）。 |
-| **`themes/cyber-neon.ts`** | **Cyber Neon** 主題的完整設定：符號用 unicode、無品牌圖、賽博風敘述。 |
-| **`themes/vacant-classic.ts`** | **vAcAnt Classic**：符號多半是 **PNG**，並指定背景／機台框／橫幅路徑。 |
-| **`themes/italian-brainrot.ts`** | **Italian Brainrot**：六個梗角色符號 + 賽博霓虹按鈕樣式 + 同上大圖路徑。 |
+1. 依 `id` 找主題；找不到就 fallback 到第一個已註冊主題。
+2. 渲染固定版型的 `SlotThemedPlayfield`。
+3. 按下轉動後：
+   - 先嘗試寫入 `wager`（扣 VAC）
+   - 啟動停輪動畫
+   - 停輪後做 `evaluateLineWins`
+   - 寫入 `payout`（加回中獎 VAC）
+   - 若下注失敗則回滾盤面並提示錯誤
 
 ---
 
-### 結算邏輯（`src/games/slots/logic/`）
+## 固定版型（重要）
 
-| 檔案 | 做什麼 |
-|------|--------|
-| **`evaluateLineWins.ts`** | **核心數學**：每條 payline 從**左到右**數連續幾個**相同符號**，滿 3／4／5 就去 paytable 找倍率；總分 = 各線加總。這版只吃 `totalBet`，並固定用主題全部 paylines 分攤每線注。另提供 `winningCellKeys` 給畫面**亮哪幾格**。 |
-| **`evaluateLineWins.test.ts`** | 連線規則單測：固定盤面驗證「多線結算」「左起連續才算」「`totalBet` 會平均分攤到全部 paylines」。 |
+`SlotThemedPlayfield` 現在是固定結構：
 
----
+- 上方：Banner（或固定占位）
+- 中段：Reel 區（5 欄）
+- Reel 下方同一排三欄（桌面）：
+  - 左：`SlotPlayfieldBetControls`
+  - 中：`SlotPlayfieldSpinButton`
+  - 右：`SlotSpinResult`（`compact` 摘要模式）
+- 最下方：`SlotPlayfieldSidebar`
 
-### 轉輪畫面（`src/games/slots/components/`）
+主題切換時不切版，只替換下列資料：
 
-| 檔案 | 做什麼 |
-|------|--------|
-| **`SlotThemedPlayfield.tsx`** | **一個主題的整張遊戲畫面**：記盤面、按轉、叫結算、排背景／橫幅／外框、塞五個 `ReelColumn`、結果與按鈕、側欄。已接錢包：下注成功先寫 `wager` 扣 VAC，停輪後寫 `payout` 加回獎勵；按鈕點下後動畫先啟動，下注失敗會回滾並提示。 |
-| **`slot-playfield/constants.ts`** | 幾列幾欄、預設單格高度；以及每欄「滾動條要拉多長」的公式（讓五欄停輪時間錯開）。 |
-| **`slot-playfield/reelStrip.ts`** | 生出**隨機結果欄**、**第一次載入可重現的盤面**、以及動畫用**長條符號帶**（上面假滾動、最後三格是真結果）。 |
-| **`slot-playfield/highlightRows.ts`** | 把「中獎格子的座標字串」拆成**某一欄要亮哪幾列**，給 `ReelColumn` 畫圈。 |
-| **`slot-playfield/useSlotCellPx.ts`** | 依**螢幕寬度**縮小單格高度，避免手機上轉輪比機台框還胖。 |
-| **`slot-playfield/ReelColumn.tsx`** | **單一欄**：長條符號用 Framer Motion **往上捲**，停在最後三格；無動畫模式則直接畫三格。 |
-| **`slot-playfield/ReelSymbolContent.tsx`** | **單一格**要顯示圖還是文字；有圖就限制高度別爆格。 |
-| **`slot-playfield/SlotPlayfieldBanner.tsx`** | 上方橫幅圖 + **疊一層標題字**（漸層霓虹字）。 |
-| **`slot-playfield/SlotPlayfieldReelFrame.tsx`** | 機台**外框 PNG**，中間用 `inset` 挖洞塞轉輪。 |
-| **`slot-playfield/SlotPlayfieldShellHeader.tsx`** | 轉輪區上方一行小資訊（有無橫幅時版面略不同）。 |
-| **`slot-playfield/SlotSpinResult.tsx`** | 顯示本局連線結果列表與**展示用**總分。 |
-| **`slot-playfield/SlotPlayfieldSpinControls.tsx`** | 下注控制 + 轉動按鈕：`totalBet` 範圍固定 `100~100000`，用 `+/-` 與跳額按鈕（100/1000/10000）調整。 |
-| **`slot-playfield/SlotPlayfieldSidebar.tsx`** | 下方兩張卡：下注參數摘要 + paytable 唯讀列表。 |
+- `theme.symbols / paylines / paytable`
+- `theme.visual.*`（色系 class）
+- `pageBackgroundSrc / machineFrameSrc / titleBannerSrc`
 
 ---
 
-### 大廳 UI（`src/components/`、`src/app/(lobby)/games/slots/`）
+## 主要檔案對照
 
-| 檔案 | 做什麼 |
-|------|--------|
-| **`components/ui/GameThemeCard.tsx`** | **遊戲圖卡**：4:5、底圖、底部漸層、標題；可標**遊戲類型**（如 Slots）；非開放時灰階 + 不可點。 |
-| **`components/home/HomeHighlightsSection.tsx`** | 首頁「熱門遊戲」：其中一張卡連到 Italian Brainrot。 |
-| **`app/(lobby)/games/slots/page.tsx`** | **老虎機列表頁**：用靜態陣列畫多張 `GameThemeCard`，並帶入可用性。 |
-| **`app/(lobby)/games/slots/[id]/page.tsx`** | **單一主題頁路由（薄）**：`await params` → 查 config／placeholder／可用性 → 交給對應的 view。 |
-| **`app/(lobby)/games/slots/[id]/slot-game-page-views.tsx`** | **同一路由的四種畫面**：僅圖卡 placeholder、找不到 id、有主題但不可玩、可玩（轉輪 + 開發備註）。與 `page.tsx` 分檔避免一支檔案塞滿分支。 |
+### 路由層
+
+| 檔案 | 作用 |
+|------|------|
+| `src/app/(lobby)/games/slots/[id]/page.tsx` | 單一路由頁；統一只渲染可玩畫面，並做主題 fallback。 |
+
+### Playfield 組件層
+
+| 檔案 | 作用 |
+|------|------|
+| `src/games/slots/components/SlotThemedPlayfield.tsx` | 固定排版總成（Banner / Reel / 三欄控制區 / Sidebar）。 |
+| `slot-playfield/SlotPlayfieldBanner.tsx` | 顯示 banner 圖與主題標題疊字（支援 compact 文字樣式）。 |
+| `slot-playfield/SlotPlayfieldShell.tsx` | 外層透明容器（目前僅做統一 padding + style 注入）。 |
+| `slot-playfield/SlotReelGrid.tsx` | 5 欄 Reel 網格，並決定是否套用外框容器。 |
+| `slot-playfield/SlotPlayfieldReelFrame.tsx` | Reel 外框圖容器（固定比例 `2:1` 與最大寬度，主題間一致）。 |
+| `slot-playfield/ReelColumn.tsx` | 單欄滾動動畫與停輪顯示。 |
+| `slot-playfield/SlotPlayfieldBetControls.tsx` | 下注控制（+100/+1000/+10000、梭哈、+-、餘額提示）。 |
+| `slot-playfield/SlotPlayfieldSpinButton.tsx` | 中央大轉動按鈕。 |
+| `slot-playfield/SlotSpinResult.tsx` | 連線結果顯示；`compact` 只顯示前幾筆。 |
+| `slot-playfield/SlotPlayfieldSidebar.tsx` | 下方補充資訊與 paytable。 |
+
+### 狀態與邏輯層
+
+| 檔案 | 作用 |
+|------|------|
+| `slot-playfield/useSlotPlayfieldState.ts` | spin 狀態機（下注、回滾、結算、派彩、error）。 |
+| `slot-playfield/useSlotPlayfieldView.ts` | 從 `theme.visual` 拆出 UI 所需資產與 style。 |
+| `slot-playfield/reelStrip.ts` | 初始盤面、隨機欄位、滾動條帶生成。 |
+| `slot-playfield/highlightRows.ts` | 中獎 key 轉欄位高亮列。 |
+| `logic/evaluateLineWins.ts` | 核心連線結算。 |
+
+### 主題與設定層
+
+| 檔案 | 作用 |
+|------|------|
+| `config/types.ts` | Slots 主題型別定義。 |
+| `config/index.ts` | 主題 registry 與查詢入口。 |
+| `config/gameAvailability.ts` | 可玩狀態與 placeholder 資料。 |
+| `config/themes/*.ts` | 各主題符號、賠率、美術資產設定。 |
 
 ---
 
-## 需要每個資料夾都放 README 嗎？
+## 近期結構調整（供維護者）
 
-**不必。** 維護時以本檔 + 程式**檔頭註解**為主即可；若之後模組再變大，再拆「架構圖」或「ADR」較划算。
+- 已移除 `slot-game-page-views.tsx`，改由 `[id]/page.tsx` 內部直接輸出可玩畫面。
+- 已拆分舊 `SlotPlayfieldSpinControls.tsx` 為：
+  - `SlotPlayfieldBetControls.tsx`
+  - `SlotPlayfieldSpinButton.tsx`
+- `SlotPlayfieldShell` 不再承擔主題背景/外框判斷，現在是簡化容器。
 
 ---
 
-## 資料流（一句話）
+## 資料流（簡版）
 
-**`themes/*.ts` → `getSlotThemeConfig` → `SlotThemedPlayfield` → `randomColumns` / `evaluateLineWins` → `SlotSpinResult` + 轉輪高亮。**
+`themes/*.ts` -> `getSlotThemeConfig` -> `SlotThemedPlayfield` -> `useSlotPlayfieldState` -> `evaluateLineWins` -> `SlotSpinResult / Reel 高亮`
