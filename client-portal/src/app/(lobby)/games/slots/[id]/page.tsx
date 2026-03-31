@@ -33,12 +33,11 @@ export default async function SlotsGamePage({ params }: SlotsGamePageProps) {
 
   if (!isSlotThemePlayable(theme.id)) {
     const availability = getSlotThemeAvailability(theme.id);
-    const badgeLabel =
-      availability === "maintenance" ? "維護中" : "即將開放";
+    const badgeLabel = availability === "maintenance" ? "維護中" : "即將開放";
     const body =
       availability === "maintenance"
         ? "此主題暫停服務，請稍後再試。"
-        : "此主題尚未開放，敬請期待。";
+        : "此主題即將登場，敬請期待。";
 
     return (
       <SlotGameThemeUnavailableView
@@ -48,6 +47,6 @@ export default async function SlotsGamePage({ params }: SlotsGamePageProps) {
       />
     );
   }
-
+  // 大部分情況下會執行這個
   return <SlotGamePlayableView theme={theme} />;
 }

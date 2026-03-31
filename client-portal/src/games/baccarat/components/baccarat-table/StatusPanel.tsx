@@ -38,7 +38,9 @@ export function StatusPanel({ eventTone, message, payout, totalBet, isSettled }:
             本局派彩：{payout}（原始下注 {totalBet}）
           </p>
         ) : (
-          <p className="min-h-3 shrink-0 text-[10px] leading-3 text-cyan-200 opacity-0">placeholder</p>
+          <p className="min-h-3 shrink-0 text-[10px] leading-3 text-cyan-200 opacity-0">
+            &nbsp;
+          </p>
         )}
       </div>
     </motion.div>

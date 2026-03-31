@@ -39,7 +39,7 @@ export default function ProfileAchievementsPage() {
     <main className="space-y-4">
       <Card
         title="成就"
-        description="進入本頁時會依目前資料批次補發尚未入庫的可解鎖成就。"
+        description="查看各項成就的解鎖進度與已達成紀錄。"
       >
         <div className="space-y-4">
           <div className="rounded-2xl border border-cyan-500/15 bg-neutral-950/70 p-4">

@@ -50,7 +50,7 @@ export function StatusPanel({ eventTone, message, topTierGroup, topTier, round }
           </span>
         ) : (
           <span className="inline-flex h-4 min-h-4 shrink-0 items-center rounded-full border border-transparent px-2 py-0 text-[10px] opacity-0">
-            placeholder
+            &nbsp;
           </span>
         )}
         {round?.phase === "settled" ? (
@@ -61,7 +61,9 @@ export function StatusPanel({ eventTone, message, topTierGroup, topTier, round }
             本局總派彩：{round.payout}（原始總下注 {round.hands.reduce((s, h) => s + h.wager, 0)}）
           </p>
         ) : (
-          <p className="min-h-3 shrink-0 text-[10px] leading-3 text-cyan-200 opacity-0">placeholder</p>
+          <p className="min-h-3 shrink-0 text-[10px] leading-3 text-cyan-200 opacity-0">
+            &nbsp;
+          </p>
         )}
       </div>
     </motion.div>

@@ -5,13 +5,19 @@
  */
 import { Card } from "@/src/components/ui/Card";
 import { GameThemeCard } from "@/src/components/ui/GameThemeCard";
+import { useFeaturedHomeProduct } from "@/src/components/home/useFeaturedHomeProduct";
+import { productCategoryLabels } from "@/src/shop/types";
+import Image from "next/image";
+import Link from "next/link";
 
 export function HomeHighlightsSection() {
+  const featuredProduct = useFeaturedHomeProduct();
+
   return (
-    <section className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+    <section className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       <Card
         title="熱門遊戲"
-        description="從老虎機、二十一點到百家樂，進入 vAcAnt 腦爛宇宙大廳。"
+        description="從二十一點和百家樂進入 vAcAnt 腦爛宇宙大廳。"
       >
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-2">
@@ -25,9 +31,6 @@ export function HomeHighlightsSection() {
               title="BACCARAT 百家樂"
               tag="百家樂"
             />
-            <p className="px-1 text-[11px] text-neutral-400">
-              閒莊和經典玩法與主題牌桌；點擊進入遊戲。
-            </p>
           </div>
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
@@ -40,29 +43,43 @@ export function HomeHighlightsSection() {
               title="BLACKJACK 二十一點"
               tag="二十一點"
             />
-            <p className="px-1 text-[11px] text-neutral-400">
-              Tung Tung Tung Sahur 莊家、過五關與標準玩法；點擊進入遊戲。
-            </p>
           </div>
         </div>
       </Card>
 
-      <Card
-        title="精選商品"
-        description="用 vAcAnt Coins 解鎖服飾、數位收藏與 VIP 資格。"
-      >
+      <Card title="精選商品" description="用 vAcAnt VAC 解鎖服飾、數位收藏。">
         <div className="space-y-3 text-sm text-neutral-200">
-          <div className="flex items-center justify-between rounded-xl bg-neutral-950/80 px-3 py-2">
-            <span>Neon Horse Hoodie</span>
-            <span className="text-xs text-cyan-300">8,800 Coins</span>
-          </div>
-          <div className="flex items-center justify-between rounded-xl bg-neutral-950/80 px-3 py-2">
-            <span>Italian Brainrot Avatar Pack</span>
-            <span className="text-xs text-cyan-300">3,200 Coins</span>
-          </div>
-          <p className="text-[11px] text-neutral-500">
-            之後會接上真實商品資料與圖片，這裡暫時為版位展示。
-          </p>
+          <Link
+            href={`/shop/${featuredProduct.id}`}
+            className="group block overflow-hidden rounded-2xl border border-cyan-500/20 bg-neutral-950/80 transition hover:border-cyan-400/40"
+          >
+            <div className="relative aspect-square w-full">
+              <Image
+                src={featuredProduct.imageSrc}
+                alt={featuredProduct.name}
+                fill
+                className="object-cover transition duration-300 group-hover:scale-[1.03]"
+                sizes="(max-width: 1024px) 100vw, 33vw"
+              />
+            </div>
+            <div className="space-y-3 px-3.5 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-neutral-50">
+                    {featuredProduct.name}
+                  </p>
+                  {featuredProduct.category ? (
+                    <p className="mt-1 text-[11px] text-neutral-400">
+                      {productCategoryLabels[featuredProduct.category]}
+                    </p>
+                  ) : null}
+                </div>
+                <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.14em] text-cyan-100">
+                  {featuredProduct.priceVac.toLocaleString()} VAC
+                </span>
+              </div>
+            </div>
+          </Link>
         </div>
       </Card>
     </section>

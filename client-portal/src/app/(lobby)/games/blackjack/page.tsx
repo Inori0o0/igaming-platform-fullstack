@@ -14,8 +14,7 @@ export default function BlackjackPage() {
           二十一點 Blackjack
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-neutral-300">
-          Italian Brainrot 牌桌第一版：標準規則 + Hit / Stand / Double / Split +
-          錢包對帳流程。
+          經典二十一點玩法，運用 Hit、Stand、Double、Split 等策略挑戰莊家。
         </p>
       </div>
       <BlackjackTable />

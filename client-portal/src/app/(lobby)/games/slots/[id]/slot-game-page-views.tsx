@@ -2,7 +2,6 @@
  * `/games/slots/[id]` 各分支畫面：由 page.tsx 依主題／可用性選擇，此檔不處理路由參數。
  */
 import Link from "next/link";
-import { Card } from "@/src/components/ui/Card";
 import { SlotThemedPlayfield } from "@/src/games/slots/components/SlotThemedPlayfield";
 import type { SlotThemeConfig } from "@/src/games/slots/config";
 
@@ -47,7 +46,8 @@ export function SlotGameComingSoonPlaceholderView({
           即將開放
         </p>
         <p className="mt-3 max-w-2xl text-sm text-neutral-300">
-          {placeholder.tagline ?? "此主題尚未開放，敬請期待。"}
+          {placeholder.tagline ??
+            "此主題即將開放，敬請期待體驗全新轉輪與獎項。"}
         </p>
       </div>
       <SlotsBackToListLink />
@@ -115,27 +115,13 @@ export function SlotGamePlayableView({ theme }: { theme: SlotThemeConfig }) {
           <p className="mt-2 max-w-2xl text-sm text-neutral-300">
             {theme.tagline}
           </p>
-          {theme.meta.status === "stub" ? (
-            <p className="mt-2 text-xs font-medium text-amber-200/90">
-              此主題仍為 schema 占位（stub），視覺與符號之後會替換。
-            </p>
-          ) : null}
         </div>
         <SlotsBackToListLink />
       </div>
 
       <SlotThemedPlayfield theme={theme} />
 
-      <Card
-        title="開發備註"
-        description="Wallet、真實連線判定與交易紀錄將在後續 phase 接上。"
-      >
-        <p className="text-xs text-neutral-400">
-          目前轉輪符號、paylines、paytable、betting 與主題視覺 token 皆來自{" "}
-          <span className="text-cyan-200/90">SlotThemeConfig</span>（
-          {theme.id}）。
-        </p>
-      </Card>
+      {/* 開發用說明區塊已移除，避免在正式 UI 中出現開發備註。 */}
     </main>
   );
 }

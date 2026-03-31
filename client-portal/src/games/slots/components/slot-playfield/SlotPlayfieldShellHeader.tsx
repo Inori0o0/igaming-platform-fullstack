@@ -26,14 +26,9 @@ export function SlotPlayfieldShellHeader({
   }
 
   return (
-    <div className="flex items-center justify-between gap-2">
-      <p
-        className={`text-xs font-semibold uppercase tracking-[0.18em] ${v.mutedText}`}
-      >
-        Reels (demo)
-      </p>
+    <div className="flex items-center justify-end gap-2">
       <span className={`text-[11px] ${v.mutedText}`}>
-        {theme.grid.rows}×{theme.grid.cols} · config:{" "}
+        {theme.grid.rows}×{theme.grid.cols} ·{" "}
         <span className={v.accentText}>{theme.id}</span>
       </span>
     </div>

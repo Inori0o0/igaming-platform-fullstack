@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { HomeHeroSection } from "@/src/components/home/HomeHeroSection";
 import { HomeHighlightsSection } from "@/src/components/home/HomeHighlightsSection";
-import { HomeBrainrotHintSection } from "@/src/components/home/HomeBrainrotHintSection";
 import { useAuthStore } from "@/src/store/authStore";
 
 export default function Home() {
@@ -26,7 +25,6 @@ export default function Home() {
         <HomeHeroSection onOpenAuthModal={() => setOpenAuthModal(true)} />
       </div>
       <HomeHighlightsSection />
-      <HomeBrainrotHintSection />
     </main>
   );
 }
