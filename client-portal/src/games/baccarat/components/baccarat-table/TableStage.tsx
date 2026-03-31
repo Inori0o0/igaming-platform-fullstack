@@ -67,7 +67,10 @@ function SideSection(props: {
   revealedCount: number;
 }) {
   const { cards, accent, label, hideCards, revealedCount } = props;
-  const total = cards.length ? baccaratTotal(cards) : 0;
+  // 僅用「已翻開」的牌計點，避免在未翻牌或補牌前洩漏即將出現的 total。
+  const visibleCards = hideCards ? [] : cards.slice(0, Math.min(revealedCount, cards.length));
+  const total = visibleCards.length ? baccaratTotal(visibleCards) : 0;
+  const showTotal = visibleCards.length > 0;
   const hideCount = cards.length > 0 ? cards.length : 2;
   return (
     <div className="rounded-2xl bg-black/15 px-2 py-2 sm:px-3">
@@ -80,14 +83,16 @@ function SideSection(props: {
         >
           {label}
         </p>
-        <span
-          className={clsx(
-            "rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-semibold",
-            accent === "player" ? "text-cyan-100" : "text-rose-100",
-          )}
-        >
-          total {total}
-        </span>
+        {showTotal ? (
+          <span
+            className={clsx(
+              "rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-semibold",
+              accent === "player" ? "text-cyan-100" : "text-rose-100",
+            )}
+          >
+            total {total}
+          </span>
+        ) : null}
       </div>
 
       <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
