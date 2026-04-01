@@ -9,7 +9,7 @@ export function HeaderBrand() {
         </span>
       </div>
       <div className="hidden flex-col leading-tight sm:flex">
-        <span className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
+        <span className="text-xs font-semibold tracking-[0.22em] text-cyan-300/80">
           vAcAnt
         </span>
         <span className="text-[10px] text-neutral-400">
@@ -19,4 +19,3 @@ export function HeaderBrand() {
     </Link>
   );
 }
-
