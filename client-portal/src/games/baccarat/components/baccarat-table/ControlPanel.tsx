@@ -8,8 +8,11 @@ import clsx from "clsx";
 import Image from "next/image";
 import { Button } from "@/src/components/ui/Button";
 import { Card } from "@/src/components/ui/Card";
-import { BACCARAT_PAYOUT, type BaccaratBetArea } from "@/src/games/baccarat/logic/game";
-import { CHIP_CARD_ASSETS, TABLE_BET_OPTIONS } from "./constants";
+import {
+  BACCARAT_PAYOUT,
+  type BaccaratBetArea,
+} from "@/src/games/baccarat/logic/game";
+import { CHIP_CARD_ASSETS, MIN_BET, TABLE_BET_OPTIONS } from "./constants";
 import { RoadPanel } from "./RoadPanel";
 import { StatusPanel } from "./StatusPanel";
 import type { BaccaratRoundState, RoadEntry } from "./types";
@@ -29,6 +32,8 @@ type ControlPanelProps = {
   onDecreaseBet: () => void;
   onIncreaseBet: () => void;
   onSelectBetArea: (area: BaccaratBetArea) => void;
+  /** 將下注設為當前餘額可下的最大值（仍受 MIN/MAX 限制）。 */
+  onAllInBet: () => void;
   onStartRound: () => void;
 };
 
@@ -56,6 +61,7 @@ export function ControlPanel(props: any) {
     onDecreaseBet,
     onIncreaseBet,
     onSelectBetArea,
+    onAllInBet,
     onStartRound,
   } = props as ControlPanelProps;
 
@@ -103,7 +109,9 @@ export function ControlPanel(props: any) {
                     "disabled:cursor-not-allowed disabled:opacity-45",
                   )}
                 >
-                  <p className="text-[11px] font-semibold">{AREA_LABEL[area]}</p>
+                  <p className="text-[11px] font-semibold">
+                    {AREA_LABEL[area]}
+                  </p>
                   <p className="mt-1 text-[10px] text-neutral-400">
                     派彩 x {BACCARAT_PAYOUT[area]}
                   </p>
@@ -114,46 +122,72 @@ export function ControlPanel(props: any) {
 
           <div className="rounded-xl border border-cyan-500/15 bg-neutral-950/70 px-3 py-2">
             <p className="text-neutral-400">下注金額 (VAC)</p>
-            <div className="mt-2 grid grid-cols-2 gap-2">
+            <div className="mt-2 grid grid-cols-5 gap-1.5">
               {TABLE_BET_OPTIONS.map((option) => (
                 <button
                   key={option}
                   disabled={!canAdjustBet}
                   onClick={() => onSelectStep(option)}
                   className={clsx(
-                    "group relative flex items-center gap-2 rounded-xl border px-2 py-1.5 text-left transition",
+                    "flex flex-col items-center justify-center gap-1 rounded-xl border py-2 transition",
                     betStep === option
                       ? "border-cyan-300/70 bg-cyan-500/10"
                       : "border-cyan-500/20 bg-neutral-950/70 hover:border-cyan-400/40",
                     "disabled:cursor-not-allowed disabled:opacity-45",
                   )}
                 >
-                  <span className="relative h-9 w-9 shrink-0">
+                  <span className="relative h-8 w-8 shrink-0">
                     <Image
                       src={CHIP_CARD_ASSETS.chips[option]}
                       alt={`chip ${option}`}
                       fill
-                      sizes="36px"
+                      sizes="32px"
                       className="object-contain"
                     />
                   </span>
-                  <span className="text-xs font-semibold text-cyan-100">{option}</span>
+                  <span className="text-[11px] font-semibold tabular-nums text-cyan-100">
+                    {option}
+                  </span>
                 </button>
               ))}
+              <button
+                type="button"
+                disabled={!canAdjustBet || vacBalance < MIN_BET}
+                onClick={onAllInBet}
+                className="flex flex-col items-center justify-center rounded-xl border border-amber-300/40 bg-amber-500/15 py-2 text-[11px] font-bold text-amber-100 transition hover:border-amber-200/70 hover:bg-amber-500/25 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                梭哈
+              </button>
             </div>
             <div className="mt-2 flex items-center gap-2">
-              <Button size="sm" variant="ghost" disabled={!canAdjustBet} onClick={onDecreaseBet}>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={!canAdjustBet}
+                onClick={onDecreaseBet}
+              >
                 -
               </Button>
               <span className="text-cyan-100">{bet}</span>
-              <Button size="sm" variant="ghost" disabled={!canAdjustBet} onClick={onIncreaseBet}>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={!canAdjustBet}
+                onClick={onIncreaseBet}
+              >
                 +
               </Button>
-              <span className="ml-auto text-[10px] text-neutral-400">餘額 {vacBalance}</span>
+              <span className="ml-auto text-[10px] text-neutral-400">
+                餘額 {vacBalance}
+              </span>
             </div>
           </div>
 
-          <Button onClick={onStartRound} disabled={!canStartOrAdvance} className="w-full py-2.5 text-sm">
+          <Button
+            onClick={onStartRound}
+            disabled={!canStartOrAdvance}
+            className="w-full py-2.5 text-sm"
+          >
             {primaryLabel}
           </Button>
 
@@ -175,7 +209,9 @@ export function ControlPanel(props: any) {
         <details className="group relative z-80">
           <summary className="cursor-pointer select-none rounded-xl bg-neutral-950/60 px-3 py-2 text-[11px] text-neutral-300 transition hover:bg-neutral-950/75">
             <span className="font-semibold text-cyan-100">展開 / 收合路單</span>
-            <span className="ml-2 text-[10px] text-neutral-400">（預設收起，縮短頁面高度）</span>
+            <span className="ml-2 text-[10px] text-neutral-400">
+              （預設收起，縮短頁面高度）
+            </span>
           </summary>
           <div className="absolute bottom-full left-0 right-0 mb-3 rounded-2xl border border-cyan-500/30 bg-neutral-950/95 p-3 shadow-[0_16px_44px_rgba(0,0,0,0.55)] backdrop-blur-md">
             <RoadPanel road={road} />
@@ -185,4 +221,3 @@ export function ControlPanel(props: any) {
     </div>
   );
 }
-

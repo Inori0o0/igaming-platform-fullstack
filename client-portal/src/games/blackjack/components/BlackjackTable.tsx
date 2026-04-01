@@ -67,6 +67,11 @@ export function BlackjackTable() {
         onSelectStep={setBetStep}
         onDecreaseBet={() => setBet((v) => Math.max(MIN_BET, v - betStep))}
         onIncreaseBet={() => setBet((v) => Math.min(MAX_BET, v + betStep))}
+        onAllInBet={() =>
+          setBet(
+            Math.max(MIN_BET, Math.min(MAX_BET, Math.floor(vacBalance))),
+          )
+        }
         onStartRound={startRound}
         onHit={hit}
         onStand={stand}

@@ -7,7 +7,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import { Button } from "@/src/components/ui/Button";
 import { Card } from "@/src/components/ui/Card";
-import { CHIP_CARD_ASSETS, TABLE_BET_OPTIONS } from "./constants";
+import { CHIP_CARD_ASSETS, MIN_BET, TABLE_BET_OPTIONS } from "./constants";
 import { StatusPanel } from "./StatusPanel";
 import type { RoundState } from "./types";
 
@@ -29,6 +29,8 @@ type ControlPanelProps = {
   onSelectStep: (step: (typeof TABLE_BET_OPTIONS)[number]) => void;
   onDecreaseBet: () => void;
   onIncreaseBet: () => void;
+  /** 將下注設為當前餘額可下的最大值（仍受 MIN/MAX 限制）。 */
+  onAllInBet: () => void;
   onStartRound: () => void;
   onHit: () => void;
   onStand: () => void;
@@ -55,6 +57,7 @@ export function ControlPanel(props: ControlPanelProps) {
     onSelectStep,
     onDecreaseBet,
     onIncreaseBet,
+    onAllInBet,
     onStartRound,
     onHit,
     onStand,
@@ -68,39 +71,59 @@ export function ControlPanel(props: ControlPanelProps) {
         <div className="space-y-3 text-[11px] text-neutral-300">
           <div className="rounded-xl border border-cyan-500/15 bg-neutral-950/70 px-3 py-2">
             <p className="text-neutral-400">下注金額 (VAC)</p>
-            <div className="mt-2 grid grid-cols-2 gap-2">
+            <div className="mt-2 grid grid-cols-5 gap-1.5">
               {TABLE_BET_OPTIONS.map((option) => (
                 <button
                   key={option}
                   disabled={inRound || isBusy}
                   onClick={() => onSelectStep(option)}
                   className={clsx(
-                    "group relative flex items-center gap-2 rounded-xl border px-2 py-1.5 text-left transition",
+                    "flex flex-col items-center justify-center gap-1 rounded-xl border py-2 transition",
                     betStep === option
                       ? "border-cyan-300/70 bg-cyan-500/10"
                       : "border-cyan-500/20 bg-neutral-950/70 hover:border-cyan-400/40",
                     "disabled:cursor-not-allowed disabled:opacity-45",
                   )}
                 >
-                  <span className="relative h-9 w-9 shrink-0">
+                  <span className="relative h-8 w-8 shrink-0">
                     <Image
                       src={CHIP_CARD_ASSETS.chips[option]}
                       alt={`chip ${option}`}
                       fill
-                      sizes="36px"
+                      sizes="32px"
                       className="object-contain"
                     />
                   </span>
-                  <span className="text-xs font-semibold text-cyan-100">{option}</span>
+                  <span className="text-[11px] font-semibold tabular-nums text-cyan-100">
+                    {option}
+                  </span>
                 </button>
               ))}
+              <button
+                type="button"
+                disabled={inRound || isBusy || vacBalance < MIN_BET}
+                onClick={onAllInBet}
+                className="flex flex-col items-center justify-center rounded-xl border border-amber-300/40 bg-amber-500/15 py-2 text-[11px] font-bold text-amber-100 transition hover:border-amber-200/70 hover:bg-amber-500/25 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                梭哈
+              </button>
             </div>
             <div className="mt-2 flex items-center gap-2">
-              <Button size="sm" variant="ghost" disabled={inRound || isBusy} onClick={onDecreaseBet}>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={inRound || isBusy}
+                onClick={onDecreaseBet}
+              >
                 -
               </Button>
               <span className="text-cyan-100">{bet}</span>
-              <Button size="sm" variant="ghost" disabled={inRound || isBusy} onClick={onIncreaseBet}>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={inRound || isBusy}
+                onClick={onIncreaseBet}
+              >
                 +
               </Button>
             </div>
@@ -114,7 +137,12 @@ export function ControlPanel(props: ControlPanelProps) {
             >
               開始本局
             </Button>
-            <Button variant="outline" onClick={onHit} disabled={!canHit} className="min-h-10 text-sm sm:min-h-9">
+            <Button
+              variant="outline"
+              onClick={onHit}
+              disabled={!canHit}
+              className="min-h-10 text-sm sm:min-h-9"
+            >
               要牌 Hit
             </Button>
             <Button
@@ -133,7 +161,12 @@ export function ControlPanel(props: ControlPanelProps) {
             >
               雙倍 Double
             </Button>
-            <Button variant="outline" onClick={onSplit} disabled={!canDoSplit} className="min-h-10 text-sm sm:min-h-9">
+            <Button
+              variant="outline"
+              onClick={onSplit}
+              disabled={!canDoSplit}
+              className="min-h-10 text-sm sm:min-h-9"
+            >
               分牌 Split
             </Button>
           </div>
@@ -147,7 +180,6 @@ export function ControlPanel(props: ControlPanelProps) {
           />
         </div>
       </Card>
-
     </div>
   );
 }
