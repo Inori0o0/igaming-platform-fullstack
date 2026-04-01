@@ -8,76 +8,56 @@ alwaysApply: false
 
 # vAcAnt iGaming 專案規則
 
-## 技術棧與架構
+## 技術棧
 
-- **前台 Client Portal**
-  - 使用 Next.js 16 + React 19 + Tailwind CSS 4
-  - 整合 Supabase（Auth、PostgreSQL、Storage、Realtime）
-  - 狀態管理優先用 Zustand
-  - 動畫優先使用 Framer Motion
-- **管理後台 Admin Dashboard**
-  - 使用 Vite + React 19
-  - 圖表使用 Recharts
-- **路由與模組結構**
-  - 依計畫中的路由結構拆分頁面與模組（games、shop、wallet、profile 等）
-  - Next.js App Router 建議用 Route Groups 分層：
-    - `(lobby)`：主站頁面（套 `ClientLayoutShell`：Header/Sidebar/Footer）
-    - `(auth)`：純流程頁（例如 `/auth/callback`），**不套主站殼**
-  - `/profile/*` 採 nested layout：在 `profile/layout.tsx` 放 tabs/共用 UI
-  - 共用元件（按鈕、卡片、Modal、Input、Avatar、Loading 等）集中在可重用的 `components` 資料夾
+- **Client Portal**：Next.js 16 + React 19 + Tailwind CSS v4 + Supabase + Zustand + Framer Motion
+- **Admin Dashboard**：Vite + React 19 + Tailwind CSS v4 + Supabase + Zustand + Recharts
+- 路由：Next.js App Router，`(lobby)` 套主站殼，`(auth)` 不套殼
 
-## 資料與 Supabase
+## UI 主題
 
-- 依 plan 內定義的資料表（users、wallets、transactions、game_history、achievements、products、orders 等）設計型別與 API
-- 優先透過 Supabase Client 存取資料，不在前端硬編假資料
-  - 例外：在「路由骨架 / 版位確認」階段可用 placeholder/demo 資料，但要清楚標示，並規劃替換為真資料的下一步
-- 交易、遊戲紀錄、訂單等與金流相關資料要有清楚的型別與狀態（pending/success/failed 等）
+- 深色背景 + 金色（`gold`）accent，iGaming / 賭場氛圍
+- Italian Brainrot 角色宇宙（Tralalero Tralala、Bombardiro Crocodilo、Brr Brr Patapim 等）貫穿所有遊戲
+- 動畫優先用 Framer Motion，避免整頁覆蓋 loading，優先用 skeleton 或小型 LogoLoader
 
-## UI / UX 風格
+## Tailwind CSS v4 語法（重要，違反會產生 linter warning）
 
-- 整體主題為 **深色 + 霓虹賭場感**，主色調以青色霓虹搭配品牌 vAcAnt 風格
-- Italian Brainrot 宇宙角色（Tralalero Tralala、Tung Tung Tung Sahur、Bombardiro Crocodilo、Brr Brr Patapim、Lirili Larila、Elefanto Cactuso 等）：
-  - 在 Slots、Blackjack、Baccarat、Lottery 等遊戲中共用同一套角色設定與美術資產
-  - 不同遊戲的 UI 顏色與插畫保持同一世界觀與視覺語言
-- Loading 與轉場：
-  - 使用計畫中定義的 `SplashScreen`、`GameLoadingScreen`、`LogoLoader` 統一 Logo 載入動畫
-  - 優先利用 Framer Motion 做淡入淡出、縮放與狀態過場
-  - 避免過度 loading 干擾：
-    - 目前主站殼採簡化策略：`SplashScreen` 由 `isAuthLoading` 直接控制
-    - 後續短暫同步/載入優先用小型 `LogoLoader` 或 skeleton，不用整頁覆蓋
+### 核心規則：`@theme` 變數直接對應工具類
 
-## 錢包（目前專案決策）
+```css
+@theme {
+  --color-gold: #d4a843;
+  --color-background: #0a0a0f;
+  --color-surface: #111118;
+  --color-text-primary: #f0f0f8;
+  --color-border: #2a2a3a;
+  --radius-md: 8px;
+}
+```
 
-- 錢包主幣別為 **vAcAnt Coins (VAC)**，充值/提領/免費領取只操作 VAC
-- BTC / ETH / USDT 目前僅做匯率與估值展示，不作為可操作持有量
-- 防濫用限制（以目前專案設定為準）：
-  - `claim` 每次 `6767 VAC`、冷卻 `1.5s`、每日最多 `677` 次
-  - `deposit` 單筆最多 `200,000 VAC`、每分鐘最多 `10` 筆、每日總額最多 `5,000,000 VAC`
-- 資料持久化：
-  - 訪客：存在瀏覽器 localStorage
-  - 登入用戶：寫入 Supabase（`wallets`、`transactions`）
+- `--color-xxx` → 工具類直接用 `xxx`（去掉 `color-` 前綴）
+- `--radius-xxx` → 直接用 `rounded-xxx`
 
-## 體驗與功能優先順序
+| ❌ 錯誤 | ✅ 正確 |
+|---|---|
+| `bg-[var(--color-gold)]` 或 `bg-(--color-gold)` | `bg-gold` |
+| `text-(--color-text-primary)` | `text-text-primary` |
+| `border-(--color-border)` | `border-border` |
+| `hover:bg-(--color-surface-elevated)` | `hover:bg-surface-elevated` |
+| `focus:ring-(--color-gold)` | `focus:ring-gold` |
+| `rounded-[var(--radius-md)]` | `rounded-md` |
+| `text-[#0a0a0f]`（硬編碼色值） | `text-background` |
 
-- 優先讓使用者盡快體驗到：
-  - 首頁 + 至少一個完整可玩的老虎機遊戲
-  - 基本錢包系統（餘額顯示 + 模擬充值/免費領取）
-- 之後再逐步補齊：
-  - 其他博弈遊戲（Blackjack、Baccarat、Lottery）
-  - 商品系統與購物車
-  - 個人中心、成就、訂單歷史
-  - 管理後台儀表板與管理功能
+**`style={{ }}` prop 裡仍保留完整 `var(--color-xxx)` 語法**，只有 className 用短名。
 
-## React 19：禁止用 useEffect 做「衍生狀態」同步
+## React 19：禁止用 useEffect 做衍生狀態同步
 
-- **不要在 `useEffect` 裡因為 props / 其他 state 變了，就同步呼叫 `setState`**（例如依 `maxSelectable` 去 `setQuantity`）。React 19 會警告 *cascading renders*，也違反 [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)。
-- **正確做法**：
-  - 能在 render 算出來的值，就用 **運算 / `useMemo`** 得到「有效值」（例如 `quantityForAdd = min(quantity, maxQty)`），表單 `value` 與提交邏輯都用這個衍生值。
-  - 若必須在「外部系統」更新後才改 state（訂閱、DOM、`fetch` 完成回呼），在**回呼裡** `setState`，不要 effect body 裡同步 `setState`。
-- **本專案預設**：新增或修改 client 元件時，完全避免「僅為了對齊另一個 state 而寫的 effect + setState」模式。
+不要在 `useEffect` 裡因 props / 其他 state 改變就 `setState`，React 19 會警告 cascading renders。
 
-## 通用開發原則
+- 能在 render 算出來的值 → 用 `useMemo` 或直接運算
+- 只有「外部系統回呼」（fetch 完成、訂閱、DOM）才在回呼裡 `setState`
 
-- 元件化與可重用性優先：遊戲卡片、商品卡片、列表、統計區塊等盡量抽成獨立元件
-- 保持型別明確：遊戲類型、交易類型、成就條件等建立對應 enum 或 union type
-- 所有動畫、特效、角色互動都以「可讀性與可用性」優先，其次才是華麗程度
+## 資料原則
+
+- 直接讀 Supabase，不硬編假資料
+- 金流相關（交易、訂單）型別要明確標示狀態（`pending` / `completed` / `failed`）
