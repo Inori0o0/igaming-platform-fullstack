@@ -10,6 +10,20 @@ const GAME_DISPLAY_NAMES: Record<string, string> = {
   baccarat: '百家樂',
 }
 
+// SQL 函式回傳的 JSON 結構型別
+interface AdminDashboardRpcResult {
+  total_users: number
+  active_today: number
+  total_wagers: number
+  total_transaction_volume: number
+  total_orders: number
+  total_products: number
+  // SQL 端以 generate_series 補齊 14 天，格式為 MM/DD
+  dau_trend: { date: string; count: number }[]
+  // 依下注局數降序排列
+  game_types: { game_id: string; count: number }[]
+}
+
 export interface DashboardStats {
   totalUsers: number
   activeToday: number
@@ -43,86 +57,36 @@ export function useDashboardStats() {
   async function fetchStats() {
     setLoading(true)
     try {
-      // 14 天前的零時，作為 DAU 趨勢查詢的時間下限
-      const fourteenDaysAgo = new Date()
-      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13)
-      fourteenDaysAgo.setHours(0, 0, 0, 0)
+      // 呼叫 SECURITY DEFINER 函式，繞過各資料表的 RLS 取得全局統計
+      // 函式內部第一行已驗證 JWT role = 'admin'，非管理員會收到 exception
+      // 前置設定：Supabase Dashboard → Authentication → Users → 管理員帳號
+      //           → Edit → App Metadata → 填入 {"role": "admin"} 並儲存
+      const { data, error } = await supabase.rpc('get_admin_dashboard_stats')
+      if (error) throw error
 
-      // 今日零時，用於從已撈回的 wager 資料中篩選「今日活躍」
-      const todayStart = new Date()
-      todayStart.setHours(0, 0, 0, 0)
-
-      // 並行送出所有查詢，降低總等待時間
-      const [
-        usersRes, wagerCountRes, txVolRes, ordersRes, productsRes,
-        recentWagersRes, allGameTypeRes,
-      ] = await Promise.all([
-        supabase.from('users').select('id', { count: 'exact', head: true }),
-
-        // 總遊戲次數：game_history 目前無資料，改以 transactions 的 wager 類型替代
-        // wager = 玩家每一次下注行為，每筆等同一局遊戲
-        supabase.from('transactions').select('id', { count: 'exact', head: true }).eq('type', 'wager'),
-
-        // 總交易金額：涵蓋所有 status='completed' 的交易（deposit/wager/payout/claim/purchase）
-        supabase.from('transactions').select('amount').eq('status', 'completed'),
-
-        supabase.from('orders').select('id', { count: 'exact', head: true }),
-        supabase.from('products').select('id', { count: 'exact', head: true }),
-
-        // 近 14 天的 wager，一次撈取後供：1) 今日活躍計算 2) DAU 趨勢分組
-        supabase
-          .from('transactions')
-          .select('user_id, created_at')
-          .eq('type', 'wager')
-          .gte('created_at', fourteenDaysAgo.toISOString()),
-
-        // 全部 wager 的 game_id，用於遊戲類型分布圓餅圖
-        supabase.from('transactions').select('game_id').eq('type', 'wager').not('game_id', 'is', null),
-      ])
-
-      const totalVolume = (txVolRes.data ?? []).reduce((sum, t) => sum + (t.amount ?? 0), 0)
-
-      // 今日活躍：從近 14 天 wager 中篩選今日，去重 user_id
-      const todayWagers = (recentWagersRes.data ?? []).filter((r) => new Date(r.created_at) >= todayStart)
-      const activeIds = new Set(todayWagers.map((r) => r.user_id))
+      const d = data as AdminDashboardRpcResult
 
       setStats({
-        totalUsers: usersRes.count ?? 0,
-        activeToday: activeIds.size,
-        totalWagers: wagerCountRes.count ?? 0,
-        totalTransactionVolume: formatCurrency(totalVolume),
-        totalProducts: productsRes.count ?? 0,
-        totalOrders: ordersRes.count ?? 0,
+        totalUsers:             d.total_users,
+        activeToday:            d.active_today,
+        totalWagers:            d.total_wagers,
+        totalTransactionVolume: formatCurrency(d.total_transaction_volume),
+        totalProducts:          d.total_products,
+        totalOrders:            d.total_orders,
       })
 
-      // 以 game_id 為 key 計數，轉換為 Recharts {name, value} 格式
-      const typeMap: Record<string, number> = {}
-      for (const row of allGameTypeRes.data ?? []) {
-        const key = row.game_id as string
-        typeMap[key] = (typeMap[key] ?? 0) + 1
-      }
-      setGameTypes(
-        Object.entries(typeMap)
-          .map(([id, value]) => ({ name: GAME_DISPLAY_NAMES[id] ?? id, value }))
-          .sort((a, b) => b.value - a.value),
+      // SQL 端已補齊 14 天並格式化為 MM/DD，直接使用
+      setDailyActive(
+        (d.dau_trend ?? []).map((row) => ({ date: row.date, count: row.count })),
       )
 
-      // 按日期分組計算不重複 user_id；補齊 14 天確保折線圖連續不斷點
-      const wagersByDay = new Map<string, Set<string>>()
-      for (const row of recentWagersRes.data ?? []) {
-        const label = new Date(row.created_at).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
-        if (!wagersByDay.has(label)) wagersByDay.set(label, new Set())
-        wagersByDay.get(label)!.add(row.user_id)
-      }
-
-      const days: DailyActive[] = []
-      for (let i = 13; i >= 0; i--) {
-        const d = new Date()
-        d.setDate(d.getDate() - i)
-        const label = d.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
-        days.push({ date: label, count: wagersByDay.get(label)?.size ?? 0 })
-      }
-      setDailyActive(days)
+      // game_id 對應中文名稱；未登記的 id 直接顯示原始值，保持擴充彈性
+      setGameTypes(
+        (d.game_types ?? []).map((row) => ({
+          name:  GAME_DISPLAY_NAMES[row.game_id] ?? row.game_id,
+          value: row.count,
+        })),
+      )
     } finally {
       setLoading(false)
     }

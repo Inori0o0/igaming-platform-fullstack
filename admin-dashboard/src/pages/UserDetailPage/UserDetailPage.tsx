@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Wallet, Gamepad2, ShoppingBag } from 'lucide-react'
+import { ArrowLeft, Wallet, Gamepad2, ShoppingBag, UserX, UserCheck, Trash2 } from 'lucide-react'
 import { formatDate, formatCurrency, formatNumber } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
+import { Input } from '@/components/ui/Input'
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, TableEmpty } from '@/components/ui/Table'
 import { useUserDetail } from './hooks/useUserDetail'
 
@@ -19,7 +21,35 @@ const ORDER_STATUS_MAP: Record<string, { label: string; variant: 'success' | 'wa
 export function UserDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { user, wallet, games, orders, loading } = useUserDetail(id)
+  const { user, wallet, games, orders, loading, banUser, unbanUser, anonymizeUser, actionLoading } = useUserDetail(id)
+  const [confirmEmail, setConfirmEmail] = useState('')
+
+  async function handleBanToggle() {
+    if (!user) return
+    const isBanned = Boolean(user.banned_at)
+    const name = user.display_name ?? user.id
+    const msg = isBanned
+      ? `確定要解除「${name}」的停權嗎？`
+      : `確定要停權「${name}」嗎？此用戶將無法登入。`
+    if (!window.confirm(msg)) return
+    if (isBanned) {
+      await unbanUser()
+    } else {
+      await banUser()
+    }
+  }
+
+  async function handleAnonymize() {
+    if (!user) return
+    await anonymizeUser()
+    setConfirmEmail('')
+    navigate('/users')
+  }
+
+  // 訪客帳號沒有 email，改為輸入 user id 前 8 碼來確認
+  const confirmTarget = user?.email ?? user?.id.slice(0, 8) ?? ''
+  const confirmPlaceholder = user?.email ? '輸入該用戶的 Email 以確認' : `輸入用戶 ID 前 8 碼：${user?.id.slice(0, 8)}`
+  const isConfirmMatch = confirmEmail === confirmTarget
 
   if (loading) {
     return (
@@ -46,20 +76,42 @@ export function UserDetailPage() {
 
       <Card>
         <CardContent className="flex items-center gap-4">
-          <div className="flex items-center justify-center w-14 h-14 rounded-full text-xl font-bold text-background shrink-0" style={{ background: 'var(--color-gold)' }}>
+          <div
+            className="flex items-center justify-center w-14 h-14 rounded-full text-xl font-bold text-background shrink-0"
+            style={{ background: user.banned_at ? 'var(--color-danger)' : 'var(--color-gold)' }}
+          >
             {(user.display_name?.[0] ?? user.email?.[0] ?? '?').toUpperCase()}
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-lg font-semibold text-text-primary">{user.display_name ?? '未命名'}</h2>
               {user.is_guest ? <Badge variant="warning">訪客</Badge> : <Badge variant="success">正式用戶</Badge>}
+              {user.banned_at
+                ? <Badge variant="danger">已停權</Badge>
+                : <Badge variant="default">正常</Badge>
+              }
             </div>
             <p className="text-sm text-text-muted mt-0.5">{user.email ?? '—'}</p>
             <p className="text-xs text-text-muted mt-1">註冊時間：{formatDate(user.created_at)}</p>
+            {user.banned_at && (
+              <p className="text-xs mt-0.5" style={{ color: 'var(--color-danger)' }}>
+                停權時間：{formatDate(user.banned_at)}
+              </p>
+            )}
           </div>
-          <div className="text-right">
-            <p className="text-xs text-text-muted">ID</p>
-            <p className="text-xs font-mono text-text-secondary mt-0.5 max-w-[140px] truncate">{user.id}</p>
+          <div className="flex flex-col items-end gap-2">
+            <div>
+              <p className="text-xs text-text-muted">ID</p>
+              <p className="text-xs font-mono text-text-secondary mt-0.5 max-w-[140px] truncate">{user.id}</p>
+            </div>
+            <Button
+              variant={user.banned_at ? 'secondary' : 'danger'}
+              size="sm"
+              disabled={actionLoading}
+              onClick={() => void handleBanToggle()}
+            >
+              {user.banned_at ? <><UserCheck size={14} />解除停權</> : <><UserX size={14} />停權用戶</>}
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -156,6 +208,37 @@ export function UserDetailPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* 危險操作區 — 匿名化為不可逆，需輸入 email 或 ID 確認 */}
+      <div className="rounded-lg border p-5 flex flex-col gap-4" style={{ borderColor: 'var(--color-danger)', background: 'var(--color-danger-muted)' }}>
+        <div className="flex items-center gap-2">
+          <Trash2 size={16} style={{ color: 'var(--color-danger)' }} />
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--color-danger)' }}>危險操作區</h3>
+        </div>
+        <div>
+          <p className="text-sm text-text-secondary">移除用戶資料（匿名化）</p>
+          <p className="text-xs text-text-muted mt-1">
+            此操作將清除用戶的姓名、Email 及頭像，並同時停權。遊戲紀錄與訂單資料會保留以維持統計完整性。此操作<span className="font-semibold" style={{ color: 'var(--color-danger)' }}>不可逆</span>。
+          </p>
+        </div>
+        <div className="flex items-end gap-3">
+          <div className="flex-1 max-w-sm">
+            <Input
+              placeholder={confirmPlaceholder}
+              value={confirmEmail}
+              onChange={(e) => setConfirmEmail(e.target.value)}
+            />
+          </div>
+          <Button
+            variant="danger"
+            size="sm"
+            disabled={!isConfirmMatch || actionLoading}
+            onClick={() => void handleAnonymize()}
+          >
+            <Trash2 size={14} />確認移除
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }

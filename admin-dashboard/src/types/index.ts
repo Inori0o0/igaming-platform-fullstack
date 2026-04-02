@@ -6,6 +6,7 @@ export interface DbUser {
   avatar_url: string | null
   is_guest: boolean
   created_at: string
+  banned_at: string | null
 }
 
 export interface DbWallet {
