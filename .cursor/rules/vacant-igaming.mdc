@@ -57,6 +57,20 @@ alwaysApply: false
 - 能在 render 算出來的值 → 用 `useMemo` 或直接運算
 - 只有「外部系統回呼」（fetch 完成、訂閱、DOM）才在回呼裡 `setState`
 
+## Zod v4 語法規範
+
+- 格式驗證器改為頂層方法，不再鏈接在 `z.string()` 後面：
+
+| ❌ 棄用 | ✅ 正確 |
+|---|---|
+| `z.string().email()` | `z.email()` |
+| `z.string().url()` | `z.url()` |
+| `z.string().uuid()` | `z.uuid()` |
+| `z.string().cuid()` | `z.cuid()` |
+
+- 自訂錯誤訊息直接作為第一個參數傳入：`z.email('請輸入有效的 Email')`
+- 長度／內容驗證（`min`、`max`、`regex` 等）仍保留在 `z.string()` 鏈上
+
 ## 資料原則
 
 - 直接讀 Supabase，不硬編假資料
