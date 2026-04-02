@@ -11,6 +11,10 @@ export function useTransactions() {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [amountMin, setAmountMin] = useState('')
+  const [amountMax, setAmountMax] = useState('')
   const [loading, setLoading] = useState(true)
 
   const fetchTxs = useCallback(async () => {
@@ -24,8 +28,16 @@ export function useTransactions() {
 
       if (typeFilter) query = query.eq('type', typeFilter)
       if (statusFilter) query = query.eq('status', statusFilter)
-      // 以 user_id（UUID 字串）精確匹配，不做模糊搜尋
+      // user_id 為 UUID 精確匹配
       if (search.trim()) query = query.eq('user_id', search.trim())
+
+      // 日期範圍：dateTo 加一天以包含當天所有時間
+      if (dateFrom) query = query.gte('created_at', `${dateFrom}T00:00:00.000Z`)
+      if (dateTo) query = query.lte('created_at', `${dateTo}T23:59:59.999Z`)
+
+      // 金額範圍
+      if (amountMin !== '') query = query.gte('amount', Number(amountMin))
+      if (amountMax !== '') query = query.lte('amount', Number(amountMax))
 
       const { data, count, error } = await query
       if (error) throw error
@@ -34,7 +46,7 @@ export function useTransactions() {
     } finally {
       setLoading(false)
     }
-  }, [page, search, typeFilter, statusFilter])
+  }, [page, search, typeFilter, statusFilter, dateFrom, dateTo, amountMin, amountMax])
 
   useEffect(() => {
     void fetchTxs()
@@ -43,7 +55,7 @@ export function useTransactions() {
   // 任何篩選條件改變時重設頁碼，避免空分頁
   useEffect(() => {
     setPage(0)
-  }, [search, typeFilter, statusFilter])
+  }, [search, typeFilter, statusFilter, dateFrom, dateTo, amountMin, amountMax])
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
@@ -52,6 +64,10 @@ export function useTransactions() {
     search, setSearch,
     typeFilter, setTypeFilter,
     statusFilter, setStatusFilter,
+    dateFrom, setDateFrom,
+    dateTo, setDateTo,
+    amountMin, setAmountMin,
+    amountMax, setAmountMax,
     loading, totalPages, refetch: fetchTxs,
   }
 }
