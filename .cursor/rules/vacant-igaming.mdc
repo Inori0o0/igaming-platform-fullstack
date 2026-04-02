@@ -38,15 +38,15 @@ alwaysApply: false
 - `--color-xxx` → 工具類直接用 `xxx`（去掉 `color-` 前綴）
 - `--radius-xxx` → 直接用 `rounded-xxx`
 
-| ❌ 錯誤 | ✅ 正確 |
-|---|---|
-| `bg-[var(--color-gold)]` 或 `bg-(--color-gold)` | `bg-gold` |
-| `text-(--color-text-primary)` | `text-text-primary` |
-| `border-(--color-border)` | `border-border` |
-| `hover:bg-(--color-surface-elevated)` | `hover:bg-surface-elevated` |
-| `focus:ring-(--color-gold)` | `focus:ring-gold` |
-| `rounded-[var(--radius-md)]` | `rounded-md` |
-| `text-[#0a0a0f]`（硬編碼色值） | `text-background` |
+| ❌ 錯誤                                         | ✅ 正確                     |
+| ----------------------------------------------- | --------------------------- |
+| `bg-[var(--color-gold)]` 或 `bg-(--color-gold)` | `bg-gold`                   |
+| `text-(--color-text-primary)`                   | `text-text-primary`         |
+| `border-(--color-border)`                       | `border-border`             |
+| `hover:bg-(--color-surface-elevated)`           | `hover:bg-surface-elevated` |
+| `focus:ring-(--color-gold)`                     | `focus:ring-gold`           |
+| `rounded-[var(--radius-md)]`                    | `rounded-md`                |
+| `text-[#0a0a0f]`（硬編碼色值）                  | `text-background`           |
 
 **`style={{ }}` prop 裡仍保留完整 `var(--color-xxx)` 語法**，只有 className 用短名。
 
@@ -61,3 +61,50 @@ alwaysApply: false
 
 - 直接讀 Supabase，不硬編假資料
 - 金流相關（交易、訂單）型別要明確標示狀態（`pending` / `completed` / `failed`）
+
+---
+
+## 專案目錄結構規範 (Colocation & Logic Separation)
+
+### 1. 頁面模組化規則
+- **禁止**直接在 `pages/` 下放置單一 `.tsx` 檔案。
+- 每個頁面必須是一個獨立資料夾：`src/pages/PageName/`。
+- 資料夾內部結構：
+  - `PageName.tsx`：主入口與 UI 佈局（**禁止命名為 index.tsx**）
+  - `hooks/`：存放該頁面專屬邏輯（例如 `usePageName.ts`）
+  - `components/`：存放僅供該頁面使用的子組件
+
+```
+src/pages/
+  DashboardPage/
+    DashboardPage.tsx     ← UI only
+    hooks/
+      useDashboardStats.ts
+    components/
+      SomeWidget.tsx      ← 僅此頁使用
+```
+
+### 2. 邏輯抽離規則
+- **強制抽離**：凡涉及資料抓取（API / Supabase）、複雜狀態處理、或邏輯超過 15 行，必須抽離至 `hooks/` 下的 Custom Hook。
+- **UI 純粹性**：`PageName.tsx` 與 `components/` 內的組件只負責渲染與樣式，不應包含具體的資料請求代碼。
+
+### 3. 共用層級規範
+- 只有在兩個以上「不同功能模組」都會用到的 Hook，才允許放在根目錄 `src/hooks/`。
+- **鄰近優先**：優先將檔案放在最靠近使用它的地方。
+
+### 4. 命名規範
+- 頁面與組件：PascalCase，例如 `UsersPage.tsx`。
+- Hook 檔案：以 `use` 開頭的 camelCase，例如 `useUserList.ts`。
+
+### 5. App.tsx import 規範
+- 由於主入口不使用 `index.tsx`，import 路徑需明確指向檔案：
+  ```ts
+  // ✅ 正確
+  import { DashboardPage } from '@/pages/DashboardPage/DashboardPage'
+  // ❌ 錯誤
+  import { DashboardPage } from '@/pages/DashboardPage'
+  ```
+
+### 6. 註解規範
+- 複雜邏輯、非直覺的演算法、業務規則，必須加上中文或英文說明。
+- 純樣式渲染代碼不需要注釋。
