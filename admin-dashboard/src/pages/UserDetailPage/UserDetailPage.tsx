@@ -21,8 +21,9 @@ const ORDER_STATUS_MAP: Record<string, { label: string; variant: 'success' | 'wa
 export function UserDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { user, wallet, games, orders, loading, banUser, unbanUser, anonymizeUser, actionLoading } = useUserDetail(id)
+  const { user, wallet, games, gameTotal, orders, loading, banUser, unbanUser, anonymizeUser, setWalletBalance, actionLoading } = useUserDetail(id)
   const [confirmEmail, setConfirmEmail] = useState('')
+  const [balanceInput, setBalanceInput] = useState('')
 
   async function handleBanToggle() {
     if (!user) return
@@ -119,12 +120,34 @@ export function UserDetailPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardContent className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-md" style={{ background: 'var(--color-gold-muted)' }}>
+            <div className="flex items-center justify-center w-10 h-10 rounded-md shrink-0" style={{ background: 'var(--color-gold-muted)' }}>
               <Wallet size={18} style={{ color: 'var(--color-gold)' }} />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <p className="text-xs text-text-muted">VAC 餘額</p>
               <p className="text-lg font-bold text-gold-light">{formatCurrency(wallet?.coin_balance ?? 0)}</p>
+              <div className="flex items-center gap-2 mt-2">
+                <Input
+                  type="number"
+                  placeholder="設定新餘額..."
+                  value={balanceInput}
+                  onChange={(e) => setBalanceInput(e.target.value)}
+                  style={{ colorScheme: 'dark' }}
+                  className="h-7 text-xs py-1"
+                />
+                <Button
+                  variant="danger"
+                  size="sm"
+                  disabled={balanceInput === '' || isNaN(Number(balanceInput)) || Number(balanceInput) < 0 || actionLoading}
+                  onClick={() => {
+                    const amount = Number(balanceInput)
+                    if (!window.confirm(`確定要將此用戶的 VAC 餘額設定為 ${amount.toLocaleString()} VAC 嗎？此操作無法復原。`)) return
+                    void setWalletBalance(amount).then(() => setBalanceInput(''))
+                  }}
+                >
+                  設定
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -135,7 +158,7 @@ export function UserDetailPage() {
             </div>
             <div>
               <p className="text-xs text-text-muted">遊戲場次</p>
-              <p className="text-lg font-bold text-text-primary">{formatNumber(games.length)}+</p>
+              <p className="text-lg font-bold text-text-primary">{formatNumber(gameTotal)}</p>
             </div>
           </CardContent>
         </Card>
@@ -158,21 +181,22 @@ export function UserDetailPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>遊戲類型</TableHead><TableHead>下注</TableHead><TableHead>贏得</TableHead><TableHead>時間</TableHead>
+                <TableHead>遊戲</TableHead><TableHead>主題</TableHead><TableHead>下注</TableHead><TableHead>贏得</TableHead><TableHead>時間</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {games.length === 0 ? <TableEmpty message="無遊戲紀錄" /> : (
                 games.map((g) => (
                   <TableRow key={g.id}>
-                    <TableCell><Badge variant="gold">{g.game_type}</Badge></TableCell>
+                    <TableCell><Badge variant="gold">{g.game_id}</Badge></TableCell>
+                    <TableCell><span className="text-xs text-text-muted">{g.theme_id ?? '—'}</span></TableCell>
                     <TableCell>{formatCurrency(g.bet_amount)}</TableCell>
                     <TableCell>
                       <span style={{ color: g.win_amount > 0 ? 'var(--color-success)' : 'var(--color-text-muted)' }}>
                         {formatCurrency(g.win_amount)}
                       </span>
                     </TableCell>
-                    <TableCell><span className="text-xs text-text-muted">{formatDate(g.played_at)}</span></TableCell>
+                    <TableCell><span className="text-xs text-text-muted">{formatDate(g.created_at)}</span></TableCell>
                   </TableRow>
                 ))
               )}
