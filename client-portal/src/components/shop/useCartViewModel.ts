@@ -17,6 +17,7 @@ export function useCartViewModel() {
 
   const [couponInput, setCouponInput] = useState("");
   const [couponMessage, setCouponMessage] = useState<string | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
 
   useEffect(() => {
     hydrate();
@@ -44,9 +45,15 @@ export function useCartViewModel() {
     [items, coupon, catalog],
   );
 
-  const handleApplyCoupon = () => {
-    const result = applyCoupon(couponInput);
-    setCouponMessage(result.message);
+  const handleApplyCoupon = async () => {
+    setCouponLoading(true);
+    setCouponMessage(null);
+    try {
+      const result = await applyCoupon(couponInput);
+      setCouponMessage(result.message);
+    } finally {
+      setCouponLoading(false);
+    }
   };
 
   const handleClearCoupon = () => {
@@ -63,6 +70,7 @@ export function useCartViewModel() {
     couponInput,
     setCouponInput,
     couponMessage,
+    couponLoading,
     handleApplyCoupon,
     handleClearCoupon,
     removeItem,

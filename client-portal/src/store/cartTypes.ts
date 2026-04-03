@@ -8,12 +8,13 @@ export type CartMode = "physical" | "digital" | null;
 
 export type CouponFulfillmentScope = "physical" | "digital" | "any";
 
-/** 與 docs/sql phase-6-shop-coupons 之 SHIPFREE / DIGI97 / ALL95 對齊 */
 export type CouponState = {
   code: string;
-  discountType: "percentage" | "free_shipping";
-  /** 小計扣除 % 數（例：3 = 97 折、5 = 95 折）；免運券為 0 */
+  discountType: "percentage" | "fixed" | "free_shipping";
+  /** 百分比折扣點數（例：3 = 97 折、5 = 95 折）；非百分比券為 0 */
   percentOffPoints: number;
+  /** 固定金額折扣 VAC；非固定金額券為 0 */
+  fixedOffVac: number;
   description: string;
   appliesFulfillment: CouponFulfillmentScope;
 };

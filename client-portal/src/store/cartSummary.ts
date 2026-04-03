@@ -52,6 +52,7 @@ export function calculateCartSummary(
     coupon && (mode === null || couponAppliesToMode(coupon, mode)) ? coupon : null;
 
   let percentDiscount = 0;
+  let fixedDiscount = 0;
   let shippingDiscount = 0;
   if (effective) {
     if (effective.discountType === "percentage") {
@@ -59,14 +60,17 @@ export function calculateCartSummary(
         subtotalVac * (effective.percentOffPoints / 100),
       );
     }
+    if (effective.discountType === "fixed") {
+      fixedDiscount = Math.min(subtotalVac, effective.fixedOffVac);
+    }
     if (effective.discountType === "free_shipping") {
       shippingDiscount = Math.min(baseShipping, PHYSICAL_SHIPPING_FEE);
     }
   }
 
-  const discountVac = percentDiscount + shippingDiscount;
+  const discountVac = percentDiscount + fixedDiscount + shippingDiscount;
   const shippingVac = Math.max(0, baseShipping - shippingDiscount);
-  const totalVac = Math.max(0, subtotalVac + shippingVac - percentDiscount);
+  const totalVac = Math.max(0, subtotalVac + shippingVac - percentDiscount - fixedDiscount);
 
   return { subtotalVac, shippingVac, discountVac, totalVac, mode };
 }
