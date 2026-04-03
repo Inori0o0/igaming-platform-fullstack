@@ -4,6 +4,30 @@ import type { DbOrder } from '@/types'
 
 const PAGE_SIZE = 20
 
+export const STATUS_LABEL: Record<string, string> = {
+  pending: '待處理',
+  paid: '已付款',
+  shipped: '出貨中',
+  completed: '已完成',
+  cancelled: '已取消',
+}
+
+export const STATUS_VARIANT: Record<string, 'success' | 'warning' | 'info' | 'danger' | 'default'> = {
+  pending: 'warning',
+  paid: 'info',
+  shipped: 'info',
+  completed: 'success',
+  cancelled: 'danger',
+}
+
+export const EDITABLE_STATUS_OPTIONS = [
+  { value: 'pending', label: '待處理' },
+  { value: 'paid', label: '已付款' },
+  { value: 'shipped', label: '出貨中' },
+  { value: 'completed', label: '已完成' },
+  { value: 'cancelled', label: '已取消' },
+]
+
 export function useOrders() {
   const [orders, setOrders] = useState<DbOrder[]>([])
   const [total, setTotal] = useState(0)
@@ -11,23 +35,22 @@ export function useOrders() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [loading, setLoading] = useState(true)
+  const [selectedOrder, setSelectedOrder] = useState<DbOrder | null>(null)
 
   const fetchOrders = useCallback(async () => {
     setLoading(true)
     try {
-      let query = supabase
-        .from('orders')
-        .select('*', { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
-
-      if (statusFilter) query = query.eq('status', statusFilter)
-      if (search.trim()) query = query.eq('user_id', search.trim())
-
-      const { data, count, error } = await query
+      // 使用 RPC 函式：支援 UUID 前綴搜尋 + coupon_code 搜尋，並正確處理 RLS
+      const { data, error } = await supabase.rpc('admin_search_orders', {
+        p_search: search.trim(),
+        p_status: statusFilter,
+        p_limit: PAGE_SIZE,
+        p_offset: page * PAGE_SIZE,
+      })
       if (error) throw error
-      setOrders((data as DbOrder[]) ?? [])
-      setTotal(count ?? 0)
+      const rows = (data ?? []) as Array<DbOrder & { total_count: number }>
+      setOrders(rows.map(({ total_count: _tc, ...order }) => order as DbOrder))
+      setTotal(rows[0]?.total_count ?? 0)
     } finally {
       setLoading(false)
     }
@@ -44,6 +67,10 @@ export function useOrders() {
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     await supabase.from('orders').update({ status: newStatus }).eq('id', orderId)
+    // 同步更新已開啟的詳情 drawer 狀態，避免關閉後資料舊化
+    setSelectedOrder((prev) =>
+      prev?.id === orderId ? { ...prev, status: newStatus as DbOrder['status'] } : prev
+    )
     void fetchOrders()
   }
 
@@ -56,5 +83,6 @@ export function useOrders() {
     loading, totalPages,
     refetch: fetchOrders,
     updateStatus,
+    selectedOrder, setSelectedOrder,
   }
 }
