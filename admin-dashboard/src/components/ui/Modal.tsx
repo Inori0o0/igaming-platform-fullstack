@@ -50,7 +50,7 @@ export function Modal({ open, onClose, title, children, size = 'md', zIndex = 50
             <X size={16} />
           </button>
         </div>
-        <div className="overflow-y-auto flex-1">{children}</div>
+        <div className="overflow-y-auto overscroll-y-contain min-h-0 flex-1">{children}</div>
       </div>
     </div>
   )
