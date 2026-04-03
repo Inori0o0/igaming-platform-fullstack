@@ -9,9 +9,10 @@ import { create } from "zustand";
 import type { ApparelSize } from "@/src/shop/types";
 import { stockAvailableForLine } from "@/src/shop/stock";
 import { couponAppliesToMode, deriveMode } from "@/src/store/cartSummary";
-import type { CartLineItem, CartMode, CouponState } from "@/src/store/cartTypes";
+import type { CartLineItem, CartMode, CouponFulfillmentScope, CouponState } from "@/src/store/cartTypes";
 import { useAuthStore } from "@/src/store/authStore";
 import { getShopCatalogSnapshot } from "@/src/store/shopCatalogStore";
+import { supabase } from "@/src/lib/supabaseClient";
 
 export type { CartLineItem, CouponState, CouponFulfillmentScope } from "@/src/store/cartTypes";
 export { calculateCartSummary } from "@/src/store/cartSummary";
@@ -36,21 +37,66 @@ type CartState = {
   items: CartLineItem[];
   mode: CartMode;
   coupon: CouponState | null;
-  hydrate: () => void;
+  hydrate: () => Promise<void>;
   addItem: (productId: string, quantity: number, size?: ApparelSize) => AddResult;
   removeItem: (productId: string, size?: ApparelSize) => void;
   updateItemQuantity: (productId: string, quantity: number, size?: ApparelSize) => void;
   clearCart: () => void;
   clearAndAdd: (productId: string, quantity: number, size?: ApparelSize) => AddResult;
-  applyCoupon: (rawCode: string) => { ok: boolean; message: string };
+  applyCoupon: (rawCode: string) => Promise<{ ok: boolean; message: string }>;
   clearCoupon: () => void;
   checkoutSuccess: () => void;
 };
 
 type StoredCart = {
   items: CartLineItem[];
-  coupon: CouponState | null;
+  couponCode: string | null;
 };
+
+/** Supabase DB 的 coupons 列型別（僅前端需要的欄位） */
+type DbCouponRow = {
+  code: string;
+  discount_type: "percentage" | "fixed" | "free_shipping";
+  discount_value: number;
+  min_purchase: number;
+  expires_at: string | null;
+  is_active: boolean;
+  applies_fulfillment: string;
+  title: string;
+};
+
+/** 查 Supabase：驗證優惠碼是否有效（active、未刪除、未過期） */
+async function fetchCouponFromDb(code: string): Promise<DbCouponRow | null> {
+  const { data, error } = await supabase
+    .from("coupons")
+    .select("code, discount_type, discount_value, min_purchase, expires_at, is_active, applies_fulfillment, title")
+    .eq("code", code)
+    .eq("is_active", true)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (error || !data) return null;
+  const row = data as DbCouponRow;
+  if (row.expires_at && new Date(row.expires_at) < new Date()) return null;
+  return row;
+}
+
+/** DB 列 → 前端 CouponState */
+function dbRowToCouponState(row: DbCouponRow): CouponState {
+  let description = row.title?.trim() || "";
+  if (!description) {
+    if (row.discount_type === "percentage") description = `${100 - row.discount_value} 折`;
+    else if (row.discount_type === "fixed") description = `折 ${row.discount_value} VAC`;
+    else description = "免運";
+  }
+  return {
+    code: row.code,
+    discountType: row.discount_type,
+    percentOffPoints: row.discount_type === "percentage" ? row.discount_value : 0,
+    fixedOffVac: row.discount_type === "fixed" ? row.discount_value : 0,
+    description,
+    appliesFulfillment: row.applies_fulfillment as CouponFulfillmentScope,
+  };
+}
 
 function lineMatches(
   item: CartLineItem,
@@ -101,41 +147,36 @@ function getCartStorageKey(identityId: string) {
   return `${CART_STORAGE_KEY}:${identityId}`;
 }
 
-function saveCart(identityId: string, payload: StoredCart) {
+type SavePayload = { items: CartLineItem[]; coupon: CouponState | null };
+
+function saveCart(identityId: string, payload: SavePayload) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(getCartStorageKey(identityId), JSON.stringify(payload));
 }
 
-function sanitizeCoupon(raw: unknown): CouponState | null {
+/** localStorage 存的 coupon 只取 code，實際內容在 hydrate 時重新向 DB 取 */
+function extractStoredCouponCode(raw: unknown): string | null {
   if (!raw || typeof raw !== "object") return null;
   const rec = raw as { code?: unknown };
-  if (typeof rec.code !== "string") return null;
-  const built = buildCoupon(rec.code);
-  if (built) return built;
-  const legacy = rec.code.trim().toUpperCase();
-  if (legacy === "SHIP60") return buildCoupon("SHIPFREE");
-  return null;
+  if (typeof rec.code !== "string" || !rec.code.trim()) return null;
+  return rec.code.trim().toUpperCase();
 }
 
 function loadCart(identityId: string): StoredCart {
   if (typeof window === "undefined") {
-    return { items: [], coupon: null };
+    return { items: [], couponCode: null };
   }
   const raw = window.localStorage.getItem(getCartStorageKey(identityId));
   if (!raw) {
-    return { items: [], coupon: null };
+    return { items: [], couponCode: null };
   }
   try {
-    const parsed = JSON.parse(raw) as Partial<StoredCart>;
-    const items = normalizeStoredItems(parsed.items);
-    let coupon = sanitizeCoupon(parsed.coupon);
-    const mode = deriveMode(items, getShopCatalogSnapshot());
-    if (coupon && mode && !couponAppliesToMode(coupon, mode)) {
-      coupon = null;
-    }
-    return { items, coupon };
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    const items = normalizeStoredItems(parsed["items"]);
+    const couponCode = extractStoredCouponCode(parsed["coupon"]);
+    return { items, couponCode };
   } catch {
-    return { items: [], coupon: null };
+    return { items: [], couponCode: null };
   }
 }
 
@@ -161,51 +202,32 @@ function markAvatarAsOwned(identityId: string, avatarIds: string[]) {
   );
 }
 
-function buildCoupon(rawCode: string): CouponState | null {
-  const code = rawCode.trim().toUpperCase();
-  if (code === "SHIPFREE") {
-    return {
-      code: "SHIPFREE",
-      discountType: "free_shipping",
-      percentOffPoints: 0,
-      description: "免運",
-      appliesFulfillment: "physical",
-    };
-  }
-  if (code === "DIGI97") {
-    return {
-      code: "DIGI97",
-      discountType: "percentage",
-      percentOffPoints: 3,
-      description: "97 折",
-      appliesFulfillment: "digital",
-    };
-  }
-  if (code === "ALL95") {
-    return {
-      code: "ALL95",
-      discountType: "percentage",
-      percentOffPoints: 5,
-      description: "95 折",
-      appliesFulfillment: "any",
-    };
-  }
-  return null;
-}
 
 export const useCartStore = create<CartState>((set, get) => ({
   items: [],
   mode: null,
   coupon: null,
 
-  hydrate: () => {
+  hydrate: async () => {
     const identityId = getCurrentIdentityId();
     const stored = loadCart(identityId);
-    set({
-      items: stored.items,
-      coupon: stored.coupon,
-      mode: deriveMode(stored.items, getShopCatalogSnapshot()),
-    });
+    const mode = deriveMode(stored.items, getShopCatalogSnapshot());
+    // 先顯示商品，coupon 等 DB 驗證後再填入
+    set({ items: stored.items, mode, coupon: null });
+
+    if (stored.couponCode) {
+      const row = await fetchCouponFromDb(stored.couponCode);
+      if (row) {
+        const coupon = dbRowToCouponState(row);
+        if (!mode || couponAppliesToMode(coupon, mode)) {
+          set({ coupon });
+          saveCart(identityId, { items: stored.items, coupon });
+          return;
+        }
+      }
+      // 優惠碼已失效或不適用，清除 localStorage 記錄
+      saveCart(identityId, { items: stored.items, coupon: null });
+    }
   },
 
   addItem: (productId, quantity, size) => {
@@ -355,18 +377,34 @@ export const useCartStore = create<CartState>((set, get) => ({
     set({ items: [], mode: null, coupon: null });
   },
 
-  applyCoupon: (rawCode) => {
-    const coupon = buildCoupon(rawCode);
-    if (!coupon) {
-      return { ok: false, message: "無效優惠碼" };
-    }
+  applyCoupon: async (rawCode) => {
+    const code = rawCode.trim().toUpperCase();
+    if (!code) return { ok: false, message: "請輸入優惠碼" };
+
+    const row = await fetchCouponFromDb(code);
+    if (!row) return { ok: false, message: "無效優惠碼" };
+
+    // 驗證最低消費
     const items = get().items;
-    const mode = deriveMode(items, getShopCatalogSnapshot());
+    const catalog = getShopCatalogSnapshot();
+    if (row.min_purchase > 0) {
+      const subtotal = items.reduce((sum, item) => {
+        const p = catalog.find((product) => product.id === item.productId);
+        return sum + (p?.priceVac ?? 0) * item.quantity;
+      }, 0);
+      if (subtotal < row.min_purchase) {
+        return { ok: false, message: `最低消費 ${row.min_purchase} VAC 才可使用` };
+      }
+    }
+
+    const coupon = dbRowToCouponState(row);
+    const mode = deriveMode(items, catalog);
     if (items.length > 0 && mode && !couponAppliesToMode(coupon, mode)) {
       return { ok: false, message: "此優惠不適用目前購物車" };
     }
+
     const identityId = getCurrentIdentityId();
-    saveCart(identityId, { items: get().items, coupon });
+    saveCart(identityId, { items, coupon });
     set({ coupon });
     return { ok: true, message: `已套用 ${coupon.description}` };
   },

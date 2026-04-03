@@ -17,6 +17,7 @@ export default function CartPage() {
     couponInput,
     setCouponInput,
     couponMessage,
+    couponLoading,
     handleApplyCoupon,
     handleClearCoupon,
     removeItem,
@@ -79,7 +80,8 @@ export default function CartPage() {
             onCouponInputChange={setCouponInput}
             coupon={coupon}
             couponMessage={couponMessage}
-            onApply={handleApplyCoupon}
+            applyLoading={couponLoading}
+            onApply={() => void handleApplyCoupon()}
             onClear={handleClearCoupon}
             cartMode={mode}
           />
