@@ -9,7 +9,7 @@ const pageTitles: Record<string, string> = {
   '/transactions': '交易紀錄',
   '/products': '商品管理',
   '/orders': '訂單管理',
-  '/settings': '網站設定',
+  '/settings': '優惠券管理',
 }
 
 export function Header() {

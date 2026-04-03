@@ -19,7 +19,7 @@ const navItems = [
   { path: '/transactions', icon: ArrowLeftRight, label: '交易紀錄' },
   { path: '/products', icon: ShoppingBag, label: '商品管理' },
   { path: '/orders', icon: ClipboardList, label: '訂單管理' },
-  { path: '/settings', icon: Settings, label: '網站設定' },
+  { path: '/settings', icon: Settings, label: '優惠券管理' },
 ]
 
 interface SidebarProps {

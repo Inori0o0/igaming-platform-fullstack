@@ -107,7 +107,7 @@ export interface DbOrderItem {
 export interface DbCoupon {
   id: string
   code: string
-  discount_type: 'percentage' | 'fixed'
+  discount_type: 'percentage' | 'fixed' | 'free_shipping'
   discount_value: number
   min_purchase: number
   expires_at: string | null

@@ -11,7 +11,7 @@ import { GamesPage } from '@/pages/GamesPage/GamesPage'
 import { TransactionsPage } from '@/pages/TransactionsPage/TransactionsPage'
 import { ProductsPage } from '@/pages/ProductsPage/ProductsPage'
 import { OrdersPage } from '@/pages/OrdersPage/OrdersPage'
-import { SettingsPage } from '@/pages/SettingsPage/SettingsPage'
+import { CouponsPage } from '@/pages/CouponsPage/CouponsPage'
 
 function App() {
   const { init } = useAuthStore()
@@ -38,7 +38,7 @@ function App() {
           <Route path="transactions" element={<TransactionsPage />} />
           <Route path="products" element={<ProductsPage />} />
           <Route path="orders" element={<OrdersPage />} />
-          <Route path="settings" element={<SettingsPage />} />
+          <Route path="settings" element={<CouponsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
