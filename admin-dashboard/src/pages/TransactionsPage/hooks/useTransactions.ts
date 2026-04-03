@@ -20,29 +20,24 @@ export function useTransactions() {
   const fetchTxs = useCallback(async () => {
     setLoading(true)
     try {
-      let query = supabase
-        .from('transactions')
-        .select('*', { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
-
-      if (typeFilter) query = query.eq('type', typeFilter)
-      if (statusFilter) query = query.eq('status', statusFilter)
-      // user_id 為 UUID 精確匹配
-      if (search.trim()) query = query.eq('user_id', search.trim())
-
-      // 日期範圍：dateTo 加一天以包含當天所有時間
-      if (dateFrom) query = query.gte('created_at', `${dateFrom}T00:00:00.000Z`)
-      if (dateTo) query = query.lte('created_at', `${dateTo}T23:59:59.999Z`)
-
-      // 金額範圍
-      if (amountMin !== '') query = query.gte('amount', Number(amountMin))
-      if (amountMax !== '') query = query.lte('amount', Number(amountMax))
-
-      const { data, count, error } = await query
+      // 使用 RPC：在 DB 端做 user_id::text ILIKE，避免 JS client 對 UUID column 的型別限制
+      const { data, error } = await supabase.rpc('admin_search_transactions', {
+        p_search: search.trim(),
+        p_type: typeFilter,
+        p_status: statusFilter,
+        p_date_from: dateFrom ? `${dateFrom}T00:00:00.000Z` : null,
+        p_date_to: dateTo ? `${dateTo}T23:59:59.999Z` : null,
+        p_amount_min: amountMin !== '' ? Number(amountMin) : null,
+        p_amount_max: amountMax !== '' ? Number(amountMax) : null,
+        p_limit: PAGE_SIZE,
+        p_offset: page * PAGE_SIZE,
+      })
       if (error) throw error
-      setTxs((data as DbTransaction[]) ?? [])
-      setTotal(count ?? 0)
+
+      const rows = (data ?? []) as Array<DbTransaction & { total_count: number }>
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      setTxs(rows.map(({ total_count, ...tx }) => tx as DbTransaction))
+      setTotal(rows[0]?.total_count ?? 0)
     } finally {
       setLoading(false)
     }
@@ -52,22 +47,26 @@ export function useTransactions() {
     void fetchTxs()
   }, [fetchTxs])
 
-  // 任何篩選條件改變時重設頁碼，避免空分頁
-  useEffect(() => {
-    setPage(0)
-  }, [search, typeFilter, statusFilter, dateFrom, dateTo, amountMin, amountMax])
+  // React 19 規範：不在 useEffect 裡做衍生狀態同步
+  const handleSetSearch = useCallback((v: string) => { setSearch(v); setPage(0) }, [])
+  const handleSetTypeFilter = useCallback((v: string) => { setTypeFilter(v); setPage(0) }, [])
+  const handleSetStatusFilter = useCallback((v: string) => { setStatusFilter(v); setPage(0) }, [])
+  const handleSetDateFrom = useCallback((v: string) => { setDateFrom(v); setPage(0) }, [])
+  const handleSetDateTo = useCallback((v: string) => { setDateTo(v); setPage(0) }, [])
+  const handleSetAmountMin = useCallback((v: string) => { setAmountMin(v); setPage(0) }, [])
+  const handleSetAmountMax = useCallback((v: string) => { setAmountMax(v); setPage(0) }, [])
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
   return {
     txs, total, page, setPage,
-    search, setSearch,
-    typeFilter, setTypeFilter,
-    statusFilter, setStatusFilter,
-    dateFrom, setDateFrom,
-    dateTo, setDateTo,
-    amountMin, setAmountMin,
-    amountMax, setAmountMax,
+    search, setSearch: handleSetSearch,
+    typeFilter, setTypeFilter: handleSetTypeFilter,
+    statusFilter, setStatusFilter: handleSetStatusFilter,
+    dateFrom, setDateFrom: handleSetDateFrom,
+    dateTo, setDateTo: handleSetDateTo,
+    amountMin, setAmountMin: handleSetAmountMin,
+    amountMax, setAmountMax: handleSetAmountMax,
     loading, totalPages, refetch: fetchTxs,
   }
 }
