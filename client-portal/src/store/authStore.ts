@@ -38,6 +38,7 @@ export type AuthUser =
       display_name: string;
       avatar_url?: string | null;
       email?: string | null;
+      banned_at?: string | null;
       is_guest: false;
     };
 
@@ -108,17 +109,19 @@ export const useAuthStore = create<AuthState>((set) => ({
 
         let display_name = metaDisplayName;
         let avatar_url: string | null = metaAvatarUrl;
+        let banned_at: string | null = null;
 
         // 額外同步 profile（需求優先順序：使用者上傳 > 商店頭像 > Google）
         try {
           const { data: dbUser } = await supabase
             .from("users")
-            .select("id, display_name, avatar_url")
+            .select("id, display_name, avatar_url, banned_at")
             .eq("auth_user_id", session.user.id)
             .maybeSingle();
 
           if (dbUser) {
             display_name = dbUser.display_name ?? metaDisplayName;
+            banned_at = dbUser.banned_at ?? null;
 
             if (dbUser.avatar_url) {
               avatar_url = dbUser.avatar_url;
@@ -160,6 +163,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             display_name,
             avatar_url,
             email: session.user.email ?? null,
+            banned_at,
             is_guest: false,
           },
           isLoading: false,
