@@ -1,13 +1,16 @@
-import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
-import { Sidebar } from './Sidebar'
-import { Header } from './Header'
+import { useState } from "react";
+import { Outlet } from "react-router-dom";
+import { Sidebar } from "./Sidebar";
+import { Header } from "./Header";
 
 export function Layout() {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--color-background)' }}>
+    <div
+      className="flex h-screen overflow-hidden"
+      style={{ background: "var(--color-background)" }}
+    >
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
 
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -17,5 +20,5 @@ export function Layout() {
         </main>
       </div>
     </div>
-  )
+  );
 }
