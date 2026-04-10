@@ -7,6 +7,7 @@ const PAGE_SIZE = 20
 
 export function useUserList() {
   const { user: adminAuthUser } = useAuthStore()
+  const adminAuthUserId = adminAuthUser?.id
   const [users, setUsers] = useState<DbUser[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(0)
@@ -24,8 +25,8 @@ export function useUserList() {
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 
       // 排除當前登入的管理員帳號，避免誤操作自己
-      if (adminAuthUser?.id) {
-        query = query.neq('auth_user_id', adminAuthUser.id)
+      if (adminAuthUserId) {
+        query = query.neq('auth_user_id', adminAuthUserId)
       }
 
       // ilike = 不區分大小寫的 LIKE；.or() 讓 email 或 display_name 任一符合即回傳
@@ -40,7 +41,7 @@ export function useUserList() {
     } finally {
       setLoading(false)
     }
-  }, [page, search])
+  }, [adminAuthUserId, page, search])
 
   useEffect(() => {
     void fetchUsers()

@@ -15,6 +15,8 @@ import type { DbProduct } from '@/types'
 
 export function ProductsPage() {
   const { products, loading, refetch, toggleActive, deleteProduct } = useProducts()
+  // 將 refetch 當作「儲存成功後要執行的 callback」傳入。
+  // useProductForm 回傳的是表單狀態/方法集合，並不是 refetch 執行後的結果。
   const productForm = useProductForm(refetch)
   const stockManager = useStockManager()
 
