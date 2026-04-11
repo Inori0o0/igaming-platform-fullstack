@@ -1,5 +1,7 @@
 # 百家樂（Baccarat）— client-portal 說明
 
+> **文件時效**：最後對照本 repo 約 **2026-04-11**；若與實際程式或資料庫不一致，**以程式與線上 schema 為準**。
+
 本文件用**白話**說明百家樂在 `client-portal` 內的程式分工與流程；細節以程式註解為準。  
 對應計畫書：`vacant_igaming_portfolio_2dba8ef1.plan.md` **§4.3**。
 

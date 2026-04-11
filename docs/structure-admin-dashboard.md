@@ -1,3 +1,5 @@
+> **文件時效**：最後對照本 repo 約 **2026-04-11**；若與實際程式或資料庫不一致，**以程式與線上 schema 為準**。
+
 admin-dashboard/src/
 ├── components/
 │ ├── layout/
