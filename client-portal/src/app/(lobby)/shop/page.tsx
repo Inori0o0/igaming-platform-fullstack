@@ -1,4 +1,3 @@
-import { Card } from "@/src/components/ui/Card";
 import { ProductCatalog } from "@/src/components/shop/ProductCatalog";
 import { loadShopCatalogForApp } from "@/src/shop/fetchShopCatalog";
 

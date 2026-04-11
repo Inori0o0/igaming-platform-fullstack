@@ -1,8 +1,10 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import { Avatar } from "@/src/components/ui/Avatar";
 import { Button } from "@/src/components/ui/Button";
 import { Modal } from "@/src/components/ui/Modal";
+import { ProfileAvatarCropModal } from "@/src/components/profile/ProfileAvatarCropModal";
 import type { AvatarProductOption } from "@/src/components/profile/useProfileAvatarEditor";
 
 type ProfileAvatarEditorModalProps = {
@@ -34,11 +36,30 @@ export function ProfileAvatarEditorModal({
   onRestoreGoogleAvatar,
   onSelectShopAvatar,
 }: ProfileAvatarEditorModalProps) {
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (cropImageSrc) URL.revokeObjectURL(cropImageSrc);
+    };
+  }, [cropImageSrc]);
+
+  const handleEditorClose = useCallback(() => {
+    setCropImageSrc(null);
+    onClose();
+  }, [onClose]);
+
   // 目前頭像 + 上傳頭像固定佔 2 格；超過兩排時才開捲動避免 modal 過高。
   const shouldScroll = remainingShopAvatars.length >= 5;
 
   return (
-    <Modal open={open} onClose={onClose} title="編輯頭像">
+    <>
+    <Modal
+      open={open}
+      onClose={handleEditorClose}
+      title="編輯頭像"
+      closeOnEscape={!cropImageSrc}
+    >
       <div className="space-y-4">
         {(hasCustomAvatar || hasEquippedShopAvatar) && (
           <div className="flex flex-wrap justify-end gap-2">
@@ -46,7 +67,7 @@ export function ProfileAvatarEditorModal({
               variant="ghost"
               onClick={async () => {
                 await onClearCustomAvatar();
-                onClose();
+                handleEditorClose();
               }}
               disabled={!hasCustomAvatar}
             >
@@ -56,7 +77,7 @@ export function ProfileAvatarEditorModal({
               variant="ghost"
               onClick={async () => {
                 await onRestoreGoogleAvatar();
-                onClose();
+                handleEditorClose();
               }}
             >
               改用 Google 頭像
@@ -130,7 +151,7 @@ export function ProfileAvatarEditorModal({
                     aria-label={`${p.name} ${p.isUnlocked ? "可選" : "未解鎖"}`}
                     onClick={async () => {
                       await onSelectShopAvatar(p.productId, p.isUnlocked);
-                      onClose();
+                      handleEditorClose();
                     }}
                   >
                     <Avatar
@@ -160,19 +181,33 @@ export function ProfileAvatarEditorModal({
           type="file"
           accept="image/*"
           className="hidden"
-          onChange={async (e) => {
-            // 先抓住 input 參考，避免 await 後 SyntheticEvent 被釋放造成 null。
+          onChange={(e) => {
             const inputEl = e.currentTarget;
             const file = e.target.files?.[0];
             if (!file) return;
-            await onUploadFile(file);
+            const url = URL.createObjectURL(file);
+            setCropImageSrc(url);
             inputEl.value = "";
-            onClose();
           }}
           disabled={uploading}
         />
       </div>
     </Modal>
+
+    <ProfileAvatarCropModal
+      key={cropImageSrc ?? "profile-avatar-crop"}
+      open={open && Boolean(cropImageSrc)}
+      imageSrc={cropImageSrc}
+      onCancel={() => setCropImageSrc(null)}
+        onConfirm={async (blob) => {
+          const file = new File([blob], `avatar-${crypto.randomUUID()}.webp`, {
+            type: "image/webp",
+          });
+          await onUploadFile(file);
+          handleEditorClose();
+        }}
+    />
+    </>
   );
 }
 
