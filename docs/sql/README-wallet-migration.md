@@ -1,5 +1,7 @@
 # Wallet Migration 使用說明（VAC 主幣）
 
+> **文件時效**：最後對照本 repo 約 **2026-04-11**；若與實際程式或資料庫不一致，**以程式與線上 schema 為準**。
+
 ## 檔案位置
 
 - **新庫／完整順序**：見 `docs/sql/README.md`（含 `phase-0-schema-bootstrap.sql` → phase-3 → phase-5 → phase-6 等）。

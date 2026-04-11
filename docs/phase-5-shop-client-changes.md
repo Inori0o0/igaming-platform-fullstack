@@ -1,5 +1,7 @@
 # Phase 5 商店／購物車／結帳 — 變更摘要（白話說明）
 
+> **文件時效**：最後對照本 repo 約 **2026-04-11**；若與實際程式或資料庫不一致，**以程式與線上 schema 為準**。
+
 本文件對應 [`vacant_igaming_portfolio_2dba8ef1.plan.md`](../vacant_igaming_portfolio_2dba8ef1.plan.md) **Phase 5** 的實作與相關檔案說明，方便之後接手的人快速對應「檔案在幹嘛」。
 
 **SQL 執行順序**請以 [`docs/sql/README.md`](./sql/README.md) 為準。

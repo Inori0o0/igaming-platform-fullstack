@@ -2,6 +2,13 @@
 
 以下路徑皆相對於 repo 根目錄的 `docs/sql/`。
 
+## 與線上庫對齊
+
+- **[`schema.sql`](./schema.sql)**：`public` 表與 enum 的**參考快照**（非可重播的完整 DDL），已於 **2026-04-11** 依 Supabase 專案 **first-igaming-project**（ref `fjduloefmqtohtnkqtfp`）對齊。若你之後用控制台／MCP 直接改庫，請再更新此檔或註明漂移。
+- **[`ARCHITECTURE.md`](./ARCHITECTURE.md)**：簡化 ER 圖（Mermaid）、主要 RPC 與 storage 說明。
+
+下方 **phase-*.sql** 仍為從空庫或舊 schema **漸進套用**的腳本；已有資料的庫請勿重跑會破壞資料的段落，並以實際庫為準驗證。
+
 | 順序 | 檔案 | 說明 |
 |------|------|------|
 | 1 | [`phase-0-schema-bootstrap.sql`](./phase-0-schema-bootstrap.sql) | 新專案／空庫：建立 users、wallets、舊版 products/orders 等基礎表與 auth 同步 trigger |
