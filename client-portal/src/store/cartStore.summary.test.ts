@@ -62,6 +62,7 @@ describe("calculateCartSummary", () => {
       code: "SHIPFREE",
       discountType: "free_shipping",
       percentOffPoints: 0,
+      fixedOffVac: 0,
       description: "免運",
       appliesFulfillment: "physical",
     };
@@ -79,6 +80,7 @@ describe("calculateCartSummary", () => {
       code: "ALL95",
       discountType: "percentage",
       percentOffPoints: 5,
+      fixedOffVac: 0,
       description: "95 折",
       appliesFulfillment: "any",
     };
@@ -95,6 +97,7 @@ describe("calculateCartSummary", () => {
       code: "DIGI97",
       discountType: "percentage",
       percentOffPoints: 3,
+      fixedOffVac: 0,
       description: "97 折",
       appliesFulfillment: "digital",
     };
@@ -113,6 +116,7 @@ describe("calculateCartSummary", () => {
       code: "DIGI97",
       discountType: "percentage",
       percentOffPoints: 3,
+      fixedOffVac: 0,
       description: "97 折",
       appliesFulfillment: "digital",
     };

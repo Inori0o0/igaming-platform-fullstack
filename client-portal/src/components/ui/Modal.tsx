@@ -12,6 +12,12 @@ export type ModalProps = PropsWithChildren<{
   onClose: () => void;
   footer?: ReactNode;
   className?: string;
+  /** 疊在其它 Modal 上時提高層級，例如裁切視窗用 z-[60] */
+  overlayZClass?: string;
+  /** 內層寬度容器，預設 max-w-md；較寬內容可傳 max-w-lg 等 */
+  shellClassName?: string;
+  /** 為 false 時不按 Escape 關閉（下層 Modal 在子層開啟時避免一起關） */
+  closeOnEscape?: boolean;
 }>;
 
 export function Modal({
@@ -20,16 +26,19 @@ export function Modal({
   onClose,
   footer,
   className,
+  overlayZClass = "z-50",
+  shellClassName = "max-h-[90vh] w-full max-w-md px-4",
+  closeOnEscape = true,
   children,
 }: ModalProps) {
   useEffect(() => {
-    if (!open) return;
+    if (!open || !closeOnEscape) return;
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [open, onClose]);
+  }, [open, onClose, closeOnEscape]);
 
   if (!open) return null;
 
@@ -39,11 +48,14 @@ export function Modal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+      className={cn(
+        "fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm",
+        overlayZClass,
+      )}
       onClick={onClose}
     >
       <div
-        className="max-h-[90vh] w-full max-w-md px-4"
+        className={shellClassName}
         onClick={(event) => event.stopPropagation()}
       >
         <Card

@@ -34,6 +34,7 @@ describe("buildCheckoutRpcPayload", () => {
       code: "SHIPFREE",
       discountType: "free_shipping",
       percentOffPoints: 0,
+      fixedOffVac: 0,
       description: "免運",
       appliesFulfillment: "physical",
     };
