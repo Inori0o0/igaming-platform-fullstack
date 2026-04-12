@@ -10,9 +10,11 @@ import type { RoundState } from "./types";
 
 type DealerSectionProps = {
   round: RoundState | null;
+  /** 發牌動畫初始垂直位移；窄視窗傳 0 可減少版面跳動。 */
+  cardMotionY?: number;
 };
 
-export function DealerSection({ round }: DealerSectionProps) {
+export function DealerSection({ round, cardMotionY = 6 }: DealerSectionProps) {
   return (
     <div className="mt-3">
       <p className="mb-1 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-300">
@@ -24,7 +26,7 @@ export function DealerSection({ round }: DealerSectionProps) {
           return (
             <motion.div
               key={`${card.rank}-${card.suit}-${idx}`}
-              initial={{ opacity: 0, y: 6, scale: 0.96 }}
+              initial={{ opacity: 0, y: cardMotionY, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.18, delay: idx * 0.04 }}
               className={clsx(

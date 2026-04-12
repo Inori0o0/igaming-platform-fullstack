@@ -9,9 +9,10 @@ import type { RoundState } from "./types";
 
 type PlayerHandsSectionProps = {
   round: RoundState | null;
+  cardMotionY?: number;
 };
 
-export function PlayerHandsSection({ round }: PlayerHandsSectionProps) {
+export function PlayerHandsSection({ round, cardMotionY = 6 }: PlayerHandsSectionProps) {
   return (
     <div className="mt-5 space-y-3 sm:mt-6">
       {(round?.hands ?? []).map((hand, index) => {
@@ -24,7 +25,7 @@ export function PlayerHandsSection({ round }: PlayerHandsSectionProps) {
               {hand.cards.map((card, cardIdx) => (
                 <motion.div
                   key={`${hand.id}-${card.rank}-${card.suit}-${cardIdx}`}
-                  initial={{ opacity: 0, y: 6, scale: 0.96 }}
+                  initial={{ opacity: 0, y: cardMotionY, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ duration: 0.18, delay: cardIdx * 0.04 }}
                   className="relative flex aspect-2/3 w-10 items-center justify-center overflow-hidden rounded-md border border-cyan-500/40 bg-neutral-900 text-sm font-semibold text-cyan-100 sm:w-11 md:w-12 lg:w-14 xl:w-16"

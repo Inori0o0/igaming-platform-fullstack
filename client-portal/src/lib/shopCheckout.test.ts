@@ -67,11 +67,13 @@ describe("buildCheckoutRpcPayload", () => {
     ];
     const items: CartLineItem[] = [{ productId: "bag", quantity: 1 }];
     const out = buildCheckoutRpcPayload(items, null, catalog, shipping, "physical");
-    expect(out.lines[0]).toEqual({
+    expect(out.lines).toHaveLength(1);
+    const line = out.lines[0]!;
+    expect(line).toEqual({
       product_id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
       quantity: 1,
     });
-    expect(out.lines[0].size).toBeUndefined();
+    expect(line.size).toBeUndefined();
   });
 
   it("sets shipping to null for digital checkout", () => {

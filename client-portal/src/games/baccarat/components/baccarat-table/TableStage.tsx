@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { BlackjackCard } from "@/src/games/blackjack/logic/types";
+import { useIsCompactTableViewport } from "@/src/games/useCompactTableViewport";
 import { baccaratTotal } from "@/src/games/baccarat/logic/game";
 import { BACCARAT_ASSETS, CHIP_CARD_ASSETS } from "./constants";
 import { cardLabel } from "./helpers";
@@ -24,11 +25,12 @@ function CardCell(props: {
   card?: BlackjackCard;
   index: number;
   accent: "player" | "banker";
+  cardMotionY?: number;
 }) {
-  const { hidden, card, index, accent } = props;
+  const { hidden, card, index, accent, cardMotionY = 6 } = props;
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6, scale: 0.96 }}
+      initial={{ opacity: 0, y: cardMotionY, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.18, delay: index * 0.04 }}
       className={clsx(
@@ -65,8 +67,10 @@ function SideSection(props: {
   label: string;
   hideCards: boolean;
   revealedCount: number;
+  cardMotionY: number;
+  compact: boolean;
 }) {
-  const { cards, accent, label, hideCards, revealedCount } = props;
+  const { cards, accent, label, hideCards, revealedCount, cardMotionY, compact } = props;
   // 僅用「已翻開」的牌計點，避免在未翻牌或補牌前洩漏即將出現的 total。
   const visibleCards = hideCards ? [] : cards.slice(0, Math.min(revealedCount, cards.length));
   const total = visibleCards.length ? baccaratTotal(visibleCards) : 0;
@@ -95,10 +99,21 @@ function SideSection(props: {
         ) : null}
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+      <div
+        className={clsx(
+          "mt-2 flex flex-wrap items-center justify-center gap-2",
+          compact && "min-h-[88px] content-start",
+        )}
+      >
         {hideCards ? (
           Array.from({ length: hideCount }).map((_, idx) => (
-            <CardCell key={`hidden-${label}-${idx}`} hidden index={idx} accent={accent} />
+            <CardCell
+              key={`hidden-${label}-${idx}`}
+              hidden
+              index={idx}
+              accent={accent}
+              cardMotionY={cardMotionY}
+            />
           ))
         ) : cards.length > 0 ? (
           cards.map((c, idx) => (
@@ -108,12 +123,13 @@ function SideSection(props: {
               card={c}
               index={idx}
               accent={accent}
+              cardMotionY={cardMotionY}
             />
           ))
         ) : (
           <>
-            <CardCell hidden index={0} accent={accent} />
-            <CardCell hidden index={1} accent={accent} />
+            <CardCell hidden index={0} accent={accent} cardMotionY={cardMotionY} />
+            <CardCell hidden index={1} accent={accent} cardMotionY={cardMotionY} />
           </>
         )}
       </div>
@@ -123,6 +139,8 @@ function SideSection(props: {
 
 export function TableStage({ round }: TableStageProps) {
   const [hideCardsAfterSettle, setHideCardsAfterSettle] = useState(false);
+  const compact = useIsCompactTableViewport();
+  const cardMotionY = compact ? 0 : 6;
 
   const settled = round?.phase === "settled" && Boolean(round.outcome);
   const outcome = settled ? round!.outcome : null;
@@ -165,13 +183,19 @@ export function TableStage({ round }: TableStageProps) {
   }, [round]);
 
   return (
-    <div className="relative min-h-[260px] overflow-hidden rounded-3xl bg-neutral-950/70 p-3 shadow-[0_0_60px_rgba(34,211,238,0.16)] sm:min-h-[300px]">
-      <div
-        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-45"
-        style={{ backgroundImage: `url(${BACCARAT_ASSETS.tableBackground})` }}
-        aria-hidden
-      />
-      <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-black/35 via-black/45 to-black/70" />
+    <div
+      className={clsx(
+        "relative min-h-[260px] overflow-visible rounded-3xl bg-neutral-950/70 p-3 shadow-[0_0_60px_rgba(34,211,238,0.16)] sm:min-h-[300px]",
+        compact && "min-h-[300px] sm:min-h-[330px]",
+      )}
+    >
+      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl" aria-hidden>
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-45"
+          style={{ backgroundImage: `url(${BACCARAT_ASSETS.tableBackground})` }}
+        />
+        <div className="absolute inset-0 bg-linear-to-b from-black/35 via-black/45 to-black/70" />
+      </div>
 
       <MascotLayer
         tralaleroMood={tralaleroFace}
@@ -195,6 +219,8 @@ export function TableStage({ round }: TableStageProps) {
             label="Banker（莊）"
             hideCards={hideCardsAfterSettle}
             revealedCount={round?.revealed.banker ?? 0}
+            cardMotionY={cardMotionY}
+            compact={compact}
           />
           <SideSection
             cards={round?.playerCards ?? []}
@@ -202,6 +228,8 @@ export function TableStage({ round }: TableStageProps) {
             label="Player（閒）"
             hideCards={hideCardsAfterSettle}
             revealedCount={round?.revealed.player ?? 0}
+            cardMotionY={cardMotionY}
+            compact={compact}
           />
         </div>
       </div>
