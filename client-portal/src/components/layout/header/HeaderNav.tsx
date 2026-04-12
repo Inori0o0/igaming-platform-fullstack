@@ -1,20 +1,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const navItems = [
-  { href: "/", label: "首頁" },
-  { href: "/games", label: "遊戲大廳" },
-  { href: "/shop", label: "商品商店" },
-  { href: "/wallet", label: "錢包" },
-  { href: "/profile", label: "個人中心" },
-];
+import { headerNavItems } from "@/src/components/layout/navConfig";
 
 export function HeaderNav() {
   const pathname = usePathname();
 
   return (
     <nav className="hidden items-center gap-2 text-sm font-medium text-neutral-300 md:flex">
-      {navItems.map((item) => {
+      {headerNavItems.map((item) => {
         const active =
           item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
         return (
