@@ -11,6 +11,7 @@ type SidebarSectionProps = {
   pathname: string;
 };
 
+/** active：`/` 只比對相等；其餘 href 用 pathname.startsWith（子路徑也算同一區）。 */
 export function SidebarSection({ title, items, pathname }: SidebarSectionProps) {
   return (
     <div className="space-y-2">

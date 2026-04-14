@@ -1,5 +1,6 @@
 "use client";
 
+// 順序：漢堡（僅 md 以下）→ 品牌 → 五連結（md 以上）；窄螢幕導覽全在抽屜，避免頂欄塞爆。
 import { HeaderBrand } from "./header/HeaderBrand";
 import { HeaderNav } from "./header/HeaderNav";
 import { HeaderWalletSummary } from "./header/HeaderWalletSummary";

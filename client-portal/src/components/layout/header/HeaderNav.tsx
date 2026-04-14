@@ -2,6 +2,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { headerNavItems } from "@/src/components/layout/navConfig";
 
+/** 僅 md 以上顯示；更窄時請用 MobileNavDrawer（左欄完整連結）。 */
 export function HeaderNav() {
   const pathname = usePathname();
 

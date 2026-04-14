@@ -6,6 +6,7 @@
 
 | 說明 | 連結 |
 |------|------|
+| 2026-04-13 安全修補（RLS / RPC / app_metadata 對齊） | [`sql/README.md#近期已落地安全修補2026-04-13`](./sql/README.md#近期已落地安全修補2026-04-13) |
 | 遷移檔建議執行順序、與線上庫對齊說明 | [`sql/README.md`](./sql/README.md) |
 | `public` schema 參考快照（非可整份執行的 migration） | [`sql/schema.sql`](./sql/schema.sql) |
 | ER 圖（Mermaid）、主要 RPC／storage 概念 | [`sql/ARCHITECTURE.md`](./sql/ARCHITECTURE.md) |

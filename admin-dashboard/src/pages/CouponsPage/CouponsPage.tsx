@@ -10,6 +10,7 @@ import { useCoupons } from './hooks/useCoupons'
 export function CouponsPage() {
   const {
     coupons, loading,
+    includeDeleted, setIncludeDeleted,
     modalOpen, editingCoupon,
     formValues, setFormValues,
     submitting, formErrors,
@@ -25,6 +26,13 @@ export function CouponsPage() {
           <div className="flex items-center justify-between">
             <CardTitle>優惠券管理</CardTitle>
             <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setIncludeDeleted((v) => !v)}
+              >
+                {includeDeleted ? '隱藏已刪除' : '顯示已刪除'}
+              </Button>
               <Button variant="secondary" size="sm" onClick={() => void refetch()}>
                 <RefreshCw size={14} />
               </Button>
@@ -107,7 +115,9 @@ export function CouponsPage() {
                             : <span className="text-xs text-text-muted">永久</span>}
                         </TableCell>
                         <TableCell>
-                          {isExpired
+                          {c.deleted_at
+                            ? <Badge variant="danger">已刪除</Badge>
+                            : isExpired
                             ? <Badge variant="danger">已過期</Badge>
                             : c.is_active
                               ? <Badge variant="success">啟用</Badge>
@@ -118,6 +128,7 @@ export function CouponsPage() {
                             {/* 啟用/停用 toggle */}
                             <button
                               title={c.is_active ? '點擊停用' : '點擊啟用'}
+                              disabled={Boolean(c.deleted_at)}
                               onClick={() => void toggleCoupon(c)}
                               className="flex items-center justify-center w-7 h-7 rounded-md transition-colors hover:bg-surface-elevated"
                             >
@@ -130,7 +141,13 @@ export function CouponsPage() {
                               <Pencil size={14} />
                             </Button>
                             {/* 刪除 */}
-                            <Button variant="ghost" size="sm" title="刪除" onClick={() => void deleteCoupon(c.id)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title="刪除"
+                              disabled={Boolean(c.deleted_at)}
+                              onClick={() => void deleteCoupon(c.id)}
+                            >
                               <Trash2 size={14} style={{ color: 'var(--color-danger)' }} />
                             </Button>
                           </div>

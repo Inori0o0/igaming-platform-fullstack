@@ -1,5 +1,6 @@
 "use client";
 
+// Splash 與主殼為兄弟節點（非包在 div 內），fullscreen 時蓋住全畫面；Auth 結束後底下版面才可操作。
 import { MainHeader } from "@/src/components/layout/MainHeader";
 import { MainSidebar } from "@/src/components/layout/MainSidebar";
 import { MainFooter } from "@/src/components/layout/MainFooter";

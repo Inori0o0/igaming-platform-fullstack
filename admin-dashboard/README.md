@@ -1,75 +1,111 @@
-# React + TypeScript + Vite
+# admin-dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> 以目前程式碼與 `../docs/sql/schema.sql` 為準；若 README 與實作不一致，請以程式與 schema 為準。
 
-Currently, two official plugins are available:
+## 中文（繁體）
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 這是什麼
 
-## React Compiler
+後台管理系統（Vite + React 19），主要功能包含：
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- Dashboard（KPI / 圖表）
+- Users / User Detail
+- Games 統計
+- Transactions
+- Products
+- Orders
+- Coupons（位於 `/settings`）
 
-Note: This will impact Vite dev & build performances.
+路由由 `src/App.tsx` 管理，登入後透過 `ProtectedRoute` 進入主殼。
 
-## Expanding the ESLint configuration
+### 安裝與啟動
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+建立 `.env`：
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_ANON_KEY=...
 ```
+
+啟動：
+
+```bash
+npm run dev
+```
+
+### 常用指令
+
+- `npm run dev`：開發
+- `npm run build`：TypeScript build + Vite build
+- `npm run preview`：預覽 build
+- `npm run lint`：ESLint
+
+### 驗收建議流程
+
+1. 進入 `/login` 並完成登入
+2. 檢查首頁 KPI 與圖表
+3. 到 Users / Transactions / Products / Orders 查看列表與篩選
+4. 到 `/settings` 驗證優惠券 CRUD（新增、編輯、啟用/停用、軟刪除）
+
+### 與資料庫文件的關係
+
+- SQL 順序：`../docs/sql/README.md`
+- 參考 schema：`../docs/sql/schema.sql`
+- 架構圖：`../docs/sql/ARCHITECTURE.md`
+- 後台結構說明：`../docs/structure-admin-dashboard.md`
+
+---
+
+## English
+
+### What this app is
+
+Admin dashboard built with Vite + React 19.
+
+Main areas:
+
+- Dashboard (KPI/charts)
+- Users / User Detail
+- Games analytics
+- Transactions
+- Products
+- Orders
+- Coupons (served at `/settings`)
+
+Routing is defined in `src/App.tsx` and protected by `ProtectedRoute`.
+
+### Setup
+
+```bash
+npm install
+```
+
+Create `.env`:
+
+```bash
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_ANON_KEY=...
+```
+
+Run:
+
+```bash
+npm run dev
+```
+
+### Scripts
+
+- `npm run dev`
+- `npm run build`
+- `npm run preview`
+- `npm run lint`
+
+### Database/docs references
+
+- `../docs/sql/README.md`
+- `../docs/sql/schema.sql`
+- `../docs/sql/ARCHITECTURE.md`

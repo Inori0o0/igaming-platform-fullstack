@@ -16,7 +16,8 @@ interface AuthState {
 
 function checkIsAdmin(user: User | null): boolean {
   if (!user) return false
-  const meta = user.user_metadata as Record<string, unknown>
+  // 後台與 DB/RLS 一致：管理權限以 app_metadata.role 判斷，不用 user_metadata。
+  const meta = user.app_metadata as Record<string, unknown>
   return meta?.role === 'admin'
 }
 
@@ -40,7 +41,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (error) return { error: error.message }
     if (!checkIsAdmin(data.user)) {
       await supabase.auth.signOut()
-      return { error: '此帳號沒有管理員權限' }
+      return { error: '此帳號沒有管理員權限（需在 app_metadata.role 設為 admin）' }
     }
     set({
       session: data.session,
