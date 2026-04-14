@@ -1,42 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# client-portal
 
-## Getting Started
+> 以目前程式碼與 `../docs/sql/schema.sql` 為準；若 README 與實作不一致，請以程式與 schema 為準。
 
-First, run the development server:
+## 中文（繁體）
+
+### 這是什麼
+
+玩家端入口網站（Next.js 16 + React 19），包含：
+
+- Auth（訪客/登入）
+- Wallet（VAC）
+- Games（Slots / Blackjack / Baccarat / Lottery）
+- Shop / Cart / Checkout
+- Profile（identity / history / orders / achievements）
+
+### 安裝與啟動
+
+```bash
+npm install
+```
+
+建立 `.env.local`：
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```
+
+啟動：
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 常用指令
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `npm run dev`：本機開發
+- `npm run build`：建置
+- `npm run start`：啟動 production build
+- `npm run lint`：ESLint
+- `npm test`：Vitest
+- `npm run test:coverage`：覆蓋率
 
-## Shop, cart, checkout
+### 測試現況
 
-- **Supabase migrations**（商店、結帳 RPC、優惠券）執行順序：repo 根目錄 [`docs/sql/README.md`](../docs/sql/README.md)。
-- **Phase 5 前端／檔案對照**（白話）：[`docs/phase-5-shop-client-changes.md`](../docs/phase-5-shop-client-changes.md)。
-- 單元測試：`npm test`（含 `stock`、`shopCheckout`、`calculateCartSummary` 等）。
+- 現有 8 個測試檔（slots、blackjack、baccarat、shop、profile）
+- 最近一次 coverage：Statements 84.56%、Branches 83.03%、Functions 82.53%、Lines 86.79%
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Loading 行為（現況）
 
-## Learn More
+- 全站 Auth 初始化：`ClientLayoutShell` 掛 `SplashScreen mode="fullscreen"`
+- `/shop` 路由 loading：`ShopPageSplashLoading` 使用 `SplashScreen mode="inline"`（保留 Header/Sidebar）
 
-To learn more about Next.js, take a look at the following resources:
+詳細見：`src/components/loading/README.md`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 資料庫與文件
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- SQL 執行順序：`../docs/sql/README.md`
+- 參考 schema：`../docs/sql/schema.sql`
+- 架構圖：`../docs/sql/ARCHITECTURE.md`
+- Shop 變更說明：`../docs/phase-5-shop-client-changes.md`
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## English
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### What this app is
+
+Player-facing portal built with Next.js 16 + React 19, including:
+
+- Auth (guest/login)
+- Wallet (VAC)
+- Games (Slots / Blackjack / Baccarat / Lottery)
+- Shop / Cart / Checkout
+- Profile (identity / history / orders / achievements)
+
+### Setup
+
+```bash
+npm install
+```
+
+Create `.env.local`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+```
+
+Run:
+
+```bash
+npm run dev
+```
+
+### Scripts
+
+- `npm run dev`
+- `npm run build`
+- `npm run start`
+- `npm run lint`
+- `npm test`
+- `npm run test:coverage`
+
+### Database & docs
+
+- `../docs/sql/README.md`
+- `../docs/sql/schema.sql`
+- `../docs/sql/ARCHITECTURE.md`

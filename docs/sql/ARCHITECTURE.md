@@ -42,6 +42,16 @@ erDiagram
 
 Triggers on the live DB include `handle_new_auth_user`, `touch_updated_at`, `enforce_transaction_limits`, `enforce_user_avatar_selection`, and an `rls_auto_enable` event trigger; DDL lives in the phase migration files, not in `schema.sql`.
 
+## Authorization / RLS notes
+
+- Admin authorization is unified on `auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'` (not `user_metadata`).
+- `products`, `product_variants`, `coupons` write operations are admin-only via RLS.
+- Coupon read model:
+  - `anon` can read active, non-deleted coupons.
+  - `authenticated` can also read active, non-deleted coupons (needed for logged-in client checkout).
+- Coupon deletion is soft delete (`deleted_at`), so deleted rows remain queryable for audit/admin tooling.
+- Sensitive RPC execute permissions are limited to `authenticated` / `postgres` / `service_role` (no `PUBLIC`/`anon`).
+
 ## Storage (conceptual)
 
 Buckets used by the app (policies in migrations): e.g. `shop-products`, `user-avatars`. Not represented as SQL tables above.

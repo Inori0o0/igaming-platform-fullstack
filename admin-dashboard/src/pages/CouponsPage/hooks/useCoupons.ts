@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { DbCoupon } from '@/types'
 
@@ -29,6 +29,7 @@ const DEFAULT_FORM: CouponFormValues = {
 export function useCoupons() {
   const [coupons, setCoupons] = useState<DbCoupon[]>([])
   const [loading, setLoading] = useState(true)
+  const [includeDeleted, setIncludeDeleted] = useState(false)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingCoupon, setEditingCoupon] = useState<DbCoupon | null>(null)
@@ -36,23 +37,28 @@ export function useCoupons() {
   const [submitting, setSubmitting] = useState(false)
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof CouponFormValues | '_global', string>>>({})
 
-  useEffect(() => {
-    void fetchCoupons()
-  }, [])
-
-  async function fetchCoupons() {
+  const fetchCoupons = useCallback(async () => {
     setLoading(true)
     try {
-      const { data } = await supabase
+      let query = supabase
         .from('coupons')
         .select('*')
-        .is('deleted_at', null)
         .order('created_at', { ascending: false })
+
+      if (!includeDeleted) {
+        query = query.is('deleted_at', null)
+      }
+
+      const { data } = await query
       setCoupons((data as DbCoupon[]) ?? [])
     } finally {
       setLoading(false)
     }
-  }
+  }, [includeDeleted])
+
+  useEffect(() => {
+    void fetchCoupons()
+  }, [fetchCoupons])
 
   function openCreate() {
     setEditingCoupon(null)
@@ -141,6 +147,7 @@ export function useCoupons() {
 
   return {
     coupons, loading,
+    includeDeleted, setIncludeDeleted,
     modalOpen, editingCoupon,
     formValues, setFormValues,
     submitting, formErrors,

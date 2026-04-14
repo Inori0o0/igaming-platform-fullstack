@@ -7,6 +7,19 @@
 - **[`schema.sql`](./schema.sql)**：`public` 表與 enum 的**參考快照**（非可重播的完整 DDL），已於 **2026-04-11** 依 Supabase 專案 **first-igaming-project**（ref `fjduloefmqtohtnkqtfp`）對齊。若你之後用控制台／MCP 直接改庫，請再更新此檔或註明漂移。
 - **[`ARCHITECTURE.md`](./ARCHITECTURE.md)**：簡化 ER 圖（Mermaid）、主要 RPC 與 storage 說明。
 
+## 近期已落地安全修補（2026-04-13）
+
+以下 migration 已直接套用在 `first-igaming-project`：
+
+1. `tighten_rls_and_admin_role_checks`
+   - `products` / `product_variants` / `coupons` 寫入改為 admin-only RLS。
+   - admin 判斷統一改為 `app_metadata.role`。
+   - `admin_search_orders` / `admin_search_transactions` 函式內權限檢查同步改為 `app_metadata.role`。
+2. `revoke_public_execute_on_sensitive_rpcs`
+   - 撤銷敏感 RPC 的 `PUBLIC` execute，僅保留 `authenticated`（以及 owner/service role）。
+3. `allow_authenticated_read_active_coupons`
+   - 補上 `authenticated` 對 active coupon 的 SELECT，避免前台登入後讀不到優惠券。
+
 下方 **phase-*.sql** 仍為從空庫或舊 schema **漸進套用**的腳本；已有資料的庫請勿重跑會破壞資料的段落，並以實際庫為準驗證。
 
 | 順序 | 檔案 | 說明 |

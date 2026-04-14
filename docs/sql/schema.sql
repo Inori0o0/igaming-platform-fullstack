@@ -1,5 +1,12 @@
 -- Reference snapshot of public schema (NOT a runnable migration).
 -- Synced from Supabase project "first-igaming-project" (ref fjduloefmqtohtnkqtfp) via MCP on 2026-04-11.
+-- Security model note (synced 2026-04-13):
+-- - Admin authorization source is app_metadata.role = 'admin'
+-- - products/product_variants/coupons writes are admin-only via RLS
+-- - Sensitive RPC execute grants were tightened to authenticated (no PUBLIC/anon)
+-- - coupons uses soft delete (deleted_at), so deleted rows remain in DB for audit
+-- - See migrations: tighten_rls_and_admin_role_checks, revoke_public_execute_on_sensitive_rpcs,
+--   allow_authenticated_read_active_coupons
 -- Table order is for human reading; constraints may require auth schema to exist.
 
 -- Enums

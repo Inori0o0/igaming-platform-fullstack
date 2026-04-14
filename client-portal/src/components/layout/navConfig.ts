@@ -1,5 +1,6 @@
 import type { SidebarItem } from "./sidebar/SidebarSection";
 
+/** 頂欄五連結（md+）；與左欄不同：不含子路由捷徑。 */
 export const headerNavItems: { href: string; label: string }[] = [
   { href: "/", label: "首頁" },
   { href: "/games", label: "遊戲大廳" },
@@ -8,6 +9,7 @@ export const headerNavItems: { href: string; label: string }[] = [
   { href: "/profile", label: "個人中心" },
 ];
 
+/** 左欄與手機漢堡選單共用（lg+ 見 MainSidebar；更窄時見 MobileNavDrawer）。改導覽只改這裡。 */
 export const lobbySidebarSections: { title: string; items: SidebarItem[] }[] = [
   {
     title: "Casino",

@@ -1,18 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
 import { lobbySidebarSections } from "@/src/components/layout/navConfig";
 import { SidebarSection } from "@/src/components/layout/sidebar/SidebarSection";
 import { cn } from "@/src/lib/cn";
 
+/** 與 MainSidebar 同源（lobbySidebarSections）；portal 疊在 header 上，關閉時還原 body overflow。 */
 export function MobileNavDrawer() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    setOpen(false);
+    startTransition(() => {
+      setOpen(false);
+    });
   }, [pathname]);
 
   useEffect(() => {

@@ -31,6 +31,8 @@ isProject: false
 
 # vAcAnt 虛擬博弈網站作品集開發計劃
 
+> **文件對齊聲明**：本計劃以目前 repo 程式碼與 `docs/sql/schema.sql`（現行 Supabase schema 快照）為準。若本文描述與實際程式或資料庫有差異，請以程式與 schema 實際內容為最終依據。
+
 ## 專案架構總覽
 
 ```mermaid
@@ -94,29 +96,42 @@ graph TB
 ### 1.3 資料庫設計 (Supabase)
 
 ```
+enums
+├── transaction_type (deposit/withdraw/bet/win/purchase/claim/wager/payout)
+├── order_status (pending/paid/shipped/completed/cancelled)
+└── coupon_discount_type (percentage/fixed/free_shipping)
+
 users
 ├── id (uuid, PK)
+├── auth_user_id (FK -> auth.users, unique)
 ├── email
 ├── display_name
 ├── avatar_url
 ├── created_at
-└── is_guest (boolean)
+├── is_guest (boolean)
+└── banned_at
 
 wallets
 ├── id (uuid, PK)
 ├── user_id (FK -> users)
 ├── coin_balance (vAcAnt Coins)
+├── btc_balance
+├── eth_balance
 └── updated_at
 
 transactions
 ├── id (uuid, PK)
 ├── user_id (FK)
-├── type (deposit/withdraw/claim/bet/win/purchase)
-├── currency
+├── type (transaction_type)
+├── currency (VAC)
 ├── amount
 ├── status (pending/completed/failed)
 ├── balance_after
 ├── description
+├── game_id
+├── theme_id
+├── round_id
+├── metadata (JSON)
 └── created_at
 
 game_history
@@ -138,26 +153,49 @@ products
 ├── id (uuid, PK)
 ├── name
 ├── description
-├── price (in coins)
+├── price
 ├── category
 ├── image_url
 ├── stock
-└── is_active
+├── is_active
+├── slug
+├── fulfillment_type (physical/digital)
+├── is_avatar
+├── image_bucket / image_object_path
+├── price_vac
+├── force_sold_out
+├── sort_order
+└── created_at / updated_at
+
+product_variants
+├── id (uuid, PK)
+├── product_id (FK)
+├── size (XS/S/M/L/XL, nullable)
+├── stock_quantity
+└── created_at / updated_at
 
 orders
 ├── id (uuid, PK)
 ├── user_id (FK)
 ├── total_amount
-├── status
+├── status (order_status)
 ├── shipping_info (JSON)
-└── created_at
+├── fulfillment_type
+├── subtotal_vac / shipping_fee_vac / discount_vac / total_vac
+├── coupon_code
+├── shipping_snapshot (JSON)
+└── created_at / updated_at
 
 order_items
 ├── id (uuid, PK)
 ├── order_id (FK)
 ├── product_id (FK)
 ├── quantity
-└── price_at_purchase
+├── price_at_purchase
+├── variant_id (FK -> product_variants)
+├── unit_price_vac / line_total_vac
+├── size_snapshot
+└── created_at
 
 wishlists
 ├── id (uuid, PK)
@@ -167,11 +205,28 @@ wishlists
 coupons
 ├── id (uuid, PK)
 ├── code
-├── discount_type (percentage/fixed)
+├── discount_type (coupon_discount_type)
 ├── discount_value
 ├── min_purchase
 ├── expires_at
-└── is_active
+├── is_active
+├── applies_fulfillment (physical/digital/any)
+├── title
+├── internal_note
+└── created_at / updated_at / deleted_at
+
+user_entitlements
+├── id (uuid, PK)
+├── user_id (FK)
+├── product_id (FK)
+├── entitlement_type (avatar/digital_item)
+├── source_order_id (FK -> orders)
+└── granted_at
+
+user_avatar_selection
+├── user_id (PK, FK -> users)
+├── avatar_product_id (FK -> products)
+└── updated_at
 ```
 
 ---
@@ -186,45 +241,13 @@ coupons
 
 ### 2.2 vAcAnt Logo 加載動畫系統
 
-建立統一的加載動畫元件，使用品牌 Logo 搭配霓虹發光 + 淡入縮放效果。重點是「**以真實載入狀態驅動**」，避免假進度條或純計時器造成誤導與干擾。
+目前以 `client-portal/src/components/loading/README.md` 為準，重點如下：
 
-**動畫效果組合：**
-
-```
-1. 初始狀態：Logo 縮小 (scale: 0.8)、透明 (opacity: 0)
-2. 進場動畫：淡入 + 放大到正常大小 (0.5s ease-out)
-3. 持續效果：霓虹發光脈動 (glow pulse, 1.5s 週期)
-4. 退場動畫：淡出 + 略微放大 (0.3s ease-in)
-```
-
-**使用場景：**
-
-| 場景               | 元件                  | 動畫行為                                                                             |
-| ------------------ | --------------------- | ------------------------------------------------------------------------------------ |
-| 網站初次載入       | `<SplashScreen>`      | **接近全螢幕** Logo 動畫；由 auth/初始化狀態驅動，並提供「最短可見時間」避免一閃而過 |
-| 後續載入（非初次） | `<SplashScreen>`      | **只覆蓋 main 內容區**；Header/Sidebar/Footer 必須一直可見                           |
-| 遊戲載入           | `<GameLoadingScreen>` | Logo + 遊戲名稱 + 提示文字；由各遊戲頁面自身 `isLoading` 狀態驅動                    |
-| 局部資料載入       | `<LogoLoader>`        | 小型 Logo 脈動效果；用在按鈕/卡片等局部區塊                                          |
-
-**技術實現：**
-
-- 使用 Framer Motion 的 `motion.div` 處理淡入縮放
-- CSS `filter: drop-shadow()` + `@keyframes` 做霓虹發光效果
-- 發光主色：青色 (#00ffff) 配合深色主題
-- 建立 `components/loading/` 資料夾統一管理
-- **禁止假進度條**：除非有真實 progress 來源，否則只顯示 Logo + 文案提示
-- **防閃爍策略**：提供 `minVisibleMs`（例如 300–600ms）改善載入很快時一閃而過
-- **精簡原則**：不做頁面切換過場（移除 `PageTransition`），避免過度 loading 干擾
-
-**元件檔案結構：**
-
-```
-client-portal/src/components/loading/
-├── SplashScreen.tsx      # 初次載入接近全螢幕 / 後續載入只覆蓋 main
-├── NeonLogoWrapper.tsx   # 霓虹動畫容器（共用）
-├── GameLoadingScreen.tsx # 遊戲載入畫面
-└── LogoLoader.tsx        # 小型載入指示器
-```
+- 使用 `SplashScreen` + `useSplashVisibility`，以真實狀態驅動並用 `minVisibleMs` 防閃爍。
+- 全站 Auth 初始化由 `ClientLayoutShell` 掛 `SplashScreen mode="fullscreen"`。
+- 商店路由 loading 使用 `SplashScreen mode="inline"`（只覆蓋 main 內容區）。
+- `GameLoadingScreen`、`LogoLoader` 目前保留為可選元件（repo 內尚未實際引用）。
+- 動畫核心仍是 Logo 淡入縮放 + 霓虹脈動，不使用假進度條。
 
 ### 2.3 主要頁面路由
 
@@ -389,26 +412,6 @@ client-portal/src/app/
 - UI：左側桌布 + 牌區 + `MascotLayer`（Tralalero／Lirili 常駐，Tung 依贏錢或和局）；右側下注與**單一主按鈕**逐步翻牌／補牌／結算；簡化路單 24 格。
 - 單元測試：`client-portal/src/games/baccarat/logic/game.test.ts`。
 
-- 規則與核心功能：
-  - 閒 / 莊 / 和 下注（可支援基本的投注區域）
-  - 發牌動畫：牌從桌面中央洗出並分配到「閒」、「莊」區
-  - 計分板 / 路單（簡化版），顯示歷史開局結果
-- 角色對應設定：
-  - **閒家 (Player)**：由 **Tralalero Tralala** 代表
-    - 當「閒」勝利時，Tralalero 會在畫面一側出現簡短慶祝動畫（例如穿著 Nike 鞋跳躍）
-  - **莊家 (Banker)**：由 **Bombardiro Crocodilo** 代表
-    - 當「莊」勝利時，鱷魚身上的炸彈會短暫亮起，導火線點燃但不真正爆炸，營造緊張感
-  - **和局 (Tie)**：由 **Tung Tung Tung Sahur** 或 **Elefanto Cactuso** 代表
-    - 和局時，畫面可出現 Tung Tung Tung Sahur 敲鍋子示意「平衡」，或 Elefanto Cactuso 站在天秤中央維持平衡
-- 計分板與路單視覺：
-  - 不再使用單純紅藍圓點，而是：
-    - 閒：使用 Tralalero 色系或頭像輪廓
-    - 莊：使用 Bombardiro Crocodilo 色系或頭像輪廓
-    - 和：使用 Elefanto Cactuso 綠色或 Tung Tung Tung Sahur 鍋子圖示
-  - 保持簡化版路單結構，確保一眼能看懂趨勢
-- 發牌與特效：
-  - 關鍵局（例如多連勝、罕見牌型）時，**Lirili Larila** 可短暫出現，拉出一小段音效，與彩票遊戲開獎演出形成呼應。
-
 > 本遊戲中的「閒 / 莊 / 和」角色，同樣與 Slots 與 Lottery 共用 Italian Brainrot 角色設定，讓玩家在不同遊戲中對角色有連續記憶感。
 
 ### 4.4 彩票遊戲 (Lottery) - Italian Brainrot 設定
@@ -569,6 +572,19 @@ client-portal/src/app/
 - 移除原有「免費幣領取金額設定」區塊；頁面專注優惠券 CRUD。
 - 操作欄：Pencil 開啟編輯 Modal，ToggleRight/Left 獨立控制啟用狀態，Trash2 軟刪除。
 - 新增 / 編輯 Modal 欄位：優惠碼、標題、折扣類型（百分比 / 固定金額）、折扣值、最低消費、適用訂單類型、到期日（留空 = 永久）、內部備注、啟用狀態。
+- 權限模型已落地：後台與資料庫一致採 `app_metadata.role = 'admin'` 作為管理員判斷來源。
+- RLS 已收斂：`products` / `product_variants` / `coupons` 的寫入改為 admin-only，避免一般 authenticated 直接寫入。
+- 敏感 RPC（admin search / dashboard stats / checkout）已撤銷 `PUBLIC` / `anon` execute，只保留 `authenticated` 與後端角色。
+- 優惠券維持軟刪除（`deleted_at`）：資料保留於 DB 供審計，後台可切換顯示已刪除項目。
+
+### 7.8 安全與授權（已落地）
+
+- **授權來源一致化**：前後台與 RLS 統一使用 `app_metadata.role`；不再以 `user_metadata.role` 作為最終授權依據。
+- **最小權限原則**：
+  - 前台讀取 coupon 僅限 active + 未刪除；
+  - 商品、規格、優惠券寫操作僅 admin 可執行；
+  - admin RPC 仍有函式內 role 檢查，避免 UI 被繞過時直接濫用。
+- **審計可追蹤**：優惠券刪除採 soft-delete，保留歷史紀錄供後台稽核與後續還原。
 
 ---
 

@@ -1,5 +1,6 @@
 "use client";
 
+// 僅 lg+ 顯示；768–1023 有頂欄五連結但無左欄，手機則靠 MainHeader 內抽屜。
 import { usePathname } from "next/navigation";
 import { lobbySidebarSections } from "@/src/components/layout/navConfig";
 import { SidebarSection } from "./sidebar/SidebarSection";
