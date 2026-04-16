@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import { Button } from "@/src/components/ui/Button";
 import type { ApparelSize, Product } from "@/src/shop/types";
 
@@ -22,7 +22,7 @@ export function CartLineItem({
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-cyan-500/20 bg-neutral-950/70 p-3">
       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-cyan-500/20">
-        <Image
+        <LoadingImage
           src={product.imageSrc}
           alt={product.name}
           fill

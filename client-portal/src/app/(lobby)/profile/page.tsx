@@ -5,6 +5,7 @@ import { Button } from "@/src/components/ui/Button";
 import { ProfileStatsCard } from "@/src/components/profile/ProfileStatsCard";
 import { ProfileIdentityCard } from "@/src/components/profile/ProfileIdentityCard";
 import { ProfileFeedbackToast } from "@/src/components/profile/ProfileFeedbackToast";
+import { LogoLoader } from "@/src/components/loading/LogoLoader";
 import { useProfileOverviewViewModel } from "@/src/components/profile/useProfileOverviewViewModel";
 
 export default function ProfileOverviewPage() {
@@ -14,8 +15,8 @@ export default function ProfileOverviewPage() {
     return (
       <main className="space-y-4">
         <Card title="個人資料" description="載入中…">
-          <div className="rounded-2xl border border-dashed border-cyan-500/25 bg-neutral-950/60 p-6 text-xs text-neutral-400">
-            Loading…
+          <div className="flex min-h-28 items-center justify-center rounded-2xl border border-dashed border-cyan-500/25 bg-neutral-950/60 p-6">
+            <LogoLoader size="md" className="text-cyan-300" />
           </div>
         </Card>
       </main>

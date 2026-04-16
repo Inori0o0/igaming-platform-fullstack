@@ -2,6 +2,7 @@
 
 import { Card } from "@/src/components/ui/Card";
 import { Button } from "@/src/components/ui/Button";
+import { LogoLoader } from "@/src/components/loading/LogoLoader";
 import { formatTime } from "@/src/components/wallet/format";
 import { useProfileGameHistory } from "@/src/components/profile/history/useProfileGameHistory";
 
@@ -16,8 +17,8 @@ export default function ProfileHistoryPage() {
     return (
       <main className="space-y-4">
         <Card title="遊戲歷史" description="載入中…">
-          <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-8 text-center text-sm text-neutral-400">
-            …
+          <div className="flex min-h-28 items-center justify-center rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-8">
+            <LogoLoader size="md" className="text-cyan-300" />
           </div>
         </Card>
       </main>
@@ -114,7 +115,7 @@ export default function ProfileHistoryPage() {
                 {vm.loading ? (
                   <tr>
                     <td colSpan={6} className="px-3 py-8 text-center text-neutral-500">
-                      載入中…
+                      <LogoLoader size="sm" className="mx-auto text-cyan-300" />
                     </td>
                   </tr>
                 ) : vm.error ? (

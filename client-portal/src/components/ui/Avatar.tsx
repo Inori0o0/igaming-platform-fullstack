@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Image, { type ImageProps } from "next/image";
+import type { ImageProps } from "next/image";
+import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import { cn } from "@/src/lib/cn";
 
 export type AvatarSize = "sm" | "md" | "lg";
@@ -58,7 +59,7 @@ export function Avatar({
       )}
     >
       {showImage ? (
-        <Image
+        <LoadingImage
           src={src ?? ""}
           alt={alt ?? fallback ?? "Avatar"}
           fill

@@ -1,5 +1,7 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
+import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import type { Product } from "@/src/shop/types";
 import { productCategoryLabels } from "@/src/shop/types";
 
@@ -14,7 +16,7 @@ export function ProductCard({ product }: ProductCardProps) {
       className="group overflow-hidden rounded-2xl border border-cyan-500/20 bg-neutral-950/70 transition hover:border-cyan-400/40"
     >
       <div className="relative aspect-square">
-        <Image
+        <LoadingImage
           src={product.imageSrc}
           alt={product.name}
           fill

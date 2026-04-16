@@ -6,8 +6,8 @@
 import { Card } from "@/src/components/ui/Card";
 import { GameThemeCard } from "@/src/components/ui/GameThemeCard";
 import { useFeaturedHomeProduct } from "@/src/components/home/useFeaturedHomeProduct";
+import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import { productCategoryLabels } from "@/src/shop/types";
-import Image from "next/image";
 import Link from "next/link";
 
 export function HomeHighlightsSection() {
@@ -54,7 +54,7 @@ export function HomeHighlightsSection() {
             className="group block overflow-hidden rounded-2xl border border-cyan-500/20 bg-neutral-950/80 transition hover:border-cyan-400/40"
           >
             <div className="relative aspect-square w-full">
-              <Image
+              <LoadingImage
                 src={featuredProduct.imageSrc}
                 alt={featuredProduct.name}
                 fill

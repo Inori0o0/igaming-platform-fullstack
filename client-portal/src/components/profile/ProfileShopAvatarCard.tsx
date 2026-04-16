@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import { Card } from "@/src/components/ui/Card";
 import { Button } from "@/src/components/ui/Button";
 import { Modal } from "@/src/components/ui/Modal";
@@ -34,7 +34,7 @@ export function ProfileShopAvatarCard({
         <div className="flex items-center gap-3">
           {selected ? (
             <div className="relative overflow-hidden rounded-full border border-cyan-500/20 bg-neutral-950/60">
-              <Image
+              <LoadingImage
                 src={selected.imageSrc}
                 alt={selected.name}
                 width={56}
@@ -89,7 +89,7 @@ export function ProfileShopAvatarCard({
                   ].join(" ")}
                   aria-label={`${p.name} ${p.isUnlocked ? "可選" : "未解鎖"}`}
                 >
-                  <Image
+                  <LoadingImage
                     src={p.imageSrc}
                     alt={p.name}
                     width={96}

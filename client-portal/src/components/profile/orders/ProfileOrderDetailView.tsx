@@ -1,8 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { LogoLoader } from "@/src/components/loading/LogoLoader";
+import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import { Card } from "@/src/components/ui/Card";
 import {
   formatVac,
@@ -54,8 +55,12 @@ export function ProfileOrderDetailView({
         {error ? (
           <p className="text-sm text-rose-300/90">{error}</p>
         ) : loading || !order ? (
-          <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-8 text-center text-sm text-neutral-400">
-            {loading ? "載入…" : "—"}
+          <div className="flex min-h-28 items-center justify-center rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-8 text-center text-sm text-neutral-400">
+            {loading ? (
+              <LogoLoader size="md" className="text-cyan-300" />
+            ) : (
+              "—"
+            )}
           </div>
         ) : (
           <div className="space-y-6">
@@ -160,7 +165,7 @@ export function ProfileOrderDetailView({
                     >
                       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-neutral-900">
                         {img ? (
-                          <Image
+                          <LoadingImage
                             src={img}
                             alt=""
                             fill
