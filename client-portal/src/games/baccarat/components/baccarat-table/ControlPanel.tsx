@@ -4,15 +4,11 @@
  * 右側面板：下注區、籌碼 step、主按鈕（文案依回合 phase 由本元件推算）、狀態與可收合路單。
  * `onStartRound` 實際綁定為 `advance`（開局與翻牌同一入口）。
  */
-import clsx from "clsx";
-import Image from "next/image";
-import { Button } from "@/src/components/ui/Button";
 import { Card } from "@/src/components/ui/Card";
-import {
-  BACCARAT_PAYOUT,
-  type BaccaratBetArea,
-} from "@/src/games/baccarat/logic/game";
-import { CHIP_CARD_ASSETS, MIN_BET, TABLE_BET_OPTIONS } from "./constants";
+import { type BaccaratBetArea } from "@/src/games/baccarat/logic/game";
+import { ActionSection } from "./ActionSection";
+import { BettingSection } from "./BettingSection";
+import { TABLE_BET_OPTIONS } from "./constants";
 import { RoadPanel } from "./RoadPanel";
 import { StatusPanel } from "./StatusPanel";
 import type { BaccaratRoundState, RoadEntry } from "./types";
@@ -35,12 +31,6 @@ type ControlPanelProps = {
   /** 將下注設為當前餘額可下的最大值（仍受 MIN/MAX 限制）。 */
   onAllInBet: () => void;
   onStartRound: () => void;
-};
-
-const AREA_LABEL: Record<BaccaratBetArea, string> = {
-  player: "閒 Player",
-  banker: "莊 Banker",
-  tie: "和 Tie",
 };
 
 // NOTE: keep props permissive to avoid TS server stale-prop diagnostics in editor.
@@ -91,115 +81,77 @@ export function ControlPanel(props: any) {
 
   return (
     <div className="space-y-2">
-      <Card title="下注與操作" description="閒 / 莊 / 和（標準百家樂）">
-        <div className="space-y-3 text-[11px] text-neutral-300">
-          <div className="rounded-xl border border-cyan-500/15 bg-neutral-950/70 px-3 py-2">
-            <p className="text-neutral-400">下注區</p>
-            <div className="mt-2 grid grid-cols-3 gap-2">
-              {(Object.keys(AREA_LABEL) as BaccaratBetArea[]).map((area) => (
-                <button
-                  key={area}
-                  disabled={!canAdjustBet}
-                  onClick={() => onSelectBetArea(area)}
-                  className={clsx(
-                    "rounded-xl border px-2 py-2 text-left transition",
-                    betArea === area
-                      ? "border-cyan-300/70 bg-cyan-500/10 text-cyan-100"
-                      : "border-cyan-500/20 bg-neutral-950/70 hover:border-cyan-400/40",
-                    "disabled:cursor-not-allowed disabled:opacity-45",
-                  )}
-                >
-                  <p className="text-[11px] font-semibold">
-                    {AREA_LABEL[area]}
-                  </p>
-                  <p className="mt-1 text-[10px] text-neutral-400">
-                    派彩 x {BACCARAT_PAYOUT[area]}
-                  </p>
-                </button>
-              ))}
-            </div>
+      {/* 手機版排版（< xl）：操作鍵上浮，下注區在下方。 */}
+      <div className="xl:hidden">
+        <Card title="下注與操作" description="閒 / 莊 / 和（標準百家樂）">
+          <div className="space-y-3 text-[11px] text-neutral-300">
+            <ActionSection
+              isMobile
+              primaryLabel={primaryLabel}
+              canStartOrAdvance={canStartOrAdvance}
+              onStartRound={onStartRound}
+            />
+
+            <BettingSection
+              bet={bet}
+              betStep={betStep}
+              vacBalance={vacBalance}
+              betArea={betArea}
+              canAdjustBet={canAdjustBet}
+              isMobile
+              onSelectStep={onSelectStep}
+              onDecreaseBet={onDecreaseBet}
+              onIncreaseBet={onIncreaseBet}
+              onSelectBetArea={onSelectBetArea}
+              onAllInBet={onAllInBet}
+            />
+
+            <StatusPanel
+              eventTone={eventTone}
+              message={message}
+              payout={round?.payout ?? 0}
+              totalBet={round?.wager ?? bet}
+              isSettled={round?.phase === "settled"}
+            />
           </div>
+        </Card>
+      </div>
 
-          <div className="rounded-xl border border-cyan-500/15 bg-neutral-950/70 px-3 py-2">
-            <p className="text-neutral-400">下注金額 (VAC)</p>
-            <div className="mt-2 grid grid-cols-5 gap-1.5">
-              {TABLE_BET_OPTIONS.map((option) => (
-                <button
-                  key={option}
-                  disabled={!canAdjustBet}
-                  onClick={() => onSelectStep(option)}
-                  className={clsx(
-                    "flex flex-col items-center justify-center gap-1 rounded-xl border py-2 transition",
-                    betStep === option
-                      ? "border-cyan-300/70 bg-cyan-500/10"
-                      : "border-cyan-500/20 bg-neutral-950/70 hover:border-cyan-400/40",
-                    "disabled:cursor-not-allowed disabled:opacity-45",
-                  )}
-                >
-                  <span className="relative h-8 w-8 shrink-0">
-                    <Image
-                      src={CHIP_CARD_ASSETS.chips[option]}
-                      alt={`chip ${option}`}
-                      fill
-                      sizes="32px"
-                      className="object-contain"
-                    />
-                  </span>
-                  <span className="text-[11px] font-semibold tabular-nums text-cyan-100">
-                    {option}
-                  </span>
-                </button>
-              ))}
-              <button
-                type="button"
-                disabled={!canAdjustBet || vacBalance < MIN_BET}
-                onClick={onAllInBet}
-                className="flex flex-col items-center justify-center rounded-xl border border-amber-300/40 bg-amber-500/15 py-2 text-[11px] font-bold text-amber-100 transition hover:border-amber-200/70 hover:bg-amber-500/25 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                梭哈
-              </button>
-            </div>
-            <div className="mt-2 flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="ghost"
-                disabled={!canAdjustBet}
-                onClick={onDecreaseBet}
-              >
-                -
-              </Button>
-              <span className="text-cyan-100">{bet}</span>
-              <Button
-                size="sm"
-                variant="ghost"
-                disabled={!canAdjustBet}
-                onClick={onIncreaseBet}
-              >
-                +
-              </Button>
-              <span className="ml-auto text-[10px] text-neutral-400">
-                餘額 {vacBalance}
-              </span>
-            </div>
+      {/* 桌機版排版（>= xl）：保留完整下注與操作資訊。 */}
+      <div className="hidden xl:block">
+        <Card title="下注與操作" description="閒 / 莊 / 和（標準百家樂）">
+          <div className="space-y-3 text-[11px] text-neutral-300">
+            <BettingSection
+              bet={bet}
+              betStep={betStep}
+              vacBalance={vacBalance}
+              betArea={betArea}
+              canAdjustBet={canAdjustBet}
+              isMobile={false}
+              onSelectStep={onSelectStep}
+              onDecreaseBet={onDecreaseBet}
+              onIncreaseBet={onIncreaseBet}
+              onSelectBetArea={onSelectBetArea}
+              onAllInBet={onAllInBet}
+            />
+
+            <ActionSection
+              isMobile={false}
+              primaryLabel={primaryLabel}
+              canStartOrAdvance={canStartOrAdvance}
+              onStartRound={onStartRound}
+            />
+
+            <StatusPanel
+              eventTone={eventTone}
+              message={message}
+              payout={round?.payout ?? 0}
+              totalBet={round?.wager ?? bet}
+              isSettled={round?.phase === "settled"}
+            />
           </div>
-
-          <Button
-            onClick={onStartRound}
-            disabled={!canStartOrAdvance}
-            className="w-full py-2.5 text-sm"
-          >
-            {primaryLabel}
-          </Button>
-
-          <StatusPanel
-            eventTone={eventTone}
-            message={message}
-            payout={round?.payout ?? 0}
-            totalBet={round?.wager ?? bet}
-            isSettled={round?.phase === "settled"}
-          />
-        </div>
-      </Card>
+        </Card>
+      </div>
 
       <Card
         title="路單（簡化）"
