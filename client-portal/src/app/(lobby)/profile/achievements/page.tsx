@@ -2,6 +2,7 @@
 
 import { Card } from "@/src/components/ui/Card";
 import { Button } from "@/src/components/ui/Button";
+import { LogoLoader } from "@/src/components/loading/LogoLoader";
 import { formatTime } from "@/src/components/wallet/format";
 import { useProfileAchievements } from "@/src/components/profile/achievements/useProfileAchievements";
 
@@ -12,8 +13,8 @@ export default function ProfileAchievementsPage() {
     return (
       <main className="space-y-4">
         <Card title="成就" description="載入中…">
-          <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-8 text-center text-sm text-neutral-400">
-            …
+          <div className="flex min-h-28 items-center justify-center rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-8">
+            <LogoLoader size="md" className="text-cyan-300" />
           </div>
         </Card>
       </main>
@@ -57,8 +58,8 @@ export default function ProfileAchievementsPage() {
               </Button>
             </div>
           ) : vm.loading ? (
-            <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-8 text-center text-sm text-neutral-400">
-              載入成就…
+            <div className="flex min-h-28 items-center justify-center rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-8">
+              <LogoLoader size="md" className="text-cyan-300" />
             </div>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

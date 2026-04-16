@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { Button } from "@/src/components/ui/Button";
 import { HomeClaimFreeCoinsOverlay } from "@/src/components/home/HomeClaimFreeCoinsOverlay";
+import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import { useAuthStore } from "@/src/store/authStore";
 
 type HomeHeroSectionProps = {
@@ -43,7 +43,7 @@ export function HomeHeroSection({ onOpenAuthModal }: HomeHeroSectionProps) {
 
       <div className="flex flex-col gap-4">
         <div className="relative h-64 w-full overflow-hidden rounded-3xl border border-cyan-500/40 bg-neutral-950/80 shadow-[0_0_60px_rgba(34,211,238,0.45)]">
-          <Image
+          <LoadingImage
             src="/home/point_down.png"
             alt="vAcAnt Brainrot Hero"
             fill

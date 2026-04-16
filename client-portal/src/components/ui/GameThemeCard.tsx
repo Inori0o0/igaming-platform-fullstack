@@ -1,7 +1,9 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import clsx from "clsx";
+import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import type { SlotGameAvailabilityStatus } from "@/src/games/slots/config/gameAvailability";
 
 export type GameThemeCardProps = {
@@ -47,12 +49,12 @@ export function GameThemeCard({
   const content = (
     <>
       {imageSrc ? (
-        <Image
+        <LoadingImage
           src={imageSrc}
           alt={imageAlt}
           fill
           className={clsx(
-            "object-cover transition duration-500 ease-out",
+            "object-cover",
             playable && "group-hover:scale-[1.04]",
             !playable && "grayscale-65",
           )}

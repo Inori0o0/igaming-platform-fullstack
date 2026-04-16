@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LogoLoader } from "@/src/components/loading/LogoLoader";
 import { ProfileOrderRow } from "@/src/components/profile/orders/ProfileOrderRow";
 import type { ProfileOrderRow as OrderRow } from "@/src/components/profile/orders/types";
 
@@ -38,8 +39,8 @@ export function ProfileOrdersBody({
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-8 text-center text-sm text-neutral-400">
-        載入訂單…
+      <div className="flex min-h-28 items-center justify-center rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-8">
+        <LogoLoader size="md" className="text-cyan-300" />
       </div>
     );
   }

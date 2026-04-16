@@ -10,7 +10,7 @@ type GameLoadingScreenProps = {
 
 export function GameLoadingScreen({ gameName, tip }: GameLoadingScreenProps) {
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-6">
+    <div className="flex w-full flex-1 min-h-[62vh] flex-col items-center justify-center gap-6 py-8">
       <NeonLogoWrapper>
         <LogoMark size="lg" />
       </NeonLogoWrapper>
