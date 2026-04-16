@@ -24,7 +24,7 @@ export function ClientLayoutShell({ children }: ClientLayoutShellProps) {
         <MainSidebar />
         <div className="flex min-h-screen flex-1 flex-col">
           <MainHeader />
-          <main className="relative flex-1 px-4 pb-8 pt-4 md:px-8 md:pb-10 md:pt-6">
+          <main className="relative flex flex-1 flex-col px-4 pb-8 pt-4 md:px-8 md:pb-10 md:pt-6">
             {children}
           </main>
           <MainFooter />

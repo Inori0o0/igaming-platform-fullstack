@@ -1,6 +1,6 @@
 "use client";
 
-// 順序：漢堡（僅 md 以下）→ 品牌 → 五連結（md 以上）；窄螢幕導覽全在抽屜，避免頂欄塞爆。
+// 順序：`lg` 以下顯示漢堡＋品牌，`lg` 以上再補桌面水平導覽，避免平板落在半手機半桌面的中間態。
 import { HeaderBrand } from "./header/HeaderBrand";
 import { HeaderNav } from "./header/HeaderNav";
 import { HeaderWalletSummary } from "./header/HeaderWalletSummary";
