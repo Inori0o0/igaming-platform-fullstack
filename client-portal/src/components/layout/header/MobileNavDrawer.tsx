@@ -7,7 +7,7 @@ import { lobbySidebarSections } from "@/src/components/layout/navConfig";
 import { SidebarSection } from "@/src/components/layout/sidebar/SidebarSection";
 import { cn } from "@/src/lib/cn";
 
-/** 與 MainSidebar 同源（lobbySidebarSections）；portal 疊在 header 上，關閉時還原 body overflow。 */
+/** `lg` 以下使用抽屜導覽；portal 疊在 header 上，關閉時還原 body overflow。 */
 export function MobileNavDrawer() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -32,7 +32,7 @@ export function MobileNavDrawer() {
       <button
         type="button"
         className={cn(
-          "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cyan-500/25 bg-neutral-900/80 text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.15)] transition-colors hover:border-cyan-400/40 hover:bg-neutral-800/90 md:hidden",
+          "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cyan-500/25 bg-neutral-900/80 text-cyan-100 shadow-[0_0_20px_rgba(34,211,238,0.15)] transition-colors hover:border-cyan-400/40 hover:bg-neutral-800/90 lg:hidden",
         )}
         aria-expanded={open}
         aria-controls="mobile-lobby-nav"
@@ -57,7 +57,7 @@ export function MobileNavDrawer() {
       {open &&
         typeof document !== "undefined" &&
         createPortal(
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <button
               type="button"
               className="fixed inset-0 z-40 bg-black/65 backdrop-blur-sm"

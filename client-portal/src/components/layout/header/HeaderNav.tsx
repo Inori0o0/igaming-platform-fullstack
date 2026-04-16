@@ -2,12 +2,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { headerNavItems } from "@/src/components/layout/navConfig";
 
-/** 僅 md 以上顯示；更窄時請用 MobileNavDrawer（左欄完整連結）。 */
+/** 僅 lg 以上顯示；手機與平板改由 MobileNavDrawer 承接完整導覽。 */
 export function HeaderNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="hidden items-center gap-2 text-sm font-medium text-neutral-300 md:flex">
+    <nav className="hidden items-center gap-2 text-sm font-medium text-neutral-300 lg:flex">
       {headerNavItems.map((item) => {
         const active =
           item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);

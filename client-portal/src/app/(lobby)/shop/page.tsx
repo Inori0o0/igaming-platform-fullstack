@@ -7,7 +7,7 @@ export default async function ShopPage() {
   const products = await loadShopCatalogForApp();
 
   return (
-    <>
+    <div className="px-4 pb-8 pt-4 md:px-8 md:pb-10 md:pt-6">
       <main className="space-y-6">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
@@ -23,6 +23,6 @@ export default async function ShopPage() {
 
         <ProductCatalog products={products} />
       </main>
-    </>
+    </div>
   );
 }
