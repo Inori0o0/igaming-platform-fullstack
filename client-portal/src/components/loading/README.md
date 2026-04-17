@@ -12,7 +12,7 @@
 | `useSplashVisibility.ts` | `show` 為 true 立刻顯示；改 false 時至少再顯示 `minVisibleMs` 再關，避免閃一下。 |
 | `GameLoadingScreen.tsx` | 區塊用：標題「正在載入 {gameName}」+ 可選 `tip`；目前已接在多個遊戲路由 `loading.tsx`。 |
 | `LogoLoader.tsx` | 行內小圖示：`size` `xs` \| `sm` \| `md` 對應到底層 `LogoMark` 的 `sm` 或 `md`（`xs`/`sm` 皆為 `sm`）。**目前 repo 內未引用**。 |
-| `ImageLoadingShimmer.tsx` | 圖片載入中的覆蓋 shimmer。需放在 `relative` 容器內，通常和 `next/image` 的 `onLoadingComplete` / `onError` 一起用。 |
+| `ImageLoadingShimmer.tsx` | 圖片載入中的覆蓋 shimmer。需放在 `relative` 容器內，通常和 `next/image` 的 `onLoad` / `onError` 一起用。 |
 | `LoadingImage.tsx` | `next/image` 的共用包裝：內建 shimmer、淡入與 error 收斂。若只是一般圖片 loading，優先用這個。 |
 
 ## `NeonLogoWrapper` Props
