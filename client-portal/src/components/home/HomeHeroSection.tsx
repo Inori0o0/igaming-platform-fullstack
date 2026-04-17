@@ -42,7 +42,7 @@ export function HomeHeroSection({ onOpenAuthModal }: HomeHeroSectionProps) {
       </div>
 
       <div className="flex flex-col gap-4">
-        <div className="relative h-64 w-full overflow-hidden rounded-3xl border border-cyan-500/40 bg-neutral-950/80 shadow-[0_0_60px_rgba(34,211,238,0.45)]">
+        <div className="relative h-40 w-full overflow-hidden rounded-2xl border border-cyan-500/40 bg-neutral-950/80 shadow-[0_0_36px_rgba(34,211,238,0.35)] sm:h-64 sm:rounded-3xl sm:shadow-[0_0_60px_rgba(34,211,238,0.45)]">
           <LoadingImage
             src="/home/point_down.png"
             alt="vAcAnt Brainrot Hero"

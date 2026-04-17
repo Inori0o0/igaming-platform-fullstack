@@ -13,7 +13,7 @@ export function LoadingImage({
   alt,
   className,
   shimmerClassName,
-  onLoadingComplete,
+  onLoad,
   onError,
   ...props
 }: LoadingImageProps) {
@@ -30,9 +30,9 @@ export function LoadingImage({
         className={`transition-opacity duration-500 ease-out ${
           phase === "ready" ? "opacity-100" : "opacity-0"
         } ${phase === "error" ? "hidden" : ""} ${className ?? ""}`.trim()}
-        onLoadingComplete={(result) => {
+        onLoad={(event) => {
           setPhase("ready");
-          onLoadingComplete?.(result);
+          onLoad?.(event);
         }}
         onError={(event) => {
           setPhase("error");
