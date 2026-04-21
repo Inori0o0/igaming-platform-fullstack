@@ -78,7 +78,7 @@ export function GameThemeCard({
 
       {!playable ? (
         <div
-          className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/36 p-4"
+          className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-black/36 p-4"
           aria-hidden
         >
           <span className="rounded-lg border border-white/25 bg-black/75 px-4 py-2 text-sm font-bold uppercase tracking-wider text-white shadow-lg backdrop-blur-sm">
@@ -88,12 +88,12 @@ export function GameThemeCard({
       ) : null}
 
       {tag ? (
-        <span className="absolute right-3 top-3 z-30 rounded-full border border-white/15 bg-black/40 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-100 backdrop-blur-sm">
+        <span className="absolute right-3 top-3 z-10 rounded-full border border-white/15 bg-black/40 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-100 backdrop-blur-sm">
           {tag}
         </span>
       ) : null}
 
-      <div className="absolute inset-x-0 bottom-0 z-30 p-4 pb-5 text-center sm:p-5">
+      <div className="absolute inset-x-0 bottom-0 z-10 p-4 pb-5 text-center sm:p-5">
         <h2 className="whitespace-pre-line text-lg font-bold uppercase leading-[1.05] tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] sm:text-xl">
           {title}
         </h2>

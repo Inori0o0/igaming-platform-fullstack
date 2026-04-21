@@ -26,19 +26,22 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
       <div className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold text-neutral-50">{product.name}</p>
+          <div className="min-w-0 flex-1 basis-0">
+            <p className="max-w-[31ch] wrap-break-word text-sm font-semibold leading-snug text-neutral-50">
+              {product.name}
+            </p>
             <p className="mt-1 text-[11px] text-neutral-400">
               {productCategoryLabels[product.category]}
             </p>
           </div>
-          <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.14em] text-cyan-100">
+          <span className="shrink-0 whitespace-nowrap rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.14em] text-cyan-100">
             {product.priceVac.toLocaleString()} VAC
           </span>
         </div>
-        <p className="text-xs leading-relaxed text-neutral-300">{product.description}</p>
+        <p className="text-xs leading-relaxed text-neutral-300">
+          {product.description}
+        </p>
       </div>
     </Link>
   );
 }
-
