@@ -22,7 +22,7 @@ export function MascotLayer({ tralaleroMood, liriliMood, showTung, tungFace }: M
     <>
       {/* Tralalero (left bottom) */}
       <motion.div
-        className="pointer-events-none absolute bottom-2 left-2 z-20 h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 lg:h-52 lg:w-52 xl:h-60 xl:w-60"
+        className="pointer-events-none absolute bottom-2 left-2 z-2 h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 lg:h-52 lg:w-52 xl:h-60 xl:w-60"
         animate={{ y: [0, -4, 0] }}
         transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
         aria-hidden
@@ -38,7 +38,7 @@ export function MascotLayer({ tralaleroMood, liriliMood, showTung, tungFace }: M
 
       {/* Lirili (right bottom) */}
       <motion.div
-        className="pointer-events-none absolute bottom-2 right-2 z-20 h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 lg:h-52 lg:w-52 xl:h-60 xl:w-60"
+        className="pointer-events-none absolute bottom-2 right-2 z-2 h-24 w-24 sm:h-28 sm:w-28 md:h-32 md:w-32 lg:h-52 lg:w-52 xl:h-60 xl:w-60"
         animate={{ y: [0, -3, 0] }}
         transition={{ duration: 3.1, repeat: Infinity, ease: "easeInOut" }}
         aria-hidden
@@ -59,7 +59,7 @@ export function MascotLayer({ tralaleroMood, liriliMood, showTung, tungFace }: M
           initial={{ opacity: 0, y: 10, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.22 }}
-          className="pointer-events-none absolute left-1/2 top-[58%] z-30 h-28 w-28 -translate-x-1/2 -translate-y-1/2 sm:h-32 sm:w-32 md:h-36 md:w-36 lg:h-56 lg:w-56 xl:h-64 xl:w-64"
+          className="pointer-events-none absolute left-1/2 top-[58%] z-3 h-28 w-28 -translate-x-1/2 -translate-y-1/2 sm:h-32 sm:w-32 md:h-36 md:w-36 lg:h-56 lg:w-56 xl:h-64 xl:w-64"
           aria-hidden
         >
           <Image

@@ -7,6 +7,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useTableViewportTier } from "@/src/games/useCompactTableViewport";
 import { BLACKJACK_ASSETS, BOMBARDIRO_WIN_DASH_MS } from "./constants";
 
 type MascotLayerProps = {
@@ -16,8 +17,14 @@ type MascotLayerProps = {
 };
 
 type WinDashPhase = "idle" | "outbound" | "returning" | "done";
+const OUTBOUND_TURN_EARLY_RATIO = 0.72;
 
-export function MascotLayer({ dealerMood, brrTriggered, bombardiroTriggered }: MascotLayerProps) {
+export function MascotLayer({
+  dealerMood,
+  brrTriggered,
+  bombardiroTriggered,
+}: MascotLayerProps) {
+  const viewportTier = useTableViewportTier();
   const [winDashPhase, setWinDashPhase] = useState<WinDashPhase>("idle");
   const [brrInjured, setBrrInjured] = useState(false);
   const prevWinRef = useRef(false);
@@ -43,10 +50,13 @@ export function MascotLayer({ dealerMood, brrTriggered, bombardiroTriggered }: M
   // outbound 結束 → Brr 鼻青臉腫 + 開始飛回
   useEffect(() => {
     if (winDashPhase !== "outbound") return;
-    const id = window.setTimeout(() => {
-      setBrrInjured(true);
-      setWinDashPhase("returning");
-    }, BOMBARDIRO_WIN_DASH_MS);
+    const id = window.setTimeout(
+      () => {
+        setBrrInjured(true);
+        setWinDashPhase("returning");
+      },
+      Math.round(BOMBARDIRO_WIN_DASH_MS * OUTBOUND_TURN_EARLY_RATIO),
+    );
     return () => window.clearTimeout(id);
   }, [winDashPhase]);
 
@@ -59,7 +69,8 @@ export function MascotLayer({ dealerMood, brrTriggered, bombardiroTriggered }: M
     return () => window.clearTimeout(id);
   }, [winDashPhase]);
 
-  const bombardiroShowTriggered = bombardiroTriggered && winDashPhase !== "done";
+  const bombardiroShowTriggered =
+    bombardiroTriggered && winDashPhase !== "done";
 
   const brrSrc = brrTriggered
     ? BLACKJACK_ASSETS.mascot.brrTriggered
@@ -67,7 +78,14 @@ export function MascotLayer({ dealerMood, brrTriggered, bombardiroTriggered }: M
       ? BLACKJACK_ASSETS.mascot.brrInjured
       : BLACKJACK_ASSETS.mascot.brrIdle;
 
-  const isDashFlying = winDashPhase === "outbound" || winDashPhase === "returning";
+  const isDashFlying =
+    winDashPhase === "outbound" || winDashPhase === "returning";
+  const dashTravelX =
+    viewportTier === "mobile"
+      ? "-70vw"
+      : viewportTier === "tablet"
+        ? "-80vw"
+        : "-39vw";
 
   return (
     <>
@@ -103,9 +121,11 @@ export function MascotLayer({ dealerMood, brrTriggered, bombardiroTriggered }: M
         className={`pointer-events-none absolute bottom-2 right-1 h-20 w-20 sm:right-2 sm:h-24 sm:w-24 md:h-28 md:w-28 lg:h-48 lg:w-48 xl:h-52 xl:w-52 ${isDashFlying ? "z-30" : "z-10"}`}
         initial={false}
         animate={{
-          x: winDashPhase === "outbound" ? "-48vw" : "0vw",
+          x: winDashPhase === "outbound" ? dashTravelX : "0vw",
           y: isDashFlying ? -8 : 0,
           scale: isDashFlying ? 1.06 : 1,
+          scaleX:
+            winDashPhase === "returning" ? -1.06 : isDashFlying ? 1.06 : 1,
           rotate: isDashFlying ? -4 : 0,
         }}
         transition={{
