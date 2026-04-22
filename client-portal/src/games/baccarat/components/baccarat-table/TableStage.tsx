@@ -81,7 +81,7 @@ export function TableStage({ round }: TableStageProps) {
         tungFace={tungFace}
       />
 
-      <div className="relative z-10 pb-2 sm:pb-3">
+      <div className="relative z-1 pb-2 sm:pb-3">
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-400">Baccarat Table</p>
           <span className="text-[11px] text-neutral-500">
