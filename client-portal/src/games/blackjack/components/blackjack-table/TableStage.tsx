@@ -53,8 +53,13 @@ export function TableStage(props: TableStageProps) {
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-neutral-400">
             Tung Tung Tung Sahur Table
           </p>
-          <span className="text-[11px] text-neutral-500">dealer total: {dealerTotal}</span>
+          {!compact ? (
+            <span className="text-[11px] text-neutral-500">dealer total: {dealerTotal}</span>
+          ) : null}
         </div>
+        {compact ? (
+          <span className="mt-1 block text-[11px] text-neutral-500">dealer total: {dealerTotal}</span>
+        ) : null}
         <DealerSection round={round} cardMotionY={cardMotionY} />
         <div
           className={clsx(

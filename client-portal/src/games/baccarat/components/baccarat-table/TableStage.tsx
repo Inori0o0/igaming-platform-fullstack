@@ -62,7 +62,7 @@ export function TableStage({ round }: TableStageProps) {
   return (
     <div
       className={clsx(
-        "relative min-h-[300px] overflow-visible rounded-3xl bg-neutral-950/70 p-3 shadow-[0_0_60px_rgba(34,211,238,0.16)]",
+        "relative isolate z-0 min-h-[300px] overflow-visible rounded-3xl bg-neutral-950/70 p-3 shadow-[0_0_60px_rgba(34,211,238,0.16)]",
         "sm:min-h-[330px] lg:min-h-[360px]",
       )}
     >

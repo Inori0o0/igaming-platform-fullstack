@@ -2,23 +2,44 @@
 
 import { useSyncExternalStore } from "react";
 
-/** Viewport ≤1023px：手機／小平板，牌桌用較穩定高度與較少動畫位移。 */
-const QUERY = "(max-width: 1023px)";
+/** 牌桌共用的 viewport hooks：供版面與動畫分級使用。 */
+const COMPACT_QUERY = "(max-width: 1023px)";
+const MOBILE_QUERY = "(max-width: 767px)";
+const TABLET_QUERY = "(min-width: 768px) and (max-width: 1023px)";
 
-function subscribe(onChange: () => void) {
-  const mq = window.matchMedia(QUERY);
+function subscribe(query: string, onChange: () => void) {
+  const mq = window.matchMedia(query);
   mq.addEventListener("change", onChange);
   return () => mq.removeEventListener("change", onChange);
 }
 
-function getSnapshot() {
-  return window.matchMedia(QUERY).matches;
+function getSnapshot(query: string) {
+  return window.matchMedia(query).matches;
 }
 
 function getServerSnapshot() {
   return false;
 }
 
+function useMediaQuery(query: string) {
+  return useSyncExternalStore(
+    (onChange) => subscribe(query, onChange),
+    () => getSnapshot(query),
+    getServerSnapshot,
+  );
+}
+
+/** 手機/平板寬度（<=1023px）時回傳 true，用於緊湊版面調整。 */
 export function useIsCompactTableViewport() {
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return useMediaQuery(COMPACT_QUERY);
+}
+
+/** 回傳動畫分級用 viewport tier："mobile" | "tablet" | "desktop"。 */
+export function useTableViewportTier() {
+  const isMobile = useMediaQuery(MOBILE_QUERY);
+  const isTablet = useMediaQuery(TABLET_QUERY);
+
+  if (isMobile) return "mobile" as const;
+  if (isTablet) return "tablet" as const;
+  return "desktop" as const;
 }
