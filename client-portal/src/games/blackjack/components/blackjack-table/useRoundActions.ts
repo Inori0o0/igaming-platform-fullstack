@@ -16,7 +16,6 @@ import { buildStandardDeck } from "@/src/games/blackjack/logic/rng";
 import type { BlackjackCard, PlayerHand } from "@/src/games/blackjack/logic/types";
 import {
   DEAL_ANIMATION_MS,
-  MAX_BET,
   MIN_BET,
   randomProvider,
 } from "./constants";
@@ -92,7 +91,7 @@ export function useRoundActions({
 
   async function startRound() {
     if (isBusy || inRound) return;
-    if (bet < MIN_BET || bet > MAX_BET) return;
+    if (bet < MIN_BET) return;
     if (vacBalance < bet) {
       setMessage("餘額不足，無法開始本局。");
       setEventTone("warning");

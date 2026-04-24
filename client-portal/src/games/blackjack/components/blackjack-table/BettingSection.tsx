@@ -93,6 +93,7 @@ export function BettingSection({
         >
           +
         </Button>
+        <span className="ml-auto text-[10px] text-neutral-400">餘額 {vacBalance}</span>
       </div>
     </div>
   );

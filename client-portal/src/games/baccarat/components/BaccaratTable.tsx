@@ -3,7 +3,7 @@
 /**
  * 百家樂牌桌組裝：左 TableStage、右 ControlPanel；狀態由 useBaccaratTableGame 集中管理。
  */
-import { MAX_BET, MIN_BET } from "./baccarat-table/constants";
+import { MIN_BET } from "./baccarat-table/constants";
 import { ControlPanel } from "./baccarat-table/ControlPanel";
 import { TableStage } from "./baccarat-table/TableStage";
 import { useBaccaratTableGame } from "./baccarat-table/useBaccaratTableGame";
@@ -43,10 +43,10 @@ export function BaccaratTable() {
         onSelectStep={setBetStep}
         onSelectBetArea={setBetArea}
         onDecreaseBet={() => setBet((v) => Math.max(MIN_BET, v - betStep))}
-        onIncreaseBet={() => setBet((v) => Math.min(MAX_BET, v + betStep))}
+        onIncreaseBet={() => setBet((v) => v + betStep)}
         onAllInBet={() =>
           setBet(
-            Math.max(MIN_BET, Math.min(MAX_BET, Math.floor(vacBalance))),
+            Math.max(MIN_BET, Math.floor(vacBalance)),
           )
         }
         onStartRound={advance}

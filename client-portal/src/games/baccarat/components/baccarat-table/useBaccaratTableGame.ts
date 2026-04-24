@@ -22,7 +22,7 @@ import {
   type BaccaratBetArea,
 } from "@/src/games/baccarat/logic/game";
 import { useWalletStore } from "@/src/store/walletStore";
-import { DEAL_ANIMATION_MS, MAX_BET, MIN_BET, RESULT_MESSAGE_DELAY_MS, TABLE_BET_OPTIONS, randomProvider } from "./constants";
+import { DEAL_ANIMATION_MS, MIN_BET, RESULT_MESSAGE_DELAY_MS, TABLE_BET_OPTIONS, randomProvider } from "./constants";
 import { draw, outcomeLabel } from "./helpers";
 import type { BaccaratRoundState, RoadEntry } from "./types";
 
@@ -48,7 +48,7 @@ export function useBaccaratTableGame() {
 
   async function startRound() {
     if (isBusy || inRound) return;
-    if (bet < MIN_BET || bet > MAX_BET) return;
+    if (bet < MIN_BET) return;
     if (vacBalance < bet) {
       setMessage("餘額不足，無法開始本局。");
       setEventTone("warning");
