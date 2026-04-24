@@ -97,9 +97,9 @@ export const italianBrainrotTheme = {
   },
   betting: {
     defaultBet: 100,
-    step: 25,
-    min: 25,
-    max: 500,
+    step: 100,
+    min: 100,
+    max: 100000,
   },
   featureIds: [],
   meta: { status: "active" },

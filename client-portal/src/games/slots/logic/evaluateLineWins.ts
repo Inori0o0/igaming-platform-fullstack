@@ -60,7 +60,7 @@ export function evaluateLineWins(
   // lines 固定採用主題全部 paylines；本版僅允許外部控制 totalBet。
   const activePaylineCount = Math.max(1, theme.paylines.length);
   const totalBetInput = betConfig?.totalBet ?? theme.betting.defaultBet;
-  const totalBet = Math.max(theme.betting.min, Math.min(totalBetInput, theme.betting.max));
+  const totalBet = Math.max(theme.betting.min, totalBetInput);
   const betPerLine = totalBet / activePaylineCount;
 
   const lineWins: LineWin[] = [];

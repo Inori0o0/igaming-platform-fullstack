@@ -9,10 +9,6 @@ type SlotPlayfieldBetControlsProps = {
   onTotalBetChange: (next: number) => void;
 };
 
-const MIN_TOTAL_BET = 100;
-const MAX_TOTAL_BET = 100000;
-const STEP_OPTIONS = [100, 1000, 10000] as const;
-
 export function SlotPlayfieldBetControls({
   theme,
   spinning,
@@ -21,27 +17,23 @@ export function SlotPlayfieldBetControls({
   onTotalBetChange,
 }: SlotPlayfieldBetControlsProps) {
   const v = theme.visual;
+  const minTotalBet = Math.max(1, Math.floor(theme.betting.min));
+  const stepOptions = [100, 1000, 10000] as const;
   const cannotAfford = vacBalance < totalBet;
-  const [step, setStep] = useState<(typeof STEP_OPTIONS)[number]>(100);
+  const [step, setStep] = useState<number>(stepOptions[0]);
 
-  const decDisabled = spinning || totalBet <= MIN_TOTAL_BET;
-  const incDisabled = spinning || totalBet >= MAX_TOTAL_BET;
+  const decDisabled = spinning || totalBet <= minTotalBet;
+  const incDisabled = spinning;
 
   const applyDelta = (delta: number) => {
-    // 任何加減都先夾在同一組下注上下限，避免 UI/外部傳值把狀態推到非法範圍。
-    const next = Math.max(
-      MIN_TOTAL_BET,
-      Math.min(MAX_TOTAL_BET, totalBet + delta),
-    );
+    // 僅保留最低下注，不設上限。
+    const next = Math.max(minTotalBet, totalBet + delta);
     onTotalBetChange(next);
   };
 
   const applyAllIn = () => {
-    // 梭哈 = 目前可用餘額（VAC）再套同樣上下限規則。
-    const next = Math.max(
-      MIN_TOTAL_BET,
-      Math.min(MAX_TOTAL_BET, Math.floor(vacBalance)),
-    );
+    // 梭哈 = 目前可用餘額（VAC），僅保留最低下注檢查。
+    const next = Math.max(minTotalBet, Math.floor(vacBalance));
     onTotalBetChange(next);
   };
 
@@ -51,7 +43,7 @@ export function SlotPlayfieldBetControls({
         <label className="space-y-1">
           <span className={`text-[11px] font-semibold ${v.mutedText}`}>總下注（VAC）</span>
           <div className="flex flex-wrap gap-2">
-            {STEP_OPTIONS.map((option) => (
+            {stepOptions.map((option) => (
               <button
                 key={option}
                 type="button"
@@ -68,7 +60,7 @@ export function SlotPlayfieldBetControls({
             <button
               type="button"
               onClick={applyAllIn}
-              disabled={spinning || vacBalance < MIN_TOTAL_BET}
+              disabled={spinning || vacBalance < minTotalBet}
               className="rounded-md border border-amber-300/40 bg-amber-500/15 px-2.5 py-1 text-[11px] font-bold tracking-wide text-amber-100 transition hover:border-amber-200/70 hover:bg-amber-500/25 disabled:cursor-not-allowed disabled:opacity-40"
             >
               梭哈

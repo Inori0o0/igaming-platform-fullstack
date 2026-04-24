@@ -10,19 +10,14 @@ import {
 import { SLOT_REEL_COLS } from "./constants";
 import { buildInitialColumns, randomColumns } from "./reelStrip";
 
-const MIN_TOTAL_BET = 100;
-const MAX_TOTAL_BET = 100000;
-
 type UseSlotPlayfieldStateArgs = {
   theme: SlotThemeConfig;
 };
 
 export function useSlotPlayfieldState({ theme }: UseSlotPlayfieldStateArgs) {
   const pool = theme.symbols;
-  const clampedDefaultBet = Math.max(
-    MIN_TOTAL_BET,
-    Math.min(theme.betting.defaultBet, MAX_TOTAL_BET),
-  );
+  const minTotalBet = Math.max(1, Math.floor(theme.betting.min));
+  const clampedDefaultBet = Math.max(minTotalBet, theme.betting.defaultBet);
 
   const [spinToken, setSpinToken] = useState(0);
   const [spinning, setSpinning] = useState(false);
@@ -107,11 +102,11 @@ export function useSlotPlayfieldState({ theme }: UseSlotPlayfieldStateArgs) {
 
   const onTotalBetChange = useCallback(
     (next: number) => {
-      const clamped = Math.max(MIN_TOTAL_BET, Math.min(next, MAX_TOTAL_BET));
+      const clamped = Math.max(minTotalBet, next);
       setTotalBet(Number.isFinite(clamped) ? clamped : clampedDefaultBet);
       setSpinError(undefined);
     },
-    [clampedDefaultBet],
+    [clampedDefaultBet, minTotalBet],
   );
 
   return {

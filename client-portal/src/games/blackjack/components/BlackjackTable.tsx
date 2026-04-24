@@ -3,7 +3,7 @@
 /**
  * 二十一點頁面主元件：左欄 TableStage、右欄 ControlPanel；狀態由 useBlackjackTableGame 集中管理。
  */
-import { MAX_BET, MIN_BET } from "./blackjack-table/constants";
+import { MIN_BET } from "./blackjack-table/constants";
 import { tierGroup } from "./blackjack-table/helpers";
 import { ControlPanel } from "./blackjack-table/ControlPanel";
 import { TableStage } from "./blackjack-table/TableStage";
@@ -66,10 +66,10 @@ export function BlackjackTable() {
         round={round}
         onSelectStep={setBetStep}
         onDecreaseBet={() => setBet((v) => Math.max(MIN_BET, v - betStep))}
-        onIncreaseBet={() => setBet((v) => Math.min(MAX_BET, v + betStep))}
+        onIncreaseBet={() => setBet((v) => v + betStep)}
         onAllInBet={() =>
           setBet(
-            Math.max(MIN_BET, Math.min(MAX_BET, Math.floor(vacBalance))),
+            Math.max(MIN_BET, Math.floor(vacBalance)),
           )
         }
         onStartRound={startRound}

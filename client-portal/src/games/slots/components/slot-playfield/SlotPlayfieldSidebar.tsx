@@ -13,9 +13,9 @@ export function SlotPlayfieldSidebar({
   theme,
   totalBet,
 }: SlotPlayfieldSidebarProps) {
-  const MIN_TOTAL_BET = 100;
-  const MAX_TOTAL_BET = 100000;
-  const BET_STEP_OPTIONS = "100 / 1000 / 10000";
+  const minTotalBet = Math.max(1, Math.floor(theme.betting.min));
+  const maxTotalBet = Math.max(minTotalBet, Math.floor(theme.betting.max));
+  const betStepOptions = "100 / 1000 / 10000";
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -33,12 +33,12 @@ export function SlotPlayfieldSidebar({
           <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
             <span>總下注範圍（目前）</span>
             <span className={theme.visual.accentText}>
-              {MIN_TOTAL_BET} / {MAX_TOTAL_BET}
+              {minTotalBet} / {maxTotalBet}
             </span>
           </div>
           <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
             <span>跳額選項（目前）</span>
-            <span className={theme.visual.accentText}>{BET_STEP_OPTIONS}</span>
+            <span className={theme.visual.accentText}>{betStepOptions}</span>
           </div>
           <div className="flex items-center justify-between rounded-xl bg-neutral-950/70 px-3 py-2">
             <span>Paylines</span>
