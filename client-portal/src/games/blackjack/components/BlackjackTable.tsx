@@ -3,13 +3,19 @@
 /**
  * 二十一點頁面主元件：左欄 TableStage、右欄 ControlPanel；狀態由 useBlackjackTableGame 集中管理。
  */
-import { MIN_BET } from "./blackjack-table/constants";
+import { BLACKJACK_ASSETS, MIN_BET } from "./blackjack-table/constants";
 import { tierGroup } from "./blackjack-table/helpers";
 import { ControlPanel } from "./blackjack-table/ControlPanel";
 import { TableStage } from "./blackjack-table/TableStage";
 import { useBlackjackTableGame } from "./blackjack-table/useBlackjackTableGame";
+import { useGameImagePreload } from "@/src/hooks/useGameImagePreload";
 
-export function BlackjackTable() {
+type BlackjackTableProps = {
+  onReady?: () => void;
+};
+
+export function BlackjackTable({ onReady }: BlackjackTableProps) {
+  useGameImagePreload(BLACKJACK_ASSETS.tableBackground, onReady);
   // Hook 負責遊戲狀態與動作，元件本身只處理畫面。
   const {
     vacBalance,

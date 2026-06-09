@@ -1,7 +1,7 @@
 /**
  * 二十一點路由頁：嵌入 BlackjackTable，版面與大廳其他頁一致。
  */
-import { BlackjackTableClient } from "./BlackjackTableClient";
+import { BlackjackTableClient } from "@/src/games/blackjack/components/BlackjackTableClient";
 
 export default function BlackjackPage() {
   return (

@@ -23,7 +23,9 @@ export function NeonLogoWrapper({
     <div
       className={clsx("neon-glow", className)}
       style={{
-        animation: `fade-scale-in ${durationIn}s ease-out forwards, neon-pulse 1.5s ease-in-out infinite`,
+        // "both" = backwards (apply `from` state immediately on mount, no
+        // one-frame flash at natural opacity:1) + forwards (keep final state).
+        animation: `fade-scale-in ${durationIn}s ease-out both, neon-pulse 1.5s ease-in-out infinite`,
       }}
     >
       {children}

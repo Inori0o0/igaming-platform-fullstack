@@ -7,7 +7,7 @@ import {
   SLOT_THEME_IDS,
   type SlotThemeConfig,
 } from "@/src/games/slots/config";
-import { SlotThemedPlayfieldClient } from "./SlotThemedPlayfieldClient";
+import { SlotThemedPlayfieldClient } from "@/src/games/slots/components/SlotThemedPlayfieldClient";
 
 type SlotsGamePageProps = {
   params: Promise<{ id: string }>;

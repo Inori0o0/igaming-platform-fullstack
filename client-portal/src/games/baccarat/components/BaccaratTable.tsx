@@ -3,12 +3,18 @@
 /**
  * 百家樂牌桌組裝：左 TableStage、右 ControlPanel；狀態由 useBaccaratTableGame 集中管理。
  */
-import { MIN_BET } from "./baccarat-table/constants";
+import { BACCARAT_ASSETS, MIN_BET } from "./baccarat-table/constants";
 import { ControlPanel } from "./baccarat-table/ControlPanel";
 import { TableStage } from "./baccarat-table/TableStage";
 import { useBaccaratTableGame } from "./baccarat-table/useBaccaratTableGame";
+import { useGameImagePreload } from "@/src/hooks/useGameImagePreload";
 
-export function BaccaratTable() {
+type BaccaratTableProps = {
+  onReady?: () => void;
+};
+
+export function BaccaratTable({ onReady }: BaccaratTableProps) {
+  useGameImagePreload(BACCARAT_ASSETS.tableBackground, onReady);
   const {
     vacBalance,
     bet,

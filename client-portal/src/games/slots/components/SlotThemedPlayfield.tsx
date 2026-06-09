@@ -6,6 +6,7 @@
  * 各主題只透過 theme/config 注入資料與美術資產，不再切不同頁面版型。
  */
 import { useReducedMotion } from "framer-motion";
+import { useGameImagePreload } from "@/src/hooks/useGameImagePreload";
 import type { SlotThemeConfig } from "@/src/games/slots/config";
 import { SlotPlayfieldBanner } from "./slot-playfield/SlotPlayfieldBanner";
 import { SlotPlayfieldBetControls } from "./slot-playfield/SlotPlayfieldBetControls";
@@ -20,9 +21,10 @@ import { useSlotPlayfieldView } from "./slot-playfield/useSlotPlayfieldView";
 
 type SlotThemedPlayfieldProps = {
   theme: SlotThemeConfig;
+  onReady?: () => void;
 };
 
-export function SlotThemedPlayfield({ theme }: SlotThemedPlayfieldProps) {
+export function SlotThemedPlayfield({ theme, onReady }: SlotThemedPlayfieldProps) {
   const reduceMotion = useReducedMotion() ?? false;
   const cellPx = useSlotCellPx();
   const { v, pageBg, frameSrc, bannerSrc, glitchStyle } =
@@ -30,6 +32,9 @@ export function SlotThemedPlayfield({ theme }: SlotThemedPlayfieldProps) {
       theme,
       reduceMotion,
     });
+
+  useGameImagePreload(pageBg ?? bannerSrc, onReady);
+
   const {
     pool,
     spinToken,

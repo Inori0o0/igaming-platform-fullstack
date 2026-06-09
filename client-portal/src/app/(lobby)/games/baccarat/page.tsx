@@ -1,7 +1,7 @@
 /**
  * 百家樂路由頁：`/games/baccarat`，僅負責版面標題與掛載 BaccaratTable。
  */
-import { BaccaratTableClient } from "./BaccaratTableClient";
+import { BaccaratTableClient } from "@/src/games/baccarat/components/BaccaratTableClient";
 
 export default function BaccaratPage() {
   return (
