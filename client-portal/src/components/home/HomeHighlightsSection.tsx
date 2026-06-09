@@ -1,18 +1,8 @@
-"use client";
-
-/**
- * 首頁「熱門遊戲」區：左欄百家樂，右欄二十一點圖卡。
- */
 import { Card } from "@/src/components/ui/Card";
 import { GameThemeCard } from "@/src/components/ui/GameThemeCard";
-import { useFeaturedHomeProduct } from "@/src/components/home/useFeaturedHomeProduct";
-import { LoadingImage } from "@/src/components/loading/LoadingImage";
-import { productCategoryLabels } from "@/src/shop/types";
-import Link from "next/link";
+import { HomeFeaturedProductCard } from "@/src/components/home/HomeFeaturedProductCard";
 
 export function HomeHighlightsSection() {
-  const featuredProduct = useFeaturedHomeProduct();
-
   return (
     <section className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       <Card
@@ -49,37 +39,7 @@ export function HomeHighlightsSection() {
 
       <Card title="精選商品" description="用 vAcAnt VAC 解鎖服飾、數位收藏。">
         <div className="space-y-3 text-sm text-neutral-200">
-          <Link
-            href={`/shop/${featuredProduct.id}`}
-            className="group block overflow-hidden rounded-2xl border border-cyan-500/20 bg-neutral-950/80 transition hover:border-cyan-400/40"
-          >
-            <div className="relative aspect-square w-full">
-              <LoadingImage
-                src={featuredProduct.imageSrc}
-                alt={featuredProduct.name}
-                fill
-                className="object-cover transition duration-300 group-hover:scale-[1.03]"
-                sizes="(max-width: 1024px) 100vw, 33vw"
-              />
-            </div>
-            <div className="space-y-3 px-3.5 py-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-neutral-50">
-                    {featuredProduct.name}
-                  </p>
-                  {featuredProduct.category ? (
-                    <p className="mt-1 text-[11px] text-neutral-400">
-                      {productCategoryLabels[featuredProduct.category]}
-                    </p>
-                  ) : null}
-                </div>
-                <span className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold tracking-[0.14em] text-cyan-100">
-                  {featuredProduct.priceVac.toLocaleString()} VAC
-                </span>
-              </div>
-            </div>
-          </Link>
+          <HomeFeaturedProductCard />
         </div>
       </Card>
     </section>

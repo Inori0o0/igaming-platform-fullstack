@@ -1,19 +1,8 @@
-"use client";
-
 import Image from "next/image";
-import { Button } from "@/src/components/ui/Button";
 import { HomeClaimFreeCoinsOverlay } from "@/src/components/home/HomeClaimFreeCoinsOverlay";
-import { useAuthStore } from "@/src/store/authStore";
+import { HomeHeroAuthButtons } from "@/src/components/home/HomeHeroAuthButtons";
 
-type HomeHeroSectionProps = {
-  onOpenAuthModal: () => void;
-};
-
-export function HomeHeroSection({ onOpenAuthModal }: HomeHeroSectionProps) {
-  const user = useAuthStore((s) => s.user);
-
-  const showAuthButtons = !user || user.is_guest;
-
+export function HomeHeroSection() {
   return (
     <section className="relative z-10 grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-center">
       <div className="space-y-4">
@@ -27,18 +16,7 @@ export function HomeHeroSection({ onOpenAuthModal }: HomeHeroSectionProps) {
           管理你的虛擬錢包、遊玩 Slots、Blackjack、Baccarat 與 Lottery， 並在
           vAcAnt 商店解鎖收藏與限定商品。
         </p>
-        {showAuthButtons && (
-          <div className="flex flex-wrap items-center gap-3">
-            <Button size="lg" onClick={onOpenAuthModal}>
-              開始連線／登入
-            </Button>
-            {user?.is_guest && (
-              <Button size="lg" variant="outline" onClick={onOpenAuthModal}>
-                以訪客進入大廳
-              </Button>
-            )}
-          </div>
-        )}
+        <HomeHeroAuthButtons />
       </div>
 
       <div className="flex flex-col gap-4">
