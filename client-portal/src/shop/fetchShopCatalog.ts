@@ -27,7 +27,7 @@ type ProductRow = {
 
 function publicImageUrl(bucket: string, objectPath: string) {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
-  if (!base) return "/products/vacant_tee.png";
+  if (!base) return "/products/vacant_tee.webp";
   const safePath = objectPath
     .split("/")
     .map((seg) => encodeURIComponent(seg))

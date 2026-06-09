@@ -26,7 +26,7 @@ export function HomeHighlightsSection() {
             </p>
             <GameThemeCard
               href="/games/baccarat"
-              imageSrc="/games/baccarat/bc_card_v2.png"
+              imageSrc="/games/baccarat/bc_card_v2.webp"
               imageAlt="百家樂"
               title="BACCARAT 百家樂"
               tag="百家樂"
@@ -38,7 +38,7 @@ export function HomeHighlightsSection() {
             </p>
             <GameThemeCard
               href="/games/blackjack"
-              imageSrc="/games/blackjack/bj_card.png"
+              imageSrc="/games/blackjack/bj_card.webp"
               imageAlt="Blackjack 二十一點"
               title="BLACKJACK 二十一點"
               tag="二十一點"

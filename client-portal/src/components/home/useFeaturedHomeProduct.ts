@@ -14,7 +14,7 @@ const fallbackFeaturedProduct: HomeFeaturedProduct = {
   id: "vacant-hoodie",
   name: "vAcAnt 黑色連帽上衣",
   priceVac: 5900,
-  imageSrc: "/products/vacant_hoodie.png",
+  imageSrc: "/products/vacant_hoodie.webp",
 };
 
 type CatalogResponse = {

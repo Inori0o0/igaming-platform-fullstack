@@ -13,42 +13,42 @@ export const italianBrainrotTheme = {
       display: "TTT",
       name: "Tung Tung Tung Sahur",
       imageSrc:
-        "/games/slots/italian-brainrot/ib-symbol/ib_triplet.png",
+        "/games/slots/italian-brainrot/ib-symbol/ib_triplet.webp",
     },
     {
       id: "ib_b",
       display: "Brr",
       name: "Brr Brr Patapim",
       imageSrc:
-        "/games/slots/italian-brainrot/ib-symbol/ib_brr_brr_patapim.png",
+        "/games/slots/italian-brainrot/ib-symbol/ib_brr_brr_patapim.webp",
     },
     {
       id: "ib_c",
       display: "Lir",
       name: "Lirilì Larilà",
       imageSrc:
-        "/games/slots/italian-brainrot/ib-symbol/ib_lirili_larila.png",
+        "/games/slots/italian-brainrot/ib-symbol/ib_lirili_larila.webp",
     },
     {
       id: "ib_d",
       display: "Bom",
       name: "Bombardino Crocodillo",
       imageSrc:
-        "/games/slots/italian-brainrot/ib-symbol/ib_bombardino_crocodillo.png",
+        "/games/slots/italian-brainrot/ib-symbol/ib_bombardino_crocodillo.webp",
     },
     {
       id: "ib_e",
       display: "Tra",
       name: "Tralalero Tralala",
       imageSrc:
-        "/games/slots/italian-brainrot/ib-symbol/ib_tralalero_tralala.png",
+        "/games/slots/italian-brainrot/ib-symbol/ib_tralalero_tralala.webp",
     },
     {
       id: "ib_f",
       display: "OHD",
       name: "Obama Have Dih",
       imageSrc:
-        "/games/slots/italian-brainrot/ib-symbol/ib_obama_have_dih.png",
+        "/games/slots/italian-brainrot/ib-symbol/ib_obama_have_dih.webp",
     },
   ],
   paylines: [
@@ -91,9 +91,9 @@ export const italianBrainrotTheme = {
     buttonPrimaryHover:
       "hover:scale-[1.05] hover:border-emerald-200/75 hover:from-emerald-400/55 hover:shadow-[0_0_36px_rgba(16,185,129,0.65),0_0_64px_rgba(163,230,53,0.22)] hover:brightness-110 disabled:hover:scale-100 disabled:hover:brightness-100",
     glitchIntensity: 0.15,
-    pageBackgroundSrc: "/games/slots/italian-brainrot/ib_bg.png",
-    machineFrameSrc: "/games/slots/italian-brainrot/ib_slot_machine_frame.png",
-    titleBannerSrc: "/games/slots/italian-brainrot/ib_banner.png",
+    pageBackgroundSrc: "/games/slots/italian-brainrot/ib_bg.webp",
+    machineFrameSrc: "/games/slots/italian-brainrot/ib_slot_machine_frame.webp",
+    titleBannerSrc: "/games/slots/italian-brainrot/ib_banner.webp",
   },
   betting: {
     defaultBet: 100,

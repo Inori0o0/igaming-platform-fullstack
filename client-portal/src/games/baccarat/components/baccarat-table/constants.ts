@@ -11,31 +11,31 @@ export const RNG_MODE: "pseudo" | "server-seeded" = "pseudo";
 export const randomProvider = resolveBlackjackRandomProvider(RNG_MODE);
 
 export const CHIP_CARD_ASSETS = {
-  cardBack: "/games/chip_card/bj_card_back.png",
+  cardBack: "/games/chip_card/bj_card_back.webp",
   chips: {
-    100: "/games/chip_card/chip_100.png",
-    500: "/games/chip_card/chip_500.png",
-    1000: "/games/chip_card/chip_1000.png",
-    5000: "/games/chip_card/chip_5000.png",
+    100: "/games/chip_card/chip_100.webp",
+    500: "/games/chip_card/chip_500.webp",
+    1000: "/games/chip_card/chip_1000.webp",
+    5000: "/games/chip_card/chip_5000.webp",
   },
 } as const;
 
 export const BACCARAT_ASSETS = {
-  tableBackground: "/games/baccarat/bc_table_bg.png",
+  tableBackground: "/games/baccarat/bc_table_bg.webp",
   mascot: {
     tralalero: {
-      idle: "/games/baccarat/mascot/mascot_tralalero_tralala_idle.png",
-      win: "/games/baccarat/mascot/mascot_tralalero_tralala_win.png",
-      lose: "/games/baccarat/mascot/mascot_tralalero_tralala_lose.png",
+      idle: "/games/baccarat/mascot/mascot_tralalero_tralala_idle.webp",
+      win: "/games/baccarat/mascot/mascot_tralalero_tralala_win.webp",
+      lose: "/games/baccarat/mascot/mascot_tralalero_tralala_lose.webp",
     },
     lirili: {
-      idle: "/games/baccarat/mascot/mascot_lirili_larila_idle.png",
-      win: "/games/baccarat/mascot/mascot_lirili_larila_win.png",
-      lose: "/games/baccarat/mascot/mascot_lirili_larila_lose.png",
+      idle: "/games/baccarat/mascot/mascot_lirili_larila_idle.webp",
+      win: "/games/baccarat/mascot/mascot_lirili_larila_win.webp",
+      lose: "/games/baccarat/mascot/mascot_lirili_larila_lose.webp",
     },
     tung: {
-      win: "/games/baccarat/mascot/mascot_triplet_win.png",
-      tie: "/games/baccarat/mascot/mascot_triplet_tie.png",
+      win: "/games/baccarat/mascot/mascot_triplet_win.webp",
+      tie: "/games/baccarat/mascot/mascot_triplet_tie.webp",
     },
   },
 } as const;

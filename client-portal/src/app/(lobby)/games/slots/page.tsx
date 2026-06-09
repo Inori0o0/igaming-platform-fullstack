@@ -21,7 +21,7 @@ const slots: SlotListItem[] = [
     description: "Tralalero、Bombardiro、Lirilì Larilà 等角色主題。",
     tag: "Slots",
     cardTitle: "ITALIAN\nBRAINROT",
-    imageSrc: "/games/slots/italian-brainrot/ib_card.png",
+    imageSrc: "/games/slots/italian-brainrot/ib_card.webp",
   },
   {
     id: "vacant-classic",
@@ -29,7 +29,7 @@ const slots: SlotListItem[] = [
     description: "霓虹馬 + vAcAnt 品牌主題。",
     tag: "Slots",
     cardTitle: "VACANT\nCLASSIC",
-    imageSrc: "/games/slots/vacant-classic/vc_card.png",
+    imageSrc: "/games/slots/vacant-classic/vc_card.webp",
   },
   {
     id: "cyber-neon",
@@ -37,7 +37,7 @@ const slots: SlotListItem[] = [
     description: "賽博龐克夜城霓虹、故障特效。",
     tag: "Slots",
     cardTitle: "CYBER\nNEON",
-    imageSrc: "/games/slots/cyber-neon/cn_card.png",
+    imageSrc: "/games/slots/cyber-neon/cn_card.webp",
   },
   {
     id: "john-pork",
@@ -45,7 +45,7 @@ const slots: SlotListItem[] = [
     description: "來電梗圖風格；即將開放。",
     tag: "Slots",
     cardTitle: "JOHN\nPORK",
-    imageSrc: "/games/slots/john-pork/jp_card.png",
+    imageSrc: "/games/slots/john-pork/jp_card.webp",
   },
 ];
 

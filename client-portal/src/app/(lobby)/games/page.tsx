@@ -30,7 +30,7 @@ const lobbyCards: LobbyCardItem[] = [
     description: "Tralalero、Bombardiro、Lirilì Larilà 等角色主題。",
     tag: "老虎機",
     cardTitle: "ITALIAN\nBRAINROT",
-    imageSrc: "/games/slots/italian-brainrot/ib_card.png",
+    imageSrc: "/games/slots/italian-brainrot/ib_card.webp",
     availability: getSlotThemeAvailability("italian-brainrot"),
   },
   {
@@ -40,7 +40,7 @@ const lobbyCards: LobbyCardItem[] = [
     description: "霓虹馬 + vAcAnt 品牌主題。",
     tag: "老虎機",
     cardTitle: "VACANT\nCLASSIC",
-    imageSrc: "/games/slots/vacant-classic/vc_card.png",
+    imageSrc: "/games/slots/vacant-classic/vc_card.webp",
     availability: getSlotThemeAvailability("vacant-classic"),
   },
   {
@@ -50,7 +50,7 @@ const lobbyCards: LobbyCardItem[] = [
     description: "賽博龐克夜城霓虹、故障特效。",
     tag: "老虎機",
     cardTitle: "CYBER\nNEON",
-    imageSrc: "/games/slots/cyber-neon/cn_card.png",
+    imageSrc: "/games/slots/cyber-neon/cn_card.webp",
     availability: getSlotThemeAvailability("cyber-neon"),
   },
   {
@@ -60,7 +60,7 @@ const lobbyCards: LobbyCardItem[] = [
     description: "來電梗圖風格；即將開放。",
     tag: "老虎機",
     cardTitle: "JOHN\nPORK",
-    imageSrc: "/games/slots/john-pork/jp_card.png",
+    imageSrc: "/games/slots/john-pork/jp_card.webp",
     availability: getSlotThemeAvailability("john-pork"),
   },
   // —— 二十一點（1）——
@@ -71,7 +71,7 @@ const lobbyCards: LobbyCardItem[] = [
     description: "Italian Brainrot 主題牌桌；標準玩法與過五關。",
     tag: "二十一點",
     cardTitle: "BLACKJACK\n二十一點",
-    imageSrc: "/games/blackjack/bj_card.png",
+    imageSrc: "/games/blackjack/bj_card.webp",
     availability: "open",
   },
   // —— 百家樂（1）——
@@ -82,7 +82,7 @@ const lobbyCards: LobbyCardItem[] = [
     description: "閒莊和經典玩法，適合喜歡桌上遊戲節奏的玩家。",
     tag: "百家樂",
     cardTitle: "BACCARAT\n百家樂",
-    imageSrc: "/games/baccarat/bc_card_v2.png",
+    imageSrc: "/games/baccarat/bc_card_v2.webp",
     availability: "open",
   },
   // —— 彩票（3）——
@@ -93,7 +93,7 @@ const lobbyCards: LobbyCardItem[] = [
     description: "主題圖卡已上架；玩法即將開放。",
     tag: "彩票",
     cardTitle: "LUCKY WHEEL\n轉盤",
-    imageSrc: "/games/lottery/lucky_wheel_card.png",
+    imageSrc: "/games/lottery/lucky_wheel_card.webp",
     availability: "coming_soon",
   },
   {
@@ -103,7 +103,7 @@ const lobbyCards: LobbyCardItem[] = [
     description: "主題圖卡已上架；玩法即將開放。",
     tag: "彩票",
     cardTitle: "SCRATCH CARD\n刮刮樂",
-    imageSrc: "/games/lottery/scratch_card_card.png",
+    imageSrc: "/games/lottery/scratch_card_card.webp",
     availability: "coming_soon",
   },
   {
@@ -113,7 +113,7 @@ const lobbyCards: LobbyCardItem[] = [
     description: "主題圖卡已上架；玩法即將開放。",
     tag: "彩票",
     cardTitle: "NUMBER LOTTERY\n數字彩",
-    imageSrc: "/games/lottery/number_lottery_card.png",
+    imageSrc: "/games/lottery/number_lottery_card.webp",
     availability: "coming_soon",
   },
 ];

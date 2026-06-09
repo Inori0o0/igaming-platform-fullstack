@@ -16,7 +16,7 @@ const lotteryCards: LotteryListItem[] = [
     description: "輪盤抽獎主題圖卡；玩法即將開放。",
     tag: "Lottery",
     cardTitle: "LUCKY WHEEL\n轉盤",
-    imageSrc: "/games/lottery/lucky_wheel_card.png",
+    imageSrc: "/games/lottery/lucky_wheel_card.webp",
   },
   {
     id: "lottery-scratch",
@@ -24,7 +24,7 @@ const lotteryCards: LotteryListItem[] = [
     description: "刮刮樂主題圖卡；玩法即將開放。",
     tag: "Lottery",
     cardTitle: "SCRATCH CARD\n刮刮樂",
-    imageSrc: "/games/lottery/scratch_card_card.png",
+    imageSrc: "/games/lottery/scratch_card_card.webp",
   },
   {
     id: "lottery-numbers",
@@ -32,7 +32,7 @@ const lotteryCards: LotteryListItem[] = [
     description: "數字彩票主題圖卡；玩法即將開放。",
     tag: "Lottery",
     cardTitle: "NUMBER LOTTERY\n數字彩",
-    imageSrc: "/games/lottery/number_lottery_card.png",
+    imageSrc: "/games/lottery/number_lottery_card.webp",
   },
 ];
 

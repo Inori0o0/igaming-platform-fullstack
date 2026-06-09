@@ -13,7 +13,7 @@ export type SlotSymbol = {
   display: string;
   /** Accessible / paytable label. */
   name: string;
-  /** 相對於 `public/` 的路徑，例如 `/games/slots/vacant-classic/vc-symbol/vac.png`。有值時轉輪優先顯示圖片。 */
+  /** 相對於 `public/` 的路徑，例如 `/games/slots/vacant-classic/vc-symbol/vac.webp`。有值時轉輪優先顯示圖片。 */
   imageSrc?: string;
 };
 
