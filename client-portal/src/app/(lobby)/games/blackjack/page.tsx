@@ -1,7 +1,22 @@
 /**
  * 二十一點路由頁：嵌入 BlackjackTable，版面與大廳其他頁一致。
  */
-import { BlackjackTable } from "@/src/games/blackjack/components/BlackjackTable";
+import dynamic from "next/dynamic";
+
+const BlackjackTable = dynamic(
+  () =>
+    import("@/src/games/blackjack/components/BlackjackTable").then(
+      (mod) => ({ default: mod.BlackjackTable }),
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-64 items-center justify-center text-sm text-neutral-500">
+        載入遊戲中…
+      </div>
+    ),
+  },
+);
 
 export default function BlackjackPage() {
   return (

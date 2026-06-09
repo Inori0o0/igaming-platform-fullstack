@@ -1,11 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { Avatar } from "@/src/components/ui/Avatar";
 import { Button } from "@/src/components/ui/Button";
 import { Modal } from "@/src/components/ui/Modal";
-import { ProfileAvatarCropModal } from "@/src/components/profile/ProfileAvatarCropModal";
 import type { AvatarProductOption } from "@/src/components/profile/useProfileAvatarEditor";
+
+const ProfileAvatarCropModal = dynamic(
+  () =>
+    import("@/src/components/profile/ProfileAvatarCropModal").then(
+      (mod) => ({ default: mod.ProfileAvatarCropModal }),
+    ),
+  { ssr: false },
+);
 
 type ProfileAvatarEditorModalProps = {
   open: boolean;
