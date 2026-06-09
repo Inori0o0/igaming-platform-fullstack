@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { useShopCatalogStore } from "@/src/store/shopCatalogStore";
 
 export type HomeFeaturedProduct = {
   id: string;
@@ -17,50 +18,18 @@ const fallbackFeaturedProduct: HomeFeaturedProduct = {
   imageSrc: "/products/vacant_hoodie.webp",
 };
 
-type CatalogResponse = {
-  products?: Array<{
-    id: string;
-    name: string;
-    priceVac: number;
-    category?: "apparel" | "digital" | "collectible";
-    imageSrc?: string;
-  }>;
-};
+export function useFeaturedHomeProduct(): HomeFeaturedProduct {
+  const products = useShopCatalogStore((s) => s.products);
 
-export function useFeaturedHomeProduct() {
-  const [featuredProduct, setFeaturedProduct] = useState<HomeFeaturedProduct>(
-    fallbackFeaturedProduct,
-  );
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadFeaturedProduct = async () => {
-      try {
-        const response = await fetch("/api/shop/catalog", { cache: "no-store" });
-        if (!response.ok) return;
-
-        const json = (await response.json()) as CatalogResponse;
-        const hoodie = json.products?.find((product) => product.id === "vacant-hoodie");
-        if (!isMounted || !hoodie) return;
-
-        setFeaturedProduct((prev) => ({
-          id: hoodie.id,
-          name: hoodie.name,
-          priceVac: hoodie.priceVac,
-          imageSrc: hoodie.imageSrc || prev.imageSrc || fallbackFeaturedProduct.imageSrc,
-          category: hoodie.category ?? prev.category,
-        }));
-      } catch {
-        // Keep fallback data when API is unavailable.
-      }
+  return useMemo(() => {
+    const hoodie = products.find((p) => p.id === "vacant-hoodie");
+    if (!hoodie) return fallbackFeaturedProduct;
+    return {
+      id: hoodie.id,
+      name: hoodie.name,
+      priceVac: hoodie.priceVac,
+      imageSrc: hoodie.imageSrc || fallbackFeaturedProduct.imageSrc,
+      category: hoodie.category,
     };
-
-    void loadFeaturedProduct();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  return featuredProduct;
+  }, [products]);
 }

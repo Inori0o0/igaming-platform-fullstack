@@ -16,3 +16,6 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+
+# Local handoff notes (not for repo)
+docs/client-portal-performance-optimization-handoff.md
