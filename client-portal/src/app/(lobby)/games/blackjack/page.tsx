@@ -1,22 +1,7 @@
 /**
  * 二十一點路由頁：嵌入 BlackjackTable，版面與大廳其他頁一致。
  */
-import dynamic from "next/dynamic";
-
-const BlackjackTable = dynamic(
-  () =>
-    import("@/src/games/blackjack/components/BlackjackTable").then(
-      (mod) => ({ default: mod.BlackjackTable }),
-    ),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-64 items-center justify-center text-sm text-neutral-500">
-        載入遊戲中…
-      </div>
-    ),
-  },
-);
+import { BlackjackTableClient } from "./BlackjackTableClient";
 
 export default function BlackjackPage() {
   return (
@@ -32,8 +17,7 @@ export default function BlackjackPage() {
           經典二十一點玩法，運用 Hit、Stand、Double、Split 等策略挑戰莊家。
         </p>
       </div>
-      <BlackjackTable />
+      <BlackjackTableClient />
     </main>
   );
 }
-

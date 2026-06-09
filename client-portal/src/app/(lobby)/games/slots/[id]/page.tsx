@@ -2,27 +2,12 @@
  * 動態路由 `/games/slots/[id]`：統一回傳同一種老虎機畫面。
  */
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import {
   getSlotThemeConfig,
   SLOT_THEME_IDS,
   type SlotThemeConfig,
 } from "@/src/games/slots/config";
-
-const SlotThemedPlayfield = dynamic(
-  () =>
-    import("@/src/games/slots/components/SlotThemedPlayfield").then(
-      (mod) => ({ default: mod.SlotThemedPlayfield }),
-    ),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-64 items-center justify-center text-sm text-neutral-500">
-        載入遊戲中…
-      </div>
-    ),
-  },
-);
+import { SlotThemedPlayfieldClient } from "./SlotThemedPlayfieldClient";
 
 type SlotsGamePageProps = {
   params: Promise<{ id: string }>;
@@ -61,7 +46,7 @@ function SlotGamePlayableView({ theme }: { theme: SlotThemeConfig }) {
         </Link>
       </div>
 
-      <SlotThemedPlayfield theme={theme} />
+      <SlotThemedPlayfieldClient theme={theme} />
     </main>
   );
 }
