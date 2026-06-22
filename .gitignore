@@ -9,8 +9,12 @@ Thumbs.db
 # IDE
 .idea/
 .vscode/
+.cursor/
 *.swp
 *.swo
+
+# Plan files
+vacant_igaming_portfolio_2dba8ef1.plan.md
 
 # Environment files
 .env
