@@ -60,7 +60,16 @@ export function useBaccaratTableGame() {
     setMessage("正在洗牌與發牌...");
     const roundId = crypto.randomUUID();
 
-    const seed = await randomProvider.createRoundSeed(roundId);
+    let seed: number;
+    try {
+      seed = await randomProvider.createRoundSeed(roundId);
+    } catch (e) {
+      console.warn("createRoundSeed failed:", e);
+      setMessage("無法取得伺服器發牌種子，請檢查網路後再試一次。");
+      setEventTone("warning");
+      setIsBusy(false);
+      return;
+    }
     const deck = randomProvider.shuffleDeck(buildStandardDeck(), seed);
 
     const nextRound: BaccaratRoundState = {

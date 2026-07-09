@@ -19,6 +19,8 @@ export default function WalletPage() {
   const claimFreeCoins = useWalletStore((s) => s.claimFreeCoins);
   const pending = useWalletStore((s) => s.pending);
   const errors = useWalletStore((s) => s.errors);
+  const hydrateStatus = useWalletStore((s) => s.hydrateStatus);
+  const hydrateError = useWalletStore((s) => s.hydrateError);
   const { rates, isLoading: isRatesLoading, error: ratesError } = useUsdtRates();
 
   useEffect(() => {
@@ -46,7 +48,13 @@ export default function WalletPage() {
         ratesError={ratesError}
       />
 
-      <BalanceCards balances={balances} rates={rates} />
+      <BalanceCards
+        balances={balances}
+        rates={rates}
+        hydrateStatus={hydrateStatus}
+        hydrateError={hydrateError}
+        onRetryHydrate={hydrateForCurrentUser}
+      />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
         <WalletActionsCard

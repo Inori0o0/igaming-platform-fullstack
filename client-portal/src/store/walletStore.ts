@@ -65,6 +65,7 @@ export type {
   WalletBalances,
   WalletTransaction,
   WalletPendingAction,
+  WalletHydrateStatus,
 } from "./wallet/types";
 
 /**
@@ -95,6 +96,8 @@ export const useWalletStore = create<WalletState>((set, get) => ({
   transactions: [],
   pending: { deposit: false, withdraw: false, claim: false },
   errors: { deposit: null, withdraw: null, claim: null },
+  hydrateStatus: "idle",
+  hydrateError: null,
 
   hydrateForCurrentUser: async () => {
     const user = getCurrentUser();
@@ -103,19 +106,28 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         userId: null,
         balances: DEFAULT_BALANCES,
         transactions: [],
+        hydrateStatus: "ready",
+        hydrateError: null,
       });
       return;
     }
 
-    // 訪客模式：僅保留瀏覽器本地資料，不落庫。
+    // 訪客模式：僅保留瀏覽器本地資料，不落庫，讀取本身不會失敗。
     if (user.is_guest) {
       const guestId = getCurrentGuestId();
       if (!guestId) return;
       const { balances, transactions } = loadLocalWallet(guestId);
-      set({ userId: guestId, balances, transactions });
+      set({
+        userId: guestId,
+        balances,
+        transactions,
+        hydrateStatus: "ready",
+        hydrateError: null,
+      });
       return;
     }
 
+    set({ hydrateStatus: "loading" });
     try {
       const dbUser = await getDbUserByAuthUserId(user.id);
       const wallet = await getOrCreateWallet(dbUser.id);
@@ -128,13 +140,17 @@ export const useWalletStore = create<WalletState>((set, get) => ({
           ETH: toNumber(wallet.eth_balance),
         },
         transactions,
+        hydrateStatus: "ready",
+        hydrateError: null,
       });
     } catch (e) {
+      // 刻意不覆蓋 balances/transactions：讀取失敗不代表錢真的變成 0，
+      // 保留上一次成功讀到的資料，改用 hydrateStatus/hydrateError 讓 UI 顯示「讀取失敗」而非假餘額。
       console.warn("hydrate wallet from supabase failed:", e);
       set({
         userId: user.id,
-        balances: DEFAULT_BALANCES,
-        transactions: [],
+        hydrateStatus: "error",
+        hydrateError: "無法讀取最新餘額，顯示的可能是舊資料，請稍後重試。",
       });
     }
   },

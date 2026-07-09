@@ -11,14 +11,15 @@
  * `seedFromServer` 本身只在 store 還是 idle 時才寫入，重複呼叫（如 React Strict Mode 重跑一次
  * render）不會覆蓋掉之後已經存在的新鮮資料。
  */
-import { useShopCatalogStore } from "@/src/store/shopCatalogStore";
+import { useShopCatalogStore, type CatalogSource } from "@/src/store/shopCatalogStore";
 import type { Product } from "@/src/shop/types";
 
 type ShopCatalogSeedProps = {
   products: Product[];
+  source: CatalogSource;
 };
 
-export function ShopCatalogSeed({ products }: ShopCatalogSeedProps) {
-  useShopCatalogStore.getState().seedFromServer(products);
+export function ShopCatalogSeed({ products, source }: ShopCatalogSeedProps) {
+  useShopCatalogStore.getState().seedFromServer(products, source);
   return null;
 }

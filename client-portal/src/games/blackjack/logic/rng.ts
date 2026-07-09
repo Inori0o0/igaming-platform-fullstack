@@ -1,6 +1,7 @@
 /**
- * 洗牌與種子：以 roundId 經 xmur3 產生確定性 seed，再用 Fisher–Yates 洗牌。
- * `server-seeded` 模式預留接 API；目前預設 pseudo 於前端完成整局。
+ * 洗牌與種子：以 roundId（或伺服器種子）經 xmur3 產生確定性 seed，再用 Fisher–Yates 洗牌。
+ * `server-seeded` 模式已接上 /api/games/seed（見 src/lib/gameSeedClient.ts）：種子改由伺服器產生，
+ * 前端不再能透過操控 roundId 來左右洗牌結果；`pseudo` 僅保留給測試/離線環境使用。
  */
 import type { BlackjackCard, Rank, Suit } from "./types";
 
@@ -30,7 +31,8 @@ export type ServerSeedClient = {
   getSeed: (roundId: string) => Promise<{ seed: number; seedHash?: string }>;
 };
 
-function xmur3(str: string) {
+/** 匯出供 `src/lib/gameSeedClient.ts` 把伺服器回傳的 hex 種子字串轉成可餵給 mulberry32 的數字種子。 */
+export function xmur3(str: string) {
   let h = 1779033703 ^ str.length;
   for (let i = 0; i < str.length; i += 1) {
     h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
@@ -80,9 +82,8 @@ export const pseudoRandomProvider: RandomProvider = {
 };
 
 /**
- * server-seeded 介面 stub：
- * - 目前先用 client 端提供 seed（可用 mock）
- * - 之後可接 API（Supabase Edge Function）回傳 seed / seedHash。
+ * server-seeded：seed 改由後端 `/api/games/seed` 核發（見 `src/lib/gameSeedClient.ts`），
+ * 前端只負責用拿到的 seed 洗牌，無法再自己決定/竄改洗出來的結果。
  */
 export function createServerSeededProvider(client: ServerSeedClient): RandomProvider {
   return {
@@ -96,11 +97,18 @@ export function createServerSeededProvider(client: ServerSeedClient): RandomProv
   };
 }
 
+/**
+ * `server-seeded` 模式若沒帶 client 直接丟錯，而不是靜默退回 `pseudo`——
+ * 避免「忘了傳 client」這種設定疏失，讓遊戲在使用者無感的情況下退回不安全的前端種子模式。
+ */
 export function resolveBlackjackRandomProvider(
   mode: "pseudo" | "server-seeded",
   client?: ServerSeedClient,
 ): RandomProvider {
-  if (mode === "server-seeded" && client) {
+  if (mode === "server-seeded") {
+    if (!client) {
+      throw new Error("server-seeded 模式需要提供 ServerSeedClient。");
+    }
     return createServerSeededProvider(client);
   }
   return pseudoRandomProvider;

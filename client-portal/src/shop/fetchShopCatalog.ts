@@ -81,37 +81,49 @@ export function mapProductRow(row: ProductRow): Product | null {
   };
 }
 
-export async function loadShopCatalogForApp(): Promise<Product[]> {
+/** `source: "mock"` 代表這批資料其實是離線示範內容（Supabase 查詢失敗或空表），呼叫端必須把這個狀態
+ * 往上傳給 UI，不能讓使用者在完全不知情的狀況下瀏覽/加購假資料（原本的行為是靜默 fallback）。 */
+export type ShopCatalogResult = {
+  products: Product[];
+  source: "live" | "mock";
+};
+
+export type ProductLookupResult = {
+  product: Product | null;
+  source: "live" | "mock";
+};
+
+const PRODUCT_SELECT = `
+  id,
+  slug,
+  name,
+  description,
+  category,
+  fulfillment_type,
+  is_avatar,
+  image_bucket,
+  image_object_path,
+  price_vac,
+  force_sold_out,
+  sort_order,
+  product_variants (
+    id,
+    size,
+    stock_quantity
+  )
+`;
+
+export async function loadShopCatalogForApp(): Promise<ShopCatalogResult> {
   try {
     const { data, error } = await supabase
       .from("products")
-      .select(
-        `
-        id,
-        slug,
-        name,
-        description,
-        category,
-        fulfillment_type,
-        is_avatar,
-        image_bucket,
-        image_object_path,
-        price_vac,
-        force_sold_out,
-        sort_order,
-        product_variants (
-          id,
-          size,
-          stock_quantity
-        )
-      `,
-      )
+      .select(PRODUCT_SELECT)
       .eq("is_active", true)
       .order("sort_order", { ascending: true });
 
     if (error) {
       console.warn("[shop] supabase products query failed:", error.message);
-      return mockShopProducts;
+      return { products: mockShopProducts, source: "mock" };
     }
 
     const rows = (data ?? []) as ProductRow[];
@@ -120,56 +132,40 @@ export async function loadShopCatalogForApp(): Promise<Product[]> {
       .filter((p): p is Product => p != null);
 
     if (mapped.length === 0) {
-      return mockShopProducts;
+      return { products: mockShopProducts, source: "mock" };
     }
-    return mapped;
+    return { products: mapped, source: "live" };
   } catch (e) {
     console.warn("[shop] loadShopCatalogForApp error:", e);
-    return mockShopProducts;
+    return { products: mockShopProducts, source: "mock" };
   }
 }
 
-export async function fetchProductBySlug(slug: string): Promise<Product | null> {
+export async function fetchProductBySlug(slug: string): Promise<ProductLookupResult> {
   try {
     const { data, error } = await supabase
       .from("products")
-      .select(
-        `
-        id,
-        slug,
-        name,
-        description,
-        category,
-        fulfillment_type,
-        is_avatar,
-        image_bucket,
-        image_object_path,
-        price_vac,
-        force_sold_out,
-        sort_order,
-        product_variants (
-          id,
-          size,
-          stock_quantity
-        )
-      `,
-      )
+      .select(PRODUCT_SELECT)
       .eq("slug", slug)
       .eq("is_active", true)
       .maybeSingle();
 
     if (error) {
       console.warn("[shop] fetchProductBySlug failed:", error.message);
-      return getProductById(slug) ?? null;
+      return { product: getProductById(slug) ?? null, source: "mock" };
     }
 
     if (!data) {
-      return getProductById(slug) ?? null;
+      return { product: getProductById(slug) ?? null, source: "mock" };
     }
 
-    return mapProductRow(data as ProductRow) ?? getProductById(slug) ?? null;
+    const mapped = mapProductRow(data as ProductRow);
+    if (!mapped) {
+      return { product: getProductById(slug) ?? null, source: "mock" };
+    }
+    return { product: mapped, source: "live" };
   } catch (e) {
     console.warn("[shop] fetchProductBySlug error:", e);
-    return getProductById(slug) ?? null;
+    return { product: getProductById(slug) ?? null, source: "mock" };
   }
 }

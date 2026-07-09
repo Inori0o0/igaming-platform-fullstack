@@ -16,7 +16,7 @@ export default async function ProductDetailPage({
   params,
 }: ProductDetailPageProps) {
   const { id } = await params;
-  const product = await fetchProductBySlug(id);
+  const { product, source } = await fetchProductBySlug(id);
 
   if (!product) {
     notFound();
@@ -24,6 +24,12 @@ export default async function ProductDetailPage({
 
   return (
     <main className="space-y-6">
+      {source === "mock" ? (
+        <div className="rounded-2xl border border-amber-500/35 bg-amber-500/10 px-4 py-3 text-xs text-amber-100">
+          目前商品資料來自離線示範內容，價格、庫存與結帳可能不是最新狀態，請重新整理頁面或稍後再試。
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300/80">

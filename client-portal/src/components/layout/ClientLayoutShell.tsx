@@ -7,6 +7,7 @@ import { MainSidebar } from "@/src/components/layout/MainSidebar";
 import { MainFooter } from "@/src/components/layout/MainFooter";
 import { SplashScreen } from "@/src/components/loading/SplashScreen";
 import { ShopCatalogHydrator } from "@/src/components/shop/catalog/ShopCatalogHydrator";
+import { ShopCatalogStatusBanner } from "@/src/components/shop/catalog/ShopCatalogStatusBanner";
 import { CrossTabSyncProvider } from "@/src/components/layout/CrossTabSyncProvider";
 import { useAuthStore } from "@/src/store/authStore";
 
@@ -34,6 +35,7 @@ export function ClientLayoutShell({ children }: ClientLayoutShellProps) {
         <div className="flex min-h-screen flex-1 flex-col">
           <MainHeader />
           <main className="relative flex flex-1 flex-col px-4 pb-8 pt-4 md:px-8 md:pb-10 md:pt-6">
+            <ShopCatalogStatusBanner />
             {children}
           </main>
           <MainFooter />

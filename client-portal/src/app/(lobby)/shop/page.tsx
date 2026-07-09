@@ -17,12 +17,15 @@ type ShopPageProps = {
 };
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
-  const [products, params] = await Promise.all([loadShopCatalogForApp(), searchParams]);
+  const [{ products, source }, params] = await Promise.all([
+    loadShopCatalogForApp(),
+    searchParams,
+  ]);
   const activeCategory = resolveActiveCategory(params.category);
 
   return (
     <main className="space-y-6">
-      <ShopCatalogSeed products={products} />
+      <ShopCatalogSeed products={products} source={source} />
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
           Shop

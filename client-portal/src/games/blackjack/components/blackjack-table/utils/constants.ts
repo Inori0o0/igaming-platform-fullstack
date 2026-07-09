@@ -2,12 +2,14 @@
  * 下注區間、籌碼 step、靜態資產路徑、動畫毫秒、RNG 單例（constants 匯出避免多處建立 provider）。
  */
 import { resolveBlackjackRandomProvider } from "@/src/games/blackjack/logic/rng";
+import { httpServerSeedClient } from "@/src/lib/gameSeedClient";
 
 export const MIN_BET = 100;
 export const MAX_BET = 100000;
 export const TABLE_BET_OPTIONS = [100, 500, 1000, 5000] as const;
-export const RNG_MODE: "pseudo" | "server-seeded" = "pseudo";
-export const randomProvider = resolveBlackjackRandomProvider(RNG_MODE);
+/** 洗牌種子改由伺服器核發（見 /api/games/seed），前端不再能自行決定/竄改開局結果。 */
+export const RNG_MODE: "pseudo" | "server-seeded" = "server-seeded";
+export const randomProvider = resolveBlackjackRandomProvider(RNG_MODE, httpServerSeedClient);
 
 export const BLACKJACK_ASSETS = {
   tableBackground: "/games/blackjack/bj_table_bg.webp",
