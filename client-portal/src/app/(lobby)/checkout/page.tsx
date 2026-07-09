@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCheckoutViewModel } from "@/src/components/shop/useCheckoutViewModel";
+import { useCheckoutViewModel } from "@/src/components/shop/checkout/useCheckoutViewModel";
 import { Card } from "@/src/components/ui/Card";
 import { cn } from "@/src/lib/cn";
 import { cartLineReactKey } from "@/src/shop/cartLineKey";

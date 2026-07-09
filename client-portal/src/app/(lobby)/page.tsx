@@ -1,6 +1,6 @@
 import Image from "next/image";
-import { HomeHeroSection } from "@/src/components/home/HomeHeroSection";
-import { HomeHighlightsSection } from "@/src/components/home/HomeHighlightsSection";
+import { HomeHeroSection } from "@/src/components/home/hero/HomeHeroSection";
+import { HomeHighlightsSection } from "@/src/components/home/highlights/HomeHighlightsSection";
 
 export default function Home() {
   return (

@@ -3,10 +3,10 @@
 /**
  * 百家樂牌桌組裝：左 TableStage、右 ControlPanel；狀態由 useBaccaratTableGame 集中管理。
  */
-import { BACCARAT_ASSETS, MIN_BET } from "./baccarat-table/constants";
-import { ControlPanel } from "./baccarat-table/ControlPanel";
-import { TableStage } from "./baccarat-table/TableStage";
-import { useBaccaratTableGame } from "./baccarat-table/useBaccaratTableGame";
+import { BACCARAT_ASSETS, MIN_BET } from "./baccarat-table/utils/constants";
+import { ControlPanel } from "./baccarat-table/sections/ControlPanel";
+import { TableStage } from "./baccarat-table/sections/TableStage";
+import { useBaccaratTableGame } from "./baccarat-table/hooks/useBaccaratTableGame";
 import { useGameImagePreload } from "@/src/hooks/useGameImagePreload";
 
 type BaccaratTableProps = {

@@ -3,11 +3,11 @@
 import { useEffect } from "react";
 import { useAuthStore } from "@/src/store/authStore";
 import { useWalletStore } from "@/src/store/walletStore";
-import { BalanceCards } from "@/src/components/wallet/BalanceCards";
-import { UsdtRates } from "@/src/components/wallet/UsdtRates";
+import { BalanceCards } from "@/src/components/wallet/transactions/BalanceCards";
+import { UsdtRates } from "@/src/components/wallet/rates/UsdtRates";
 import { WalletActionsCard } from "@/src/components/wallet/WalletActionsCard";
-import { TransactionsCard } from "@/src/components/wallet/TransactionsCard";
-import { useUsdtRates } from "@/src/components/wallet/useUsdtRates";
+import { TransactionsCard } from "@/src/components/wallet/transactions/TransactionsCard";
+import { useUsdtRates } from "@/src/components/wallet/rates/useUsdtRates";
 
 export default function WalletPage() {
   const userId = useAuthStore((s) => s.user?.id);

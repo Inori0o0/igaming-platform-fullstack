@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { CartCouponCard } from "@/src/components/shop/CartCouponCard";
+import { CartCouponCard } from "@/src/components/shop/cart/CartCouponCard";
 import { cn } from "@/src/lib/cn";
-import { CartItemsCard } from "@/src/components/shop/CartItemsCard";
-import { CartSummaryCard } from "@/src/components/shop/CartSummaryCard";
-import { useCartViewModel } from "@/src/components/shop/useCartViewModel";
+import { CartItemsCard } from "@/src/components/shop/cart/CartItemsCard";
+import { CartSummaryCard } from "@/src/components/shop/cart/CartSummaryCard";
+import { useCartViewModel } from "@/src/components/shop/cart/useCartViewModel";
 
 export default function CartPage() {
   const {

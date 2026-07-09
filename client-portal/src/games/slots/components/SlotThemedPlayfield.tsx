@@ -8,16 +8,16 @@
 import { useReducedMotion } from "framer-motion";
 import { useGameImagePreload } from "@/src/hooks/useGameImagePreload";
 import type { SlotThemeConfig } from "@/src/games/slots/config";
-import { SlotPlayfieldBanner } from "./slot-playfield/SlotPlayfieldBanner";
-import { SlotPlayfieldBetControls } from "./slot-playfield/SlotPlayfieldBetControls";
-import { SlotPlayfieldShell } from "./slot-playfield/SlotPlayfieldShell";
-import { SlotPlayfieldSidebar } from "./slot-playfield/SlotPlayfieldSidebar";
-import { SlotPlayfieldSpinButton } from "./slot-playfield/SlotPlayfieldSpinButton";
-import { SlotSpinResult } from "./slot-playfield/SlotSpinResult";
-import { SlotReelGrid } from "./slot-playfield/SlotReelGrid";
-import { useSlotPlayfieldState } from "./slot-playfield/useSlotPlayfieldState";
-import { useSlotCellPx } from "./slot-playfield/useSlotCellPx";
-import { useSlotPlayfieldView } from "./slot-playfield/useSlotPlayfieldView";
+import { SlotPlayfieldBanner } from "./slot-playfield/sections/SlotPlayfieldBanner";
+import { SlotPlayfieldBetControls } from "./slot-playfield/sections/SlotPlayfieldBetControls";
+import { SlotPlayfieldShell } from "./slot-playfield/sections/SlotPlayfieldShell";
+import { SlotPlayfieldSidebar } from "./slot-playfield/sections/SlotPlayfieldSidebar";
+import { SlotPlayfieldSpinButton } from "./slot-playfield/sections/SlotPlayfieldSpinButton";
+import { SlotSpinResult } from "./slot-playfield/sections/SlotSpinResult";
+import { SlotReelGrid } from "./slot-playfield/sections/SlotReelGrid";
+import { useSlotPlayfieldState } from "./slot-playfield/hooks/useSlotPlayfieldState";
+import { useSlotCellPx } from "./slot-playfield/hooks/useSlotCellPx";
+import { useSlotPlayfieldView } from "./slot-playfield/hooks/useSlotPlayfieldView";
 
 type SlotThemedPlayfieldProps = {
   theme: SlotThemeConfig;

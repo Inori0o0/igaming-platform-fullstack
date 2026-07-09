@@ -3,11 +3,11 @@
 /**
  * 二十一點頁面主元件：左欄 TableStage、右欄 ControlPanel；狀態由 useBlackjackTableGame 集中管理。
  */
-import { BLACKJACK_ASSETS, MIN_BET } from "./blackjack-table/constants";
-import { tierGroup } from "./blackjack-table/helpers";
-import { ControlPanel } from "./blackjack-table/ControlPanel";
-import { TableStage } from "./blackjack-table/TableStage";
-import { useBlackjackTableGame } from "./blackjack-table/useBlackjackTableGame";
+import { BLACKJACK_ASSETS, MIN_BET } from "./blackjack-table/utils/constants";
+import { tierGroup } from "./blackjack-table/utils/helpers";
+import { ControlPanel } from "./blackjack-table/sections/ControlPanel";
+import { TableStage } from "./blackjack-table/sections/TableStage";
+import { useBlackjackTableGame } from "./blackjack-table/hooks/useBlackjackTableGame";
 import { useGameImagePreload } from "@/src/hooks/useGameImagePreload";
 
 type BlackjackTableProps = {

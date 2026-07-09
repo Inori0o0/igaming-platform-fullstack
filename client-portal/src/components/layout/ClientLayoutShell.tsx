@@ -6,7 +6,7 @@ import { MainHeader } from "@/src/components/layout/MainHeader";
 import { MainSidebar } from "@/src/components/layout/MainSidebar";
 import { MainFooter } from "@/src/components/layout/MainFooter";
 import { SplashScreen } from "@/src/components/loading/SplashScreen";
-import { ShopCatalogHydrator } from "@/src/components/shop/ShopCatalogHydrator";
+import { ShopCatalogHydrator } from "@/src/components/shop/catalog/ShopCatalogHydrator";
 import { CrossTabSyncProvider } from "@/src/components/layout/CrossTabSyncProvider";
 import { useAuthStore } from "@/src/store/authStore";
 

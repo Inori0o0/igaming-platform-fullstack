@@ -1,5 +1,5 @@
-import { ProductCatalog } from "@/src/components/shop/ProductCatalog";
-import { ShopCatalogSeed } from "@/src/components/shop/ShopCatalogSeed";
+import { ProductCatalog } from "@/src/components/shop/catalog/ProductCatalog";
+import { ShopCatalogSeed } from "@/src/components/shop/catalog/ShopCatalogSeed";
 import { loadShopCatalogForApp } from "@/src/shop/fetchShopCatalog";
 import { productCategories, type ProductCategory } from "@/src/shop/types";
 

@@ -1,11 +1,11 @@
 "use client";
 
-import { ProfileStatsCard } from "@/src/components/profile/ProfileStatsCard";
-import { ProfileIdentityCard } from "@/src/components/profile/ProfileIdentityCard";
-import { ProfileFeedbackToast } from "@/src/components/profile/ProfileFeedbackToast";
-import { ProfileLoadingCard } from "@/src/components/profile/ProfileLoadingCard";
-import { ProfileGuestGate } from "@/src/components/profile/ProfileGuestGate";
-import { useProfileOverviewViewModel } from "@/src/components/profile/useProfileOverviewViewModel";
+import { ProfileStatsCard } from "@/src/components/profile/overview/ProfileStatsCard";
+import { ProfileIdentityCard } from "@/src/components/profile/overview/ProfileIdentityCard";
+import { ProfileFeedbackToast } from "@/src/components/profile/shared/ProfileFeedbackToast";
+import { ProfileLoadingCard } from "@/src/components/profile/overview/ProfileLoadingCard";
+import { ProfileGuestGate } from "@/src/components/profile/shared/ProfileGuestGate";
+import { useProfileOverviewViewModel } from "@/src/components/profile/overview/useProfileOverviewViewModel";
 
 export default function ProfileOverviewPage() {
   const vm = useProfileOverviewViewModel();

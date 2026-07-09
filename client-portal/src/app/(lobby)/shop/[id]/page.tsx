@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AddToCartPanel } from "@/src/components/shop/AddToCartPanel";
-import { ProductDetailImage } from "@/src/components/shop/ProductDetailImage";
+import { AddToCartPanel } from "@/src/components/shop/cart/AddToCartPanel";
+import { ProductDetailImage } from "@/src/components/shop/catalog/ProductDetailImage";
 import { Card } from "@/src/components/ui/Card";
 import { fetchProductBySlug } from "@/src/shop/fetchShopCatalog";
 import { productCategoryLabels } from "@/src/shop/types";

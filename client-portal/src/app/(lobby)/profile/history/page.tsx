@@ -4,8 +4,8 @@ import { Card } from "@/src/components/ui/Card";
 import { Button } from "@/src/components/ui/Button";
 import { LogoLoader } from "@/src/components/loading/LogoLoader";
 import { formatTime } from "@/src/components/wallet/format";
-import { ProfileLoadingCard } from "@/src/components/profile/ProfileLoadingCard";
-import { ProfileGuestGate } from "@/src/components/profile/ProfileGuestGate";
+import { ProfileLoadingCard } from "@/src/components/profile/overview/ProfileLoadingCard";
+import { ProfileGuestGate } from "@/src/components/profile/shared/ProfileGuestGate";
 import { useProfileGameHistory } from "@/src/components/profile/history/useProfileGameHistory";
 
 function formatVac(value: number) {

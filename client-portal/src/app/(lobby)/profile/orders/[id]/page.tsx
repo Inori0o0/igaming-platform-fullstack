@@ -2,8 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { ProfileOrderDetailView } from "@/src/components/profile/orders/ProfileOrderDetailView";
-import { ProfileLoadingCard } from "@/src/components/profile/ProfileLoadingCard";
-import { ProfileGuestGate } from "@/src/components/profile/ProfileGuestGate";
+import { ProfileLoadingCard } from "@/src/components/profile/overview/ProfileLoadingCard";
+import { ProfileGuestGate } from "@/src/components/profile/shared/ProfileGuestGate";
 import { useProfileOrderDetail } from "@/src/components/profile/orders/useProfileOrderDetail";
 
 export default function ProfileOrderDetailPage() {

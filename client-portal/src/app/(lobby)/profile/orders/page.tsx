@@ -2,8 +2,8 @@
 
 import { Card } from "@/src/components/ui/Card";
 import { ProfileOrdersBody } from "@/src/components/profile/orders/ProfileOrdersBody";
-import { ProfileLoadingCard } from "@/src/components/profile/ProfileLoadingCard";
-import { ProfileGuestGate } from "@/src/components/profile/ProfileGuestGate";
+import { ProfileLoadingCard } from "@/src/components/profile/overview/ProfileLoadingCard";
+import { ProfileGuestGate } from "@/src/components/profile/shared/ProfileGuestGate";
 import { useProfileOrders } from "@/src/components/profile/orders/useProfileOrders";
 
 export default function ProfileOrdersPage() {

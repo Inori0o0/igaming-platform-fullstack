@@ -1,6 +1,6 @@
 /**
  * 牌局資料模型：牌、玩家手牌、回合階段、結算結果與 HandTier（過五關／Blackjack 等）。
- * 與 `blackjack-table/types.ts`（RoundState）分工：此處偏「規則層」，彼處偏「一局 UI 快照」。
+ * 與 `blackjack-table/utils/types.ts`（RoundState）分工：此處偏「規則層」，彼處偏「一局 UI 快照」。
  */
 export type Suit = "S" | "H" | "D" | "C";
 
