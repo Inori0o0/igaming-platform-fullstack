@@ -7,8 +7,9 @@ import {
   evaluateLineWins,
   winningCellKeys,
 } from "@/src/games/slots/logic/evaluateLineWins";
-import { SLOT_REEL_COLS } from "./constants";
-import { buildInitialColumns, randomColumns } from "./reelStrip";
+import { SLOT_REEL_COLS, SLOT_REEL_ROWS } from "./constants";
+import { buildInitialColumns } from "./reelStrip";
+import { randomColumnsForRound } from "@/src/games/slots/logic/rng";
 
 type UseSlotPlayfieldStateArgs = {
   theme: SlotThemeConfig;
@@ -46,9 +47,13 @@ export function useSlotPlayfieldState({ theme }: UseSlotPlayfieldStateArgs) {
     }
 
     setSpinError(undefined);
+    // 立刻鎖住（在任何下注請求送出之前），避免連點在 setSpinning(true) 真正落地前
+    // 又通過上面的 `if (spinning) return` 檢查，觸發第二筆下注。
+    setSpinning(true);
     const prevColumns = columns;
-    const next = randomColumns(pool);
+    // roundId 先產生、再拿去當 RNG 種子：同一 roundId 一定對應同一盤面，結果可重現、可稽核。
     const roundId = crypto.randomUUID();
+    const next = randomColumnsForRound(pool, roundId, SLOT_REEL_COLS, SLOT_REEL_ROWS);
     const wagerPromise = placeSlotWager({
       themeId: theme.id,
       totalBet,
@@ -68,7 +73,6 @@ export function useSlotPlayfieldState({ theme }: UseSlotPlayfieldStateArgs) {
 
     setColumns(next);
     setSpinToken((t) => t + 1);
-    setSpinning(true);
 
     // 以最慢一欄的動畫時間當結算時點，確保停輪後才更新結果。
     const maxMs = (1.05 + (SLOT_REEL_COLS - 1) * 0.18) * 1000 + 120;

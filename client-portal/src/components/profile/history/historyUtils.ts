@@ -1,3 +1,7 @@
+import { toNumber } from "@/src/lib/numeric";
+
+export { toNumber } from "@/src/lib/numeric";
+
 export const PAGE_SIZE = 10;
 
 export const gameOptions = [
@@ -29,16 +33,6 @@ export type ProfileGameHistoryRow = {
   winAmount: number;
   createdAt: string;
 };
-
-export function toNumber(value: number | string | null | undefined) {
-  // Supabase numeric 常以字串回傳，這裡統一轉為 number 供前端計算。
-  if (typeof value === "number") return value;
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : 0;
-  }
-  return 0;
-}
 
 export function gameLabelById(gameId: string | null) {
   if (gameId === "slots") return "Slots";

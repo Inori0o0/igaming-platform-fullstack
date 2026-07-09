@@ -47,6 +47,7 @@ function parseRpcOrderId(data: unknown): string | null {
 
 export function useCheckoutViewModel() {
   const router = useRouter();
+  const userId = useAuthStore((s) => s.user?.id);
   const hydrate = useCartStore((s) => s.hydrate);
   const hydrateWallet = useWalletStore((s) => s.hydrateForCurrentUser);
   const catalog = useShopCatalogStore((s) => s.products);
@@ -69,8 +70,9 @@ export function useCheckoutViewModel() {
   const confirmLockRef = useRef(false);
 
   useEffect(() => {
+    // 依賴 userId：登入/登出/切換帳號時（頁面未重新 mount）也要換成對應身份的購物車快照。
     hydrate();
-  }, [hydrate]);
+  }, [hydrate, userId]);
 
   const summary = useMemo(
     () => calculateCartSummary(items, coupon, catalog),

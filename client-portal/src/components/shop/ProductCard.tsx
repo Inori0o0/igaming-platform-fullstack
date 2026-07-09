@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import type { Product } from "@/src/shop/types";

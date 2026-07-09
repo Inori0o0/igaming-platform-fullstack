@@ -1,41 +1,26 @@
-"use client";
-
-import { useMemo, useState } from "react";
 import { ProductCard } from "@/src/components/shop/ProductCard";
-import { Button } from "@/src/components/ui/Button";
+import { ProductCategoryFilter } from "@/src/components/shop/ProductCategoryFilter";
 import type { Product, ProductCategory } from "@/src/shop/types";
-import { productCategories, productCategoryLabels } from "@/src/shop/types";
 
 type ProductCatalogProps = {
   products: Product[];
+  activeCategory?: ProductCategory;
 };
 
-export function ProductCatalog({ products }: ProductCatalogProps) {
-  const [activeCategory, setActiveCategory] = useState<ProductCategory>("all");
-
-  const filteredProducts = useMemo(() => {
-    if (activeCategory === "all") {
-      return products;
-    }
-
-    return products.filter((product) => product.category === activeCategory);
-  }, [activeCategory, products]);
+/**
+ * 商品格線：只有 `ProductCategoryFilter` 需要互動（改網址查詢字串），
+ * 這裡改成 Server Component，篩選改成用 `activeCategory`（來自 URL）直接過濾，
+ * 避免整頁商品格線因為分類篩選的 `useState` 被迫整棵樹一起送到 client 端 hydrate。
+ */
+export function ProductCatalog({ products, activeCategory = "all" }: ProductCatalogProps) {
+  const filteredProducts =
+    activeCategory === "all"
+      ? products
+      : products.filter((product) => product.category === activeCategory);
 
   return (
     <section className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        {productCategories.map((category) => (
-          <Button
-            key={category}
-            variant={activeCategory === category ? "primary" : "ghost"}
-            size="sm"
-            onClick={() => setActiveCategory(category)}
-            aria-pressed={activeCategory === category}
-          >
-            {productCategoryLabels[category]}
-          </Button>
-        ))}
-      </div>
+      <ProductCategoryFilter activeCategory={activeCategory} />
 
       <p className="text-xs text-neutral-400">
         目前顯示 {filteredProducts.length} 件商品
@@ -49,4 +34,3 @@ export function ProductCatalog({ products }: ProductCatalogProps) {
     </section>
   );
 }
-

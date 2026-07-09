@@ -17,6 +17,8 @@ export default function WalletPage() {
   const deposit = useWalletStore((s) => s.deposit);
   const submitWithdrawRequest = useWalletStore((s) => s.submitWithdrawRequest);
   const claimFreeCoins = useWalletStore((s) => s.claimFreeCoins);
+  const pending = useWalletStore((s) => s.pending);
+  const errors = useWalletStore((s) => s.errors);
   const { rates, isLoading: isRatesLoading, error: ratesError } = useUsdtRates();
 
   useEffect(() => {
@@ -51,6 +53,8 @@ export default function WalletPage() {
           onDeposit={deposit}
           onSubmitWithdrawRequest={submitWithdrawRequest}
           onClaimFreeCoins={claimFreeCoins}
+          pending={pending}
+          errors={errors}
         />
         <TransactionsCard transactions={transactions} />
       </div>

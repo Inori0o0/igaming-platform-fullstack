@@ -1,13 +1,28 @@
 import { ProductCatalog } from "@/src/components/shop/ProductCatalog";
+import { ShopCatalogSeed } from "@/src/components/shop/ShopCatalogSeed";
 import { loadShopCatalogForApp } from "@/src/shop/fetchShopCatalog";
+import { productCategories, type ProductCategory } from "@/src/shop/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function ShopPage() {
-  const products = await loadShopCatalogForApp();
+function resolveActiveCategory(raw: string | string[] | undefined): ProductCategory {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return (productCategories as readonly string[]).includes(value ?? "")
+    ? (value as ProductCategory)
+    : "all";
+}
+
+type ShopPageProps = {
+  searchParams: Promise<{ category?: string | string[] }>;
+};
+
+export default async function ShopPage({ searchParams }: ShopPageProps) {
+  const [products, params] = await Promise.all([loadShopCatalogForApp(), searchParams]);
+  const activeCategory = resolveActiveCategory(params.category);
 
   return (
     <main className="space-y-6">
+      <ShopCatalogSeed products={products} />
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
           Shop
@@ -20,7 +35,7 @@ export default async function ShopPage() {
         </p>
       </div>
 
-      <ProductCatalog products={products} />
+      <ProductCatalog products={products} activeCategory={activeCategory} />
     </main>
   );
 }

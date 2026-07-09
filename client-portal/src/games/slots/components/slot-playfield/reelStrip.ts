@@ -1,12 +1,10 @@
 /**
- * 轉輪「紙帶」資料：隨機結果欄、可重現初始盤面、以及動畫用長條 strip（上方雜訊 + 最後三格為本局結果）。
+ * 轉輪「紙帶」資料：可重現初始盤面、以及動畫用長條 strip（上方雜訊 + 最後三格為本局結果）。
+ * 本局結果一律由 `logic/rng.ts` 的 `randomColumnsForRound(pool, roundId, ...)` 依 roundId 決定性產生，
+ * 這裡不再提供 `Math.random()` 版本的抽符號函式，避免每次呼叫都是不可重現、無法稽核的結果。
  */
 import type { SlotSymbol } from "@/src/games/slots/config";
 import { SLOT_REEL_COLS, SLOT_REEL_ROWS } from "./constants";
-
-export function randomSymbol(pool: readonly SlotSymbol[]): SlotSymbol {
-  return pool[Math.floor(Math.random() * pool.length)]!;
-}
 
 export function symbolByIndex(
   pool: readonly SlotSymbol[],
@@ -40,8 +38,3 @@ export function buildInitialColumns(pool: readonly SlotSymbol[]): SlotSymbol[][]
   );
 }
 
-export function randomColumns(pool: readonly SlotSymbol[]): SlotSymbol[][] {
-  return Array.from({ length: SLOT_REEL_COLS }, () =>
-    Array.from({ length: SLOT_REEL_ROWS }, () => randomSymbol(pool)),
-  );
-}

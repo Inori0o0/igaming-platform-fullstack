@@ -4,6 +4,8 @@ import { Card } from "@/src/components/ui/Card";
 import { Button } from "@/src/components/ui/Button";
 import { LogoLoader } from "@/src/components/loading/LogoLoader";
 import { formatTime } from "@/src/components/wallet/format";
+import { ProfileLoadingCard } from "@/src/components/profile/ProfileLoadingCard";
+import { ProfileGuestGate } from "@/src/components/profile/ProfileGuestGate";
 import { useProfileGameHistory } from "@/src/components/profile/history/useProfileGameHistory";
 
 function formatVac(value: number) {
@@ -14,29 +16,17 @@ export default function ProfileHistoryPage() {
   const vm = useProfileGameHistory();
 
   if (vm.authLoading) {
-    return (
-      <main className="space-y-4">
-        <Card title="遊戲歷史" description="載入中…">
-          <div className="flex min-h-28 items-center justify-center rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-8">
-            <LogoLoader size="md" className="text-cyan-300" />
-          </div>
-        </Card>
-      </main>
-    );
+    return <ProfileLoadingCard title="遊戲歷史" description="載入中…" />;
   }
 
   if (!vm.user || vm.user.is_guest) {
     return (
-      <main className="space-y-4">
-        <Card title="遊戲歷史" description="登入後可查看每局結算紀錄與統計。">
-          <div className="space-y-4 rounded-2xl border border-dashed border-cyan-500/25 bg-neutral-950/60 p-6 text-center text-sm text-neutral-400">
-            <p>請先登入以查看遊戲歷史。</p>
-            <Button variant="secondary" onClick={() => vm.setOpenAuthModal(true)}>
-              立即登入
-            </Button>
-          </div>
-        </Card>
-      </main>
+      <ProfileGuestGate
+        title="遊戲歷史"
+        description="登入後可查看每局結算紀錄與統計。"
+        message="請先登入以查看遊戲歷史。"
+        onLogin={() => vm.setOpenAuthModal(true)}
+      />
     );
   }
 

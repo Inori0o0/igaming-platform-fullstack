@@ -1,5 +1,6 @@
 import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import { Button } from "@/src/components/ui/Button";
+import { stockAvailableForLine } from "@/src/shop/stock";
 import type { ApparelSize, Product } from "@/src/shop/types";
 
 type CartLineItemProps = {
@@ -19,6 +20,18 @@ export function CartLineItem({
   onQuantityChange,
   onRemove,
 }: CartLineItemProps) {
+  // 選單上限跟著實際庫存走（與 addItem/updateItemQuantity 用同一個 stockAvailableForLine），
+  // 避免選單本身就能選出超過庫存的數量；同時與 store 的單品上限（99）保持一致，並至少保留
+  // 目前已在購物車的數量，避免選單瞬間消失選項。
+  const maxSelectable = Math.min(
+    99,
+    Math.max(quantity, stockAvailableForLine(product, size)),
+  );
+  const quantityOptions = Array.from(
+    { length: Math.max(1, maxSelectable) },
+    (_, idx) => idx + 1,
+  );
+
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-cyan-500/20 bg-neutral-950/70 p-3">
       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-cyan-500/20">
@@ -50,7 +63,7 @@ export function CartLineItem({
             value={quantity}
             onChange={(event) => onQuantityChange(Number(event.target.value))}
           >
-            {[1, 2, 3, 4, 5].map((qty) => (
+            {quantityOptions.map((qty) => (
               <option key={qty} value={qty}>
                 {qty}
               </option>

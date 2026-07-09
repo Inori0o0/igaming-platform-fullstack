@@ -120,14 +120,20 @@ function normalizeStoredItems(raw: unknown): CartLineItem[] {
     if (typeof rec.productId !== "string" || typeof rec.quantity !== "number") continue;
     const product = getShopCatalogSnapshot().find((p) => p.id === rec.productId);
     if (!product) continue;
-    const cap = product.isAvatar ? 1 : 99;
-    const qty = Math.max(1, Math.min(cap, Math.floor(rec.quantity)));
+    // 從 localStorage 讀回時也要重新對照目前庫存，避免使用者離線期間庫存變少、
+    // 或直接編輯 localStorage 塞進超量數字，購物車卻一直顯示舊的（未經驗證的）數量。
     if (product.sizeOptions?.length) {
       const s = rec.size;
       const size: ApparelSize =
         s && product.sizeOptions.includes(s) ? s : "M";
+      const cap = Math.min(product.isAvatar ? 1 : 99, stockAvailableForLine(product, size));
+      if (cap <= 0) continue;
+      const qty = Math.max(1, Math.min(cap, Math.floor(rec.quantity)));
       out.push({ productId: rec.productId, quantity: qty, size });
     } else {
+      const cap = Math.min(product.isAvatar ? 1 : 99, stockAvailableForLine(product));
+      if (cap <= 0) continue;
+      const qty = Math.max(1, Math.min(cap, Math.floor(rec.quantity)));
       out.push({ productId: rec.productId, quantity: qty });
     }
   }
@@ -202,6 +208,29 @@ function markAvatarAsOwned(identityId: string, avatarIds: string[]) {
   );
 }
 
+
+/**
+ * 跨分頁同步：`storage` 事件只會在「其他」分頁觸發（同分頁自己 setItem 不會收到），
+ * 剛好可以拿來偵測「另一個分頁改了目前身份的購物車／頭像持有清單」，重新 hydrate 補上差異。
+ * 回傳 cleanup function，供呼叫端（見 CrossTabSyncProvider）在 unmount 時移除監聽。
+ */
+export function attachCartStorageSync(): () => void {
+  if (typeof window === "undefined") return () => {};
+
+  const handler = (event: StorageEvent) => {
+    if (!event.key) return;
+    const identityId = getCurrentIdentityId();
+    if (
+      event.key === getCartStorageKey(identityId) ||
+      event.key === getAvatarOwnershipStorageKey(identityId)
+    ) {
+      void useCartStore.getState().hydrate();
+    }
+  };
+
+  window.addEventListener("storage", handler);
+  return () => window.removeEventListener("storage", handler);
+}
 
 export const useCartStore = create<CartState>((set, get) => ({
   items: [],
@@ -358,11 +387,17 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   updateItemQuantity: (productId, quantity, size) => {
     const product = getShopCatalogSnapshot().find((p) => p.id === productId);
-    const maxQty = product?.isAvatar ? 1 : 99;
+    if (!product) return;
+    // 與 addItem 用同一套庫存來源（stockAvailableForLine），避免「加車有驗庫存、改數量沒驗」的落差，
+    // 讓使用者無法透過購物車頁的數量選單把某個品項改到超過實際庫存。
+    const maxQty = product.isAvatar ? 1 : 99;
+    const stockCap = stockAvailableForLine(product, size);
     const safeQuantity = Math.min(
       maxQty,
+      Math.max(0, stockCap),
       Math.max(1, Math.floor(quantity)),
     );
+    if (safeQuantity <= 0) return;
     const nextItems = get().items.map((item) =>
       lineMatches(item, productId, size) ? { ...item, quantity: safeQuantity } : item,
     );

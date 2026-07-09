@@ -7,6 +7,7 @@ import { MainSidebar } from "@/src/components/layout/MainSidebar";
 import { MainFooter } from "@/src/components/layout/MainFooter";
 import { SplashScreen } from "@/src/components/loading/SplashScreen";
 import { ShopCatalogHydrator } from "@/src/components/shop/ShopCatalogHydrator";
+import { CrossTabSyncProvider } from "@/src/components/layout/CrossTabSyncProvider";
 import { useAuthStore } from "@/src/store/authStore";
 
 type ClientLayoutShellProps = {
@@ -25,6 +26,7 @@ export function ClientLayoutShell({ children }: ClientLayoutShellProps) {
   return (
     <>
       <ShopCatalogHydrator />
+      <CrossTabSyncProvider />
       <SplashScreen show={isAuthLoading && !isGamePage} mode="fullscreen" />
 
       <div className="flex min-h-screen">

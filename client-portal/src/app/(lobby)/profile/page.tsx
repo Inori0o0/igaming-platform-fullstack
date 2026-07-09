@@ -1,11 +1,10 @@
 "use client";
 
-import { Card } from "@/src/components/ui/Card";
-import { Button } from "@/src/components/ui/Button";
 import { ProfileStatsCard } from "@/src/components/profile/ProfileStatsCard";
 import { ProfileIdentityCard } from "@/src/components/profile/ProfileIdentityCard";
 import { ProfileFeedbackToast } from "@/src/components/profile/ProfileFeedbackToast";
-import { LogoLoader } from "@/src/components/loading/LogoLoader";
+import { ProfileLoadingCard } from "@/src/components/profile/ProfileLoadingCard";
+import { ProfileGuestGate } from "@/src/components/profile/ProfileGuestGate";
 import { useProfileOverviewViewModel } from "@/src/components/profile/useProfileOverviewViewModel";
 
 export default function ProfileOverviewPage() {
@@ -13,31 +12,19 @@ export default function ProfileOverviewPage() {
 
   if (vm.authLoading || vm.profileLoading) {
     return (
-      <main className="space-y-4">
-        <Card title="個人資料" description="載入中…">
-          <div className="flex min-h-28 items-center justify-center rounded-2xl border border-dashed border-cyan-500/25 bg-neutral-950/60 p-6">
-            <LogoLoader size="md" className="text-cyan-300" />
-          </div>
-        </Card>
-      </main>
+      <ProfileLoadingCard title="個人資料" description="載入中…" variant="dashed" />
     );
   }
 
   if (!vm.user || vm.user.is_guest) {
     return (
-      <main className="space-y-4">
-        <Card
-          title="登入後才能使用"
-          description="個人資料（顯示名稱、頭像）僅限已登入用戶。"
-        >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-neutral-300">
-              你目前使用的是「訪客模式」。點擊下方按鈕登入即可開始設定。
-            </p>
-            <Button onClick={() => vm.setOpenAuthModal(true)}>立即登入</Button>
-          </div>
-        </Card>
-      </main>
+      <ProfileGuestGate
+        title="登入後才能使用"
+        description="個人資料（顯示名稱、頭像）僅限已登入用戶。"
+        message="你目前使用的是「訪客模式」。點擊下方按鈕登入即可開始設定。"
+        onLogin={() => vm.setOpenAuthModal(true)}
+        layout="row"
+      />
     );
   }
 

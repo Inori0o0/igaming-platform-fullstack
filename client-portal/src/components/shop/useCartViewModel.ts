@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { calculateCartSummary, useCartStore } from "@/src/store/cartStore";
 import { useShopCatalogStore } from "@/src/store/shopCatalogStore";
+import { useAuthStore } from "@/src/store/authStore";
 
 export function useCartViewModel() {
+  const userId = useAuthStore((s) => s.user?.id);
   const hydrate = useCartStore((s) => s.hydrate);
   const catalog = useShopCatalogStore((s) => s.products);
   const items = useCartStore((s) => s.items);
@@ -20,8 +22,10 @@ export function useCartViewModel() {
   const [couponLoading, setCouponLoading] = useState(false);
 
   useEffect(() => {
+    // 依賴 userId：登入/登出/切換帳號時（頁面未重新 mount）也要換成對應身份的購物車快照，
+    // 否則會一直顯示切換前的身份殘留資料。
     hydrate();
-  }, [hydrate]);
+  }, [hydrate, userId]);
 
   const cartRows = useMemo(
     () =>

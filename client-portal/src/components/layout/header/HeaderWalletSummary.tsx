@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAuthStore } from "@/src/store/authStore";
 import { useWalletStore } from "@/src/store/walletStore";
+import { formatAmount } from "@/src/components/wallet/format";
 
 export function HeaderWalletSummary() {
   const userId = useAuthStore((s) => s.user?.id);
@@ -15,9 +16,7 @@ export function HeaderWalletSummary() {
 
   const currencyLabel =
     displayCurrency === "VAC" ? "vAcAnt Coins" : displayCurrency;
-  const amount = balances[displayCurrency].toLocaleString(undefined, {
-    maximumFractionDigits: displayCurrency === "VAC" ? 0 : 6,
-  });
+  const amount = formatAmount(displayCurrency, balances[displayCurrency]);
 
   return (
     <div className="hidden flex-col items-end text-xs text-neutral-300 sm:flex">

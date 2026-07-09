@@ -1,0 +1,219 @@
+import { supabase } from "@/src/lib/supabaseClient";
+import { getStartOfDayIso, getThresholdIso, toNumber } from "./numberUtils";
+import type {
+  AdjustWalletBalanceResult,
+  DbTransactionRow,
+  DbUserRow,
+  DbWalletRow,
+  TransactionType,
+  WalletTransaction,
+} from "./types";
+
+export async function getDbUserByAuthUserId(
+  authUserId: string,
+): Promise<DbUserRow> {
+  const { data, error } = await supabase
+    .from("users")
+    .select("id, auth_user_id")
+    .eq("auth_user_id", authUserId)
+    .single();
+
+  if (error || !data) {
+    throw new Error("找不到對應的資料庫使用者，請確認 SQL trigger 已生效。");
+  }
+
+  return data as DbUserRow;
+}
+
+export async function getOrCreateWallet(
+  dbUserId: string,
+): Promise<DbWalletRow> {
+  const { data, error } = await supabase
+    .from("wallets")
+    .select("user_id, coin_balance, btc_balance, eth_balance")
+    .eq("user_id", dbUserId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("讀取錢包失敗");
+  }
+
+  if (data) {
+    return data as DbWalletRow;
+  }
+
+  // phase-7：前端已無法直接 INSERT wallets（見 adjust_wallet_balance 遷移）。
+  // 一般帳號的錢包列由 handle_new_auth_user trigger 在註冊時建立；
+  // 這裡呼叫 ensure_wallet() RPC 作為安全網（例如遷移前就存在的舊帳號）。
+  const { data: ensured, error: ensureError } = await supabase.rpc(
+    "ensure_wallet",
+  );
+
+  if (ensureError || !ensured) {
+    throw new Error("建立錢包失敗");
+  }
+
+  return ensured as DbWalletRow;
+}
+
+export async function listTransactions(
+  dbUserId: string,
+): Promise<WalletTransaction[]> {
+  const { data, error } = await supabase
+    .from("transactions")
+    .select(
+      "id, type, currency, amount, description, created_at, status, balance_after",
+    )
+    .eq("user_id", dbUserId)
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  if (error || !data) {
+    throw new Error("讀取交易紀錄失敗");
+  }
+
+  return (data as DbTransactionRow[]).map((row) => ({
+    id: row.id,
+    createdAt: row.created_at,
+    type: row.type,
+    currency: row.currency,
+    amount: toNumber(row.amount),
+    status:
+      row.status === "pending" || row.status === "failed"
+        ? row.status
+        : "completed",
+    description: row.description ?? "",
+    balanceAfter:
+      row.balance_after === null ? null : toNumber(row.balance_after),
+  }));
+}
+
+export async function insertTransaction(params: {
+  dbUserId: string;
+  type: TransactionType;
+  amount: number;
+  status: "pending" | "completed" | "failed";
+  description: string;
+  balanceAfter: number | null;
+  gameId?: string;
+  themeId?: string;
+  roundId?: string;
+  metadata?: Record<string, unknown>;
+}) {
+  // 目前僅 withdraw（提領申請，pending，不影響餘額）還會走這條路徑；
+  // 會異動餘額的交易一律改走 adjust_wallet_balance() RPC（見下方 adjustWalletBalance）。
+  const payload: Record<string, unknown> = {
+    user_id: params.dbUserId,
+    type: params.type,
+    currency: "VAC",
+    amount: params.amount,
+    status: params.status,
+    description: params.description,
+    balance_after: params.balanceAfter,
+  };
+  if (params.gameId) payload.game_id = params.gameId;
+  if (params.themeId) payload.theme_id = params.themeId;
+  if (params.roundId) payload.round_id = params.roundId;
+  if (params.metadata) payload.metadata = params.metadata;
+  const { error } = await supabase.from("transactions").insert(payload);
+
+  if (error) {
+    throw new Error("寫入交易紀錄失敗");
+  }
+}
+
+export async function getDbClaimStats(dbUserId: string) {
+  const { count, error: countError } = await supabase
+    .from("transactions")
+    .select("id", { head: true, count: "exact" })
+    .eq("user_id", dbUserId)
+    .eq("type", "claim")
+    .gte("created_at", getStartOfDayIso());
+  if (countError) {
+    throw new Error("讀取 claim 統計失敗");
+  }
+
+  const { data: latestRow, error: latestError } = await supabase
+    .from("transactions")
+    .select("created_at")
+    .eq("user_id", dbUserId)
+    .eq("type", "claim")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (latestError) {
+    throw new Error("讀取 claim 最新時間失敗");
+  }
+
+  return {
+    todayCount: count ?? 0,
+    lastClaimAtMs: latestRow?.created_at
+      ? new Date(latestRow.created_at).getTime()
+      : null,
+  };
+}
+
+export async function getDbDepositStats(dbUserId: string) {
+  const { count, error: minuteCountError } = await supabase
+    .from("transactions")
+    .select("id", { head: true, count: "exact" })
+    .eq("user_id", dbUserId)
+    .eq("type", "deposit")
+    .gte("created_at", getThresholdIso(60_000));
+  if (minuteCountError) {
+    throw new Error("讀取 deposit 每分鐘統計失敗");
+  }
+
+  const { data: todayRows, error: todayError } = await supabase
+    .from("transactions")
+    .select("amount")
+    .eq("user_id", dbUserId)
+    .eq("type", "deposit")
+    .gte("created_at", getStartOfDayIso());
+  if (todayError) {
+    throw new Error("讀取 deposit 每日統計失敗");
+  }
+
+  const todayAmount = (todayRows ?? []).reduce(
+    (sum, row) => sum + toNumber(row.amount),
+    0,
+  );
+
+  return {
+    minuteCount: count ?? 0,
+    todayAmount,
+  };
+}
+
+/**
+ * phase-7：唯一可異動已登入使用者 coin_balance 的入口。
+ * 呼叫 Postgres `adjust_wallet_balance` RPC（SECURITY DEFINER），由資料庫以
+ * 「UPDATE ... WHERE coin_balance + delta >= 0」單一原子陳述式完成「檢查餘額 + 寫入」，
+ * 前端不再能（也不再需要）直接 UPDATE wallets，避免 read-modify-write 競態與 Console 竄改。
+ */
+export async function adjustWalletBalance(params: {
+  delta: number;
+  type: TransactionType;
+  description: string;
+  gameId?: string;
+  themeId?: string;
+  roundId?: string;
+  metadata?: Record<string, unknown>;
+}): Promise<AdjustWalletBalanceResult> {
+  const { data, error } = await supabase.rpc("adjust_wallet_balance", {
+    p_delta: params.delta,
+    p_type: params.type,
+    p_description: params.description,
+    p_game_id: params.gameId ?? null,
+    p_theme_id: params.themeId ?? null,
+    p_round_id: params.roundId ?? null,
+    p_metadata: params.metadata ?? null,
+  });
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  const balance = toNumber((data as { balance?: number } | null)?.balance);
+  return { ok: true, balance };
+}

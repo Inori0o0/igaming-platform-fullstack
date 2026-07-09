@@ -8,13 +8,16 @@ type ShopCatalogState = {
   products: Product[];
   fetchState: "idle" | "loading" | "ok" | "error";
   hydrateFromApi: () => Promise<void>;
+  /** 讓已經在 Server Component 拿到目錄的頁面（如 /shop）直接餵資料，不必再讓全站的 client fetch 重查一次。 */
+  seedFromServer: (products: Product[]) => void;
 };
 
 export const useShopCatalogStore = create<ShopCatalogState>((set, get) => ({
   products: shopProducts,
   fetchState: "idle",
   hydrateFromApi: async () => {
-    if (get().fetchState === "loading") return;
+    // "ok"：已經有新鮮資料（不論是上一次 fetch 還是被某頁 seedFromServer 餵入），不用重查。
+    if (get().fetchState === "loading" || get().fetchState === "ok") return;
     set({ fetchState: "loading" });
     try {
       const res = await fetch("/api/shop/catalog", { cache: "no-store" });
@@ -28,6 +31,10 @@ export const useShopCatalogStore = create<ShopCatalogState>((set, get) => ({
     } catch {
       set({ products: shopProducts, fetchState: "error" });
     }
+  },
+  seedFromServer: (products) => {
+    if (get().fetchState !== "idle" || products.length === 0) return;
+    set({ products, fetchState: "ok" });
   },
 }));
 

@@ -6,9 +6,15 @@ import { Input } from "@/src/components/ui/Input";
 
 type DepositActionProps = {
   onDeposit: (amount: number) => void;
+  isSubmitting?: boolean;
+  errorMessage?: string | null;
 };
 
-export function DepositAction({ onDeposit }: DepositActionProps) {
+export function DepositAction({
+  onDeposit,
+  isSubmitting,
+  errorMessage,
+}: DepositActionProps) {
   const [depositAmount, setDepositAmount] = useState("");
   const [inputError, setInputError] = useState("");
   const MAX_DEPOSIT_PER_TX = 200000;
@@ -40,6 +46,7 @@ export function DepositAction({ onDeposit }: DepositActionProps) {
             size="sm"
             variant="secondary"
             onClick={() => onDeposit(amount)}
+            disabled={isSubmitting}
           >
             +{amount.toLocaleString()}
           </Button>
@@ -58,12 +65,18 @@ export function DepositAction({ onDeposit }: DepositActionProps) {
             placeholder="輸入數字"
             error={inputError || undefined}
             helperText={`單筆上限 ${MAX_DEPOSIT_PER_TX.toLocaleString()} VAC`}
+            disabled={isSubmitting}
           />
         </div>
-        <Button size="sm" onClick={onCustomDeposit}>
-          充值
+        <Button size="sm" onClick={onCustomDeposit} disabled={isSubmitting}>
+          {isSubmitting ? "充值中…" : "充值"}
         </Button>
       </div>
+      {errorMessage ? (
+        <p className="mt-2 text-xs text-rose-400" role="alert">
+          {errorMessage}
+        </p>
+      ) : null}
     </div>
   );
 }

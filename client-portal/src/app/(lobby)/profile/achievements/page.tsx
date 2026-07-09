@@ -4,35 +4,25 @@ import { Card } from "@/src/components/ui/Card";
 import { Button } from "@/src/components/ui/Button";
 import { LogoLoader } from "@/src/components/loading/LogoLoader";
 import { formatTime } from "@/src/components/wallet/format";
+import { ProfileLoadingCard } from "@/src/components/profile/ProfileLoadingCard";
+import { ProfileGuestGate } from "@/src/components/profile/ProfileGuestGate";
 import { useProfileAchievements } from "@/src/components/profile/achievements/useProfileAchievements";
 
 export default function ProfileAchievementsPage() {
   const vm = useProfileAchievements();
 
   if (vm.authLoading) {
-    return (
-      <main className="space-y-4">
-        <Card title="成就" description="載入中…">
-          <div className="flex min-h-28 items-center justify-center rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-8">
-            <LogoLoader size="md" className="text-cyan-300" />
-          </div>
-        </Card>
-      </main>
-    );
+    return <ProfileLoadingCard title="成就" description="載入中…" />;
   }
 
   if (!vm.user || vm.user.is_guest) {
     return (
-      <main className="space-y-4">
-        <Card title="成就" description="登入後可查看成就進度與解鎖狀態。">
-          <div className="space-y-4 rounded-2xl border border-dashed border-cyan-500/25 bg-neutral-950/60 p-6 text-center text-sm text-neutral-400">
-            <p>請先登入以查看成就。</p>
-            <Button variant="secondary" onClick={() => vm.setOpenAuthModal(true)}>
-              立即登入
-            </Button>
-          </div>
-        </Card>
-      </main>
+      <ProfileGuestGate
+        title="成就"
+        description="登入後可查看成就進度與解鎖狀態。"
+        message="請先登入以查看成就。"
+        onLogin={() => vm.setOpenAuthModal(true)}
+      />
     );
   }
 
