@@ -22,7 +22,15 @@ import {
   type BaccaratBetArea,
 } from "@/src/games/baccarat/logic/game";
 import { useWalletStore } from "@/src/store/walletStore";
-import { DEAL_ANIMATION_MS, MIN_BET, RESULT_MESSAGE_DELAY_MS, TABLE_BET_OPTIONS, randomProvider } from "../utils/constants";
+import {
+  DEAL_ANIMATION_MS,
+  DEFAULT_BET,
+  DEFAULT_BET_STEP,
+  MIN_BET,
+  RESULT_MESSAGE_DELAY_MS,
+  TABLE_BET_OPTIONS,
+  randomProvider,
+} from "../utils/constants";
 import { draw, outcomeLabel } from "../utils/helpers";
 import type { BaccaratRoundState, RoadEntry } from "../utils/types";
 
@@ -33,8 +41,8 @@ export function useBaccaratTableGame() {
   const placeBaccaratWager = useWalletStore((s) => s.placeBaccaratWager);
   const applyBaccaratPayout = useWalletStore((s) => s.applyBaccaratPayout);
 
-  const [bet, setBet] = useState(500);
-  const [betStep, setBetStep] = useState<(typeof TABLE_BET_OPTIONS)[number]>(500);
+  const [bet, setBet] = useState(DEFAULT_BET);
+  const [betStep, setBetStep] = useState<(typeof TABLE_BET_OPTIONS)[number]>(DEFAULT_BET_STEP);
   const [betArea, setBetArea] = useState<BaccaratBetArea>("player");
 
   const [round, setRound] = useState<BaccaratRoundState | null>(null);

@@ -59,7 +59,7 @@ export function useRoundActions({
   applyBlackjackPayout,
   settleRound,
 }: UseRoundActionsParams) {
-  const inRound = round && round.phase !== "idle" && round.phase !== "settled";
+  const inRound = round?.phase === "player_turn";
   const activeHand = round ? round.hands[round.activeHandIndex] : null;
 
   function withUpdatedActiveHand(

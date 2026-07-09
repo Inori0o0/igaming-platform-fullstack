@@ -6,7 +6,7 @@ import {
   isBlackjack,
   handValue,
 } from "@/src/games/blackjack/logic/game";
-import type { BlackjackCard, PlayerHand } from "@/src/games/blackjack/logic/types";
+import type { BlackjackCard, PlayerHand, RoundPhase } from "@/src/games/blackjack/logic/types";
 
 export function draw(deck: BlackjackCard[]): BlackjackCard {
   const card = deck.shift();
@@ -77,11 +77,11 @@ export function tierGroup(tier: ReturnType<typeof classifyHandTier>) {
 }
 
 export function dealerVisibleTotal(params: {
-  roundPhase: "player_turn" | "dealing" | "idle" | "dealer_turn" | "settled";
+  roundPhase: RoundPhase;
   dealerCards: BlackjackCard[];
 }) {
   const { roundPhase, dealerCards } = params;
-  if (roundPhase === "player_turn" || roundPhase === "dealing") {
+  if (roundPhase === "player_turn") {
     const first = dealerCards[0];
     if (!first) return 0;
     return handValue([first]).total;

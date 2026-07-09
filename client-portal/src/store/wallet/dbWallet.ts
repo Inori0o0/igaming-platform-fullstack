@@ -1,5 +1,5 @@
 import { supabase } from "@/src/lib/supabaseClient";
-import { getStartOfDayIso, getThresholdIso, toNumber } from "./numberUtils";
+import { toNumber } from "./numberUtils";
 import type {
   AdjustWalletBalanceResult,
   DbTransactionRow,
@@ -122,69 +122,6 @@ export async function insertTransaction(params: {
   }
 }
 
-export async function getDbClaimStats(dbUserId: string) {
-  const { count, error: countError } = await supabase
-    .from("transactions")
-    .select("id", { head: true, count: "exact" })
-    .eq("user_id", dbUserId)
-    .eq("type", "claim")
-    .gte("created_at", getStartOfDayIso());
-  if (countError) {
-    throw new Error("讀取 claim 統計失敗");
-  }
-
-  const { data: latestRow, error: latestError } = await supabase
-    .from("transactions")
-    .select("created_at")
-    .eq("user_id", dbUserId)
-    .eq("type", "claim")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (latestError) {
-    throw new Error("讀取 claim 最新時間失敗");
-  }
-
-  return {
-    todayCount: count ?? 0,
-    lastClaimAtMs: latestRow?.created_at
-      ? new Date(latestRow.created_at).getTime()
-      : null,
-  };
-}
-
-export async function getDbDepositStats(dbUserId: string) {
-  const { count, error: minuteCountError } = await supabase
-    .from("transactions")
-    .select("id", { head: true, count: "exact" })
-    .eq("user_id", dbUserId)
-    .eq("type", "deposit")
-    .gte("created_at", getThresholdIso(60_000));
-  if (minuteCountError) {
-    throw new Error("讀取 deposit 每分鐘統計失敗");
-  }
-
-  const { data: todayRows, error: todayError } = await supabase
-    .from("transactions")
-    .select("amount")
-    .eq("user_id", dbUserId)
-    .eq("type", "deposit")
-    .gte("created_at", getStartOfDayIso());
-  if (todayError) {
-    throw new Error("讀取 deposit 每日統計失敗");
-  }
-
-  const todayAmount = (todayRows ?? []).reduce(
-    (sum, row) => sum + toNumber(row.amount),
-    0,
-  );
-
-  return {
-    minuteCount: count ?? 0,
-    todayAmount,
-  };
-}
-
 /**
  * phase-7：唯一可異動已登入使用者 coin_balance 的入口。
  * 呼叫 Postgres `adjust_wallet_balance` RPC（SECURITY DEFINER），由資料庫以
@@ -208,6 +145,42 @@ export async function adjustWalletBalance(params: {
     p_theme_id: params.themeId ?? null,
     p_round_id: params.roundId ?? null,
     p_metadata: params.metadata ?? null,
+  });
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  const balance = toNumber((data as { balance?: number } | null)?.balance);
+  return { ok: true, balance };
+}
+
+/**
+ * P1 #4：修正 TOCTOU 空窗。免費領取的「今日次數／冷卻檢查」與「餘額寫入」
+ * 過去分成前端兩次 SELECT + 一次 RPC，中間有空窗可被併發請求繞過。
+ * 現在整個檢查與寫入都在 `claim_free_coins` RPC 內、同一筆資料庫交易、鎖列後完成，
+ * 前端不再需要（也不再能）自己做額度判斷。
+ */
+export async function claimFreeCoinsRpc(): Promise<AdjustWalletBalanceResult> {
+  const { data, error } = await supabase.rpc("claim_free_coins");
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  const balance = toNumber((data as { balance?: number } | null)?.balance);
+  return { ok: true, balance };
+}
+
+/**
+ * P1 #4：充值版本的同一修正。每分鐘次數／每日金額上限的檢查與加值，
+ * 全部在 `deposit_wallet` RPC 內鎖列後原子完成。
+ */
+export async function depositWalletRpc(
+  amount: number,
+): Promise<AdjustWalletBalanceResult> {
+  const { data, error } = await supabase.rpc("deposit_wallet", {
+    p_amount: amount,
   });
 
   if (error) {

@@ -20,7 +20,9 @@ export function useProfileOverviewViewModel() {
   const hydrateForCurrentUser = useWalletStore(
     (s) => s.hydrateForCurrentUser,
   );
-  const balances = useWalletStore((s) => s.balances);
+  // P1 #7：Profile 摘要卡片只顯示 VAC，訂閱整包 balances 物件會讓 BTC/ETH
+  // 變動也觸發這裡重渲染；改成只選取 VAC 這一個數字。
+  const vacBalance = useWalletStore((s) => s.balances.VAC);
   const transactions = useWalletStore((s) => s.transactions);
 
   const {
@@ -189,7 +191,7 @@ export function useProfileOverviewViewModel() {
     profileLoading,
     profileError,
 
-    balances,
+    vacBalance,
     transactions,
     stats,
 

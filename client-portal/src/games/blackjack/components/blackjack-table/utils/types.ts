@@ -9,6 +9,7 @@ import type {
   RoundPhase,
 } from "@/src/games/blackjack/logic/types";
 
+/** `round === null` 表示尚未開局（下注階段）；開局後 phase 僅在 player_turn / settled 間轉換。 */
 export type RoundState = {
   roundId: string;
   deck: BlackjackCard[];

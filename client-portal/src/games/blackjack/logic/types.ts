@@ -39,12 +39,11 @@ export type PlayerHand = {
   result: HandResult;
 };
 
-export type RoundPhase =
-  | "idle"
-  | "dealing"
-  | "player_turn"
-  | "dealer_turn"
-  | "settled";
+/**
+ * 進行中回合的階段。局間空檔以 `RoundState | null`（round === null）表示，不用 phase。
+ * 發牌動畫與結算忙碌狀態由 `isBusy` 承載，不在 phase 重複建模。
+ */
+export type RoundPhase = "player_turn" | "settled";
 
 export type SettlementOutcome = "win" | "lose" | "push" | "blackjack";
 export type HandTier =

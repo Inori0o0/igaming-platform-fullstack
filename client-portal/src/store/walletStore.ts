@@ -11,13 +11,12 @@ import {
   DEPOSIT_SINGLE_LIMIT,
 } from "./wallet/constants";
 import {
-  getDbClaimStats,
-  getDbDepositStats,
+  claimFreeCoinsRpc,
+  depositWalletRpc,
   getDbUserByAuthUserId,
   getOrCreateWallet,
   insertTransaction,
   listTransactions,
-  adjustWalletBalance,
 } from "./wallet/dbWallet";
 import { applyGamePayout, placeGameWager } from "./wallet/gameTransactions";
 import {
@@ -221,22 +220,10 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         return;
       }
 
-      const dbUser = await getDbUserByAuthUserId(user.id);
-      const dbStats = await getDbDepositStats(dbUser.id);
-      if (dbStats.minuteCount >= DEPOSIT_PER_MINUTE_LIMIT) {
-        endAction(set, "deposit", "充值過於頻繁，請稍後再試");
-        return;
-      }
-      if (dbStats.todayAmount + amount > DEPOSIT_DAILY_LIMIT) {
-        endAction(set, "deposit", "已達今日充值上限");
-        return;
-      }
-
-      const result = await adjustWalletBalance({
-        delta: amount,
-        type: "deposit",
-        description: "充值 vAcAnt Coins",
-      });
+      // P1 #4：每分鐘次數／每日金額上限的檢查與加值，現在都在 `deposit_wallet`
+      // RPC 內鎖列後原子完成，前端不再自己先查統計、再另外呼叫寫入 RPC
+      // （那個順序中間有 TOCTOU 空窗，併發請求可能同時通過檢查）。
+      const result = await depositWalletRpc(amount);
       if (!result.ok) throw new Error(result.error);
       await get().hydrateForCurrentUser();
       endAction(set, "deposit", null);
@@ -358,25 +345,11 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         return;
       }
 
-      const dbUser = await getDbUserByAuthUserId(user.id);
-      const claimStats = await getDbClaimStats(dbUser.id);
-      if (claimStats.todayCount >= CLAIM_DAILY_LIMIT) {
-        endAction(set, "claim", "今日領取次數已達上限");
-        return;
-      }
-      if (
-        claimStats.lastClaimAtMs !== null &&
-        Date.now() - claimStats.lastClaimAtMs < CLAIM_COOLDOWN_MS
-      ) {
-        endAction(set, "claim", "領取過於頻繁，請稍後再試");
-        return;
-      }
-
-      const result = await adjustWalletBalance({
-        delta: amount,
-        type: "claim",
-        description: "免費領取 vAcAnt Coins",
-      });
+      // P1 #4：今日次數／冷卻的檢查與加值，現在都在 `claim_free_coins` RPC
+      // 內鎖列後原子完成，取代先前「前端 SELECT 統計 -> 判斷 -> 呼叫
+      // adjust_wallet_balance」的兩階段流程（中間的空窗讓併發請求都能通過
+      // 檢查，導致實際領取次數/金額超過設計上限）。
+      const result = await claimFreeCoinsRpc();
       if (!result.ok) throw new Error(result.error);
       await get().hydrateForCurrentUser();
       endAction(set, "claim", null);

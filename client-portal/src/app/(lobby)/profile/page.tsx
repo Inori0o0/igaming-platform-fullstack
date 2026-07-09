@@ -61,7 +61,7 @@ export default function ProfileOverviewPage() {
 
           <div className="min-w-0 flex-1 lg:basis-2/5">
             <ProfileStatsCard
-              vacBalance={vm.balances.VAC}
+              vacBalance={vm.vacBalance}
               plays={vm.stats.plays}
               totalWin={vm.stats.totalWin}
               ordersLoading={vm.ordersLoading}

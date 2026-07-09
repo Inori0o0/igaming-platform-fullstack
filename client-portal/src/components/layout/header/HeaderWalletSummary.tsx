@@ -5,8 +5,12 @@ import { formatAmount } from "@/src/components/wallet/format";
 
 export function HeaderWalletSummary() {
   const userId = useAuthStore((s) => s.user?.id);
-  const balances = useWalletStore((s) => s.balances);
+  // P1 #7：不要訂閱整包 balances 物件——每次任一幣別變動（deposit/claim/遊戲輸贏）
+  // 都會產生新的 balances 參考，訂閱整包物件的元件全部會被通知重渲染，即使
+  // Header 這裡實際只顯示 displayCurrency 對應的那一個數字。改成直接選取
+  // `balances[displayCurrency]`，只有這個數字真的變了才會觸發重渲染。
   const displayCurrency = useWalletStore((s) => s.displayCurrency);
+  const displayAmount = useWalletStore((s) => s.balances[s.displayCurrency]);
   const hydrateForCurrentUser = useWalletStore((s) => s.hydrateForCurrentUser);
   const hydrateStatus = useWalletStore((s) => s.hydrateStatus);
 
@@ -17,7 +21,7 @@ export function HeaderWalletSummary() {
 
   const currencyLabel =
     displayCurrency === "VAC" ? "vAcAnt Coins" : displayCurrency;
-  const amount = formatAmount(displayCurrency, balances[displayCurrency]);
+  const amount = formatAmount(displayCurrency, displayAmount);
   // hydrate 失敗時 balances 仍是上一次成功讀到的值（不會被蓋成 0），
   // 但顯示上要讓使用者知道「這可能不是最新餘額」，而不是誤以為錢真的變成這個數字。
   const hasHydrateError = hydrateStatus === "error";

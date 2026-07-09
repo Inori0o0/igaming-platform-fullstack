@@ -4,7 +4,7 @@
  */
 import { useMemo, useState } from "react";
 import { useWalletStore } from "@/src/store/walletStore";
-import { TABLE_BET_OPTIONS } from "../utils/constants";
+import { DEFAULT_BET, DEFAULT_BET_STEP, TABLE_BET_OPTIONS } from "../utils/constants";
 import { dealerVisibleTotal } from "../utils/helpers";
 import type { MascotCue, RoundState } from "../utils/types";
 import { useRoundActions } from "./useRoundActions";
@@ -14,8 +14,8 @@ export function useBlackjackTableGame() {
   const vacBalance = useWalletStore((s) => s.balances.VAC);
   const placeBlackjackWager = useWalletStore((s) => s.placeBlackjackWager);
   const applyBlackjackPayout = useWalletStore((s) => s.applyBlackjackPayout);
-  const [bet, setBet] = useState(500);
-  const [betStep, setBetStep] = useState<(typeof TABLE_BET_OPTIONS)[number]>(500);
+  const [bet, setBet] = useState(DEFAULT_BET);
+  const [betStep, setBetStep] = useState<(typeof TABLE_BET_OPTIONS)[number]>(DEFAULT_BET_STEP);
   const [round, setRound] = useState<RoundState | null>(null);
   const [message, setMessage] = useState("請先下注後開始本局。");
   const [eventTone, setEventTone] = useState<"info" | "success" | "warning">("info");

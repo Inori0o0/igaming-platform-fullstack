@@ -2,6 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  isCheckoutSubmitLocked,
+  setCheckoutSubmitLocked,
+  subscribeCheckoutPageShow,
+} from "@/src/components/shop/checkout/checkoutSubmitLock";
+import {
+  validateShippingField,
+  validateShippingForm,
+  type ShippingFieldErrors,
+} from "@/src/lib/checkoutValidation";
 import { buildCheckoutRpcPayload } from "@/src/lib/shopCheckout";
 import { supabase } from "@/src/lib/supabaseClient";
 import { calculateCartSummary, useCartStore } from "@/src/store/cartStore";
@@ -61,18 +71,30 @@ export function useCheckoutViewModel() {
     address: "",
     note: "",
   });
-  const [uiState, setUiState] = useState<CheckoutUiState>({
+  const [fieldErrors, setFieldErrors] = useState<ShippingFieldErrors>({});
+  // 初始值直接讀 sessionStorage 的鎖狀態：如果頁面是在一筆訂單處理中被重新
+  // 載入（而不是單純的元件記憶體殘留 isSubmitting=false），這裡要如實反映。
+  const [uiState, setUiState] = useState<CheckoutUiState>(() => ({
     error: null,
-    isSubmitting: false,
-  });
+    isSubmitting: isCheckoutSubmitLocked(),
+  }));
 
-  /** 避免連點或 async 競態導致重複送出 RPC。 */
-  const confirmLockRef = useRef(false);
+  /** 避免連點或 async 競態導致重複送出 RPC（元件記憶體內的第一層鎖）。 */
+  const confirmLockRef = useRef(isCheckoutSubmitLocked());
 
   useEffect(() => {
     // 依賴 userId：登入/登出/切換帳號時（頁面未重新 mount）也要換成對應身份的購物車快照。
     hydrate();
   }, [hydrate, userId]);
+
+  useEffect(() => {
+    // P1 #5：bfcache 還原時（event.persisted），以 sessionStorage 的鎖狀態
+    // 重新同步 ref 與 UI，避免瀏覽器還原出一個「看起來可以再送出一次」的畫面。
+    return subscribeCheckoutPageShow((locked) => {
+      confirmLockRef.current = locked;
+      setUiState((prev) => ({ ...prev, isSubmitting: locked }));
+    });
+  }, []);
 
   const summary = useMemo(
     () => calculateCartSummary(items, coupon, catalog),
@@ -97,10 +119,17 @@ export function useCheckoutViewModel() {
     value: ShippingForm[K],
   ) => {
     setShippingForm((prev) => ({ ...prev, [key]: value }));
+    // P1 #6：逐欄位即時反饋，不用等送出才知道哪裡填錯。note 是選填欄位，
+    // 但仍套用同一個 schema（長度上限等）以維持單一驗證來源。
+    if (key === "recipient" || key === "phone" || key === "address" || key === "note") {
+      const message = validateShippingField(key, value);
+      setFieldErrors((prev) => ({ ...prev, [key]: message ?? undefined }));
+    }
   }, []);
 
   const handleConfirm = useCallback(async () => {
-    if (confirmLockRef.current) {
+    // 第一層鎖（元件記憶體）+ 第二層鎖（sessionStorage，跨 remount/bfcache 還原存活）。
+    if (confirmLockRef.current || isCheckoutSubmitLocked()) {
       return;
     }
 
@@ -118,20 +147,21 @@ export function useCheckoutViewModel() {
       setUiState((prev) => ({ ...prev, error: "購物車是空的" }));
       return;
     }
-    if (
-      isPhysical &&
-      (!shippingForm.recipient.trim() ||
-        !shippingForm.phone.trim() ||
-        !shippingForm.address.trim())
-    ) {
-      setUiState((prev) => ({
-        ...prev,
-        error: "請填寫收件人、手機與地址",
-      }));
-      return;
+
+    if (isPhysical) {
+      const errors = validateShippingForm(shippingForm);
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        setUiState((prev) => ({
+          ...prev,
+          error: "請修正收件資訊中標示的欄位",
+        }));
+        return;
+      }
     }
 
     confirmLockRef.current = true;
+    setCheckoutSubmitLocked(true);
     setUiState((prev) => ({ ...prev, isSubmitting: true, error: null }));
 
     try {
@@ -163,6 +193,7 @@ export function useCheckoutViewModel() {
       await hydrateWallet();
       setUiState({ error: null, isSubmitting: false });
       confirmLockRef.current = false;
+      setCheckoutSubmitLocked(false);
 
       const next =
         orderId != null
@@ -171,6 +202,7 @@ export function useCheckoutViewModel() {
       router.replace(next);
     } catch (e: unknown) {
       confirmLockRef.current = false;
+      setCheckoutSubmitLocked(false);
       const msg =
         e && typeof e === "object" && "message" in e
           ? rpcErrorMessage(e as { message?: string })
@@ -198,6 +230,7 @@ export function useCheckoutViewModel() {
     summary,
     isPhysical,
     shippingForm,
+    fieldErrors,
     uiState,
     setShippingField,
     handleConfirm,

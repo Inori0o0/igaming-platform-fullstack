@@ -12,6 +12,7 @@ export default function CheckoutPage() {
     summary,
     isPhysical,
     shippingForm,
+    fieldErrors,
     uiState,
     setShippingField,
     handleConfirm,
@@ -48,30 +49,70 @@ export default function CheckoutPage() {
         >
           {isPhysical ? (
             <div className="space-y-3 text-xs text-neutral-300">
-              <input
-                value={shippingForm.recipient}
-                onChange={(event) => setShippingField("recipient", event.target.value)}
-                className="w-full rounded-lg border border-cyan-500/25 bg-black/30 px-3 py-2 text-xs text-neutral-100 outline-none focus:border-cyan-400/60"
-                placeholder="收件人"
-              />
-              <input
-                value={shippingForm.phone}
-                onChange={(event) => setShippingField("phone", event.target.value)}
-                className="w-full rounded-lg border border-cyan-500/25 bg-black/30 px-3 py-2 text-xs text-neutral-100 outline-none focus:border-cyan-400/60"
-                placeholder="手機號碼"
-              />
-              <input
-                value={shippingForm.address}
-                onChange={(event) => setShippingField("address", event.target.value)}
-                className="w-full rounded-lg border border-cyan-500/25 bg-black/30 px-3 py-2 text-xs text-neutral-100 outline-none focus:border-cyan-400/60"
-                placeholder="完整地址"
-              />
-              <textarea
-                value={shippingForm.note}
-                onChange={(event) => setShippingField("note", event.target.value)}
-                className="min-h-20 w-full rounded-lg border border-cyan-500/25 bg-black/30 px-3 py-2 text-xs text-neutral-100 outline-none focus:border-cyan-400/60"
-                placeholder="備註（選填）"
-              />
+              <div>
+                <input
+                  value={shippingForm.recipient}
+                  onChange={(event) => setShippingField("recipient", event.target.value)}
+                  className={cn(
+                    "w-full rounded-lg border bg-black/30 px-3 py-2 text-xs text-neutral-100 outline-none",
+                    fieldErrors.recipient
+                      ? "border-rose-500/60 focus:border-rose-400/80"
+                      : "border-cyan-500/25 focus:border-cyan-400/60",
+                  )}
+                  placeholder="收件人"
+                />
+                {fieldErrors.recipient && (
+                  <p className="mt-1 text-[11px] text-rose-300">{fieldErrors.recipient}</p>
+                )}
+              </div>
+              <div>
+                <input
+                  value={shippingForm.phone}
+                  onChange={(event) => setShippingField("phone", event.target.value)}
+                  className={cn(
+                    "w-full rounded-lg border bg-black/30 px-3 py-2 text-xs text-neutral-100 outline-none",
+                    fieldErrors.phone
+                      ? "border-rose-500/60 focus:border-rose-400/80"
+                      : "border-cyan-500/25 focus:border-cyan-400/60",
+                  )}
+                  placeholder="手機號碼"
+                />
+                {fieldErrors.phone && (
+                  <p className="mt-1 text-[11px] text-rose-300">{fieldErrors.phone}</p>
+                )}
+              </div>
+              <div>
+                <input
+                  value={shippingForm.address}
+                  onChange={(event) => setShippingField("address", event.target.value)}
+                  className={cn(
+                    "w-full rounded-lg border bg-black/30 px-3 py-2 text-xs text-neutral-100 outline-none",
+                    fieldErrors.address
+                      ? "border-rose-500/60 focus:border-rose-400/80"
+                      : "border-cyan-500/25 focus:border-cyan-400/60",
+                  )}
+                  placeholder="完整地址"
+                />
+                {fieldErrors.address && (
+                  <p className="mt-1 text-[11px] text-rose-300">{fieldErrors.address}</p>
+                )}
+              </div>
+              <div>
+                <textarea
+                  value={shippingForm.note}
+                  onChange={(event) => setShippingField("note", event.target.value)}
+                  className={cn(
+                    "min-h-20 w-full rounded-lg border bg-black/30 px-3 py-2 text-xs text-neutral-100 outline-none",
+                    fieldErrors.note
+                      ? "border-rose-500/60 focus:border-rose-400/80"
+                      : "border-cyan-500/25 focus:border-cyan-400/60",
+                  )}
+                  placeholder="備註（選填）"
+                />
+                {fieldErrors.note && (
+                  <p className="mt-1 text-[11px] text-rose-300">{fieldErrors.note}</p>
+                )}
+              </div>
             </div>
           ) : (
             <div className="rounded-2xl border border-cyan-500/20 bg-neutral-950/60 p-5 text-xs text-neutral-300">
