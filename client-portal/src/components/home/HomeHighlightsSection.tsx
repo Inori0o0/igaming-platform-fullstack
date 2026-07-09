@@ -9,7 +9,7 @@ export function HomeHighlightsSection() {
         title="熱門遊戲"
         description="從二十一點和百家樂進入 vAcAnt 腦爛宇宙大廳。"
       >
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
               百家樂
@@ -18,7 +18,7 @@ export function HomeHighlightsSection() {
               href="/games/baccarat"
               imageSrc="/games/baccarat/bc_card_v2.webp"
               imageAlt="百家樂"
-              title="BACCARAT 百家樂"
+              title={"BACCARAT\n百家樂"}
               tag="百家樂"
             />
           </div>
@@ -30,7 +30,7 @@ export function HomeHighlightsSection() {
               href="/games/blackjack"
               imageSrc="/games/blackjack/bj_card.webp"
               imageAlt="Blackjack 二十一點"
-              title="BLACKJACK 二十一點"
+              title={"BLACKJACK\n二十一點"}
               tag="二十一點"
             />
           </div>

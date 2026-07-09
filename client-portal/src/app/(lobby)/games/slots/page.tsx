@@ -64,7 +64,7 @@ export default function SlotsListPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3">
         {slots.map((slot) => (
           <div key={slot.id} className="space-y-2">
             <GameThemeCard
@@ -75,7 +75,9 @@ export default function SlotsListPage() {
               tag={slot.tag}
               availability={getSlotThemeAvailability(slot.id)}
             />
-            <p className="px-1 text-xs text-neutral-400">{slot.description}</p>
+            <p className="line-clamp-2 px-1 text-xs text-neutral-400">
+              {slot.description}
+            </p>
           </div>
         ))}
       </div>

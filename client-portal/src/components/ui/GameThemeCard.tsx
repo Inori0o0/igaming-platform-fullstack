@@ -58,7 +58,7 @@ export function GameThemeCard({
             playable && "group-hover:scale-[1.04]",
             !playable && "grayscale-65",
           )}
-          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+          sizes="(max-width: 1280px) 50vw, 33vw"
         />
       ) : (
         (fallback ?? (
@@ -78,36 +78,36 @@ export function GameThemeCard({
 
       {!playable ? (
         <div
-          className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-black/36 p-4"
+          className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-black/36 p-3 sm:p-4"
           aria-hidden
         >
-          <span className="rounded-lg border border-white/25 bg-black/75 px-4 py-2 text-sm font-bold uppercase tracking-wider text-white shadow-lg backdrop-blur-sm">
+          <span className="rounded-lg border border-white/25 bg-black/75 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg backdrop-blur-sm sm:px-4 sm:py-2 sm:text-sm">
             {availability === "maintenance" ? "維護中" : "即將開放"}
           </span>
         </div>
       ) : null}
 
       {tag ? (
-        <span className="absolute right-3 top-3 z-10 rounded-full border border-white/15 bg-black/40 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-100 backdrop-blur-sm">
+        <span className="absolute right-2 top-2 z-10 rounded-full border border-white/15 bg-black/40 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-cyan-100 backdrop-blur-sm sm:right-3 sm:top-3 sm:px-2.5 sm:text-[10px] sm:tracking-[0.14em]">
           {tag}
         </span>
       ) : null}
 
-      <div className="absolute inset-x-0 bottom-0 z-10 p-4 pb-5 text-center sm:p-5">
-        <h2 className="whitespace-pre-line text-lg font-bold uppercase leading-[1.05] tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] sm:text-xl">
+      <div className="absolute inset-x-0 bottom-0 z-10 p-3 pb-4 text-center sm:p-5 sm:pb-5">
+        <h2 className="whitespace-pre-line text-base font-bold uppercase leading-[1.05] tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] sm:text-xl">
           {title}
         </h2>
         {subtitle ? (
-          <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-white/90">
+          <p className="mt-2 text-[9px] font-bold uppercase tracking-[0.16em] text-white/90 sm:mt-3 sm:text-[10px] sm:tracking-[0.2em]">
             {subtitle}
           </p>
         ) : null}
         {playable ? (
-          <p className="mt-4 text-[11px] font-semibold text-cyan-200/90 transition group-hover:text-cyan-100">
+          <p className="mt-2 text-[10px] font-semibold text-cyan-200/90 transition group-hover:text-cyan-100 sm:mt-4 sm:text-[11px]">
             開始遊玩 →
           </p>
         ) : (
-          <p className="mt-4 text-[11px] font-semibold text-amber-200/95">
+          <p className="mt-2 text-[10px] font-semibold text-amber-200/95 sm:mt-4 sm:text-[11px]">
             {availability === "maintenance" ? "維護中" : "即將開放"}
           </p>
         )}

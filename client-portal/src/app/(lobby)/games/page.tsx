@@ -133,7 +133,7 @@ export default function GamesLobbyPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3">
         {lobbyCards.map((item) => (
           <div key={item.id} className="space-y-2">
             <GameThemeCard
@@ -144,7 +144,9 @@ export default function GamesLobbyPage() {
               tag={item.tag}
               availability={item.availability}
             />
-            <p className="px-1 text-xs text-neutral-400">{item.description}</p>
+            <p className="line-clamp-2 px-1 text-xs text-neutral-400">
+              {item.description}
+            </p>
           </div>
         ))}
       </div>
