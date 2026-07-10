@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { type ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import clsx from "clsx";
 import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import type { SlotGameAvailabilityStatus } from "@/src/games/slots/config/gameAvailability";
@@ -25,7 +27,7 @@ export type GameThemeCardProps = {
  * 大廳用遊戲圖卡（4:5）：全幅插圖 + 底部暗角漸層 + 疊字標題。
  * 文字不燒在圖上；`availability` 非 `open` 時不可點入、灰階並顯示維護／即將開放。
  */
-export function GameThemeCard({
+export const GameThemeCard = memo(function GameThemeCard({
   href,
   imageSrc,
   imageAlt,
@@ -130,4 +132,4 @@ export function GameThemeCard({
       {content}
     </div>
   );
-}
+});

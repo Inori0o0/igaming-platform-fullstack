@@ -1,9 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import {
+  AVATAR_MAX_QUANTITY,
+  MAX_ADD_BATCH_QUANTITY,
+} from "@/src/shop/constants";
 import { stockAvailableForLine } from "@/src/shop/stock";
 import type { ApparelSize, Product } from "@/src/shop/types";
 import { useCartStore } from "@/src/store/cartStore";
+import { showToast } from "@/src/store/toastStore";
 
 export function useAddToCartPanel(product: Product) {
   const addItem = useCartStore((s) => s.addItem);
@@ -33,14 +38,14 @@ export function useAddToCartPanel(product: Product) {
   const maxSelectable = isOutOfStock
     ? 0
     : isAvatar
-      ? inCartQty >= 1
+      ? inCartQty >= AVATAR_MAX_QUANTITY
         ? 0
-        : 1
-      : Math.min(5, remaining);
+        : AVATAR_MAX_QUANTITY
+      : Math.min(MAX_ADD_BATCH_QUANTITY, remaining);
   const cartHoldsAllStock =
     !isOutOfStock &&
     maxSelectable <= 0 &&
-    (isAvatar ? inCartQty >= 1 : lineCap > 0 && remaining <= 0);
+    (isAvatar ? inCartQty >= AVATAR_MAX_QUANTITY : lineCap > 0 && remaining <= 0);
 
   const quantityOptions = useMemo(
     () => Array.from({ length: maxSelectable }, (_, i) => i + 1),
@@ -48,7 +53,7 @@ export function useAddToCartPanel(product: Product) {
   );
 
   const quantityForAdd = useMemo(() => {
-    if (isAvatar) return 1;
+    if (isAvatar) return AVATAR_MAX_QUANTITY;
     if (quantityOptions.length === 0) return 1;
     const cap = quantityOptions[quantityOptions.length - 1]!;
     return Math.min(Math.max(1, quantity), cap);
@@ -62,7 +67,12 @@ export function useAddToCartPanel(product: Product) {
       quantityForAdd,
       hasSizes ? size : undefined,
     );
-    setMessage(result.message);
+    if (result.ok) {
+      showToast("success", result.message);
+      setMessage(null);
+    } else {
+      setMessage(result.message);
+    }
     setShowReplaceAction(
       result.ok === false && result.reason === "mixed_fulfillment",
     );
@@ -74,7 +84,12 @@ export function useAddToCartPanel(product: Product) {
       quantityForAdd,
       hasSizes ? size : undefined,
     );
-    setMessage(result.message);
+    if (result.ok) {
+      showToast("success", result.message);
+      setMessage(null);
+    } else {
+      setMessage(result.message);
+    }
     setShowReplaceAction(false);
   };
 

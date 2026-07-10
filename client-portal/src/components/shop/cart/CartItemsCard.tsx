@@ -14,16 +14,9 @@ type CartRow = {
 type CartItemsCardProps = {
   cartRows: CartRow[];
   mode: "physical" | "digital" | null;
-  onQuantityChange: (productId: string, quantity: number, size?: ApparelSize) => void;
-  onRemove: (productId: string, size?: ApparelSize) => void;
 };
 
-export function CartItemsCard({
-  cartRows,
-  mode,
-  onQuantityChange,
-  onRemove,
-}: CartItemsCardProps) {
+export function CartItemsCard({ cartRows, mode }: CartItemsCardProps) {
   return (
     <Card title="商品列表" description="調整數量或移除">
       {cartRows.length === 0 ? (
@@ -50,10 +43,6 @@ export function CartItemsCard({
               size={row.size}
               quantity={row.quantity}
               lineTotal={row.lineTotal}
-              onQuantityChange={(qty) =>
-                onQuantityChange(row.product.id, qty, row.size)
-              }
-              onRemove={() => onRemove(row.product.id, row.size)}
             />
           ))}
         </div>

@@ -1,17 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { memo } from "react";
 import { cn } from "@/src/lib/cn";
 import { formatVac, fulfillmentLabel, orderStatusLabel, shortOrderId } from "@/src/components/profile/orders/orderDisplay";
-import type { ProfileOrderRow } from "@/src/components/profile/orders/types";
+import type { ProfileOrderRow as OrderRow } from "@/src/components/profile/orders/types";
 
 type ProfileOrderRowProps = {
-  order: ProfileOrderRow;
-  copiedId: string | null;
+  order: OrderRow;
+  isCopied: boolean;
   onCopyOrderId: (id: string) => void;
 };
 
-export function ProfileOrderRow({ order: o, copiedId, onCopyOrderId }: ProfileOrderRowProps) {
+export const ProfileOrderRow = memo(function ProfileOrderRow({
+  order: o,
+  isCopied,
+  onCopyOrderId,
+}: ProfileOrderRowProps) {
   return (
     <li className="overflow-hidden rounded-2xl border border-neutral-800/90 bg-neutral-950/70">
       <Link
@@ -56,9 +61,9 @@ export function ProfileOrderRow({ order: o, copiedId, onCopyOrderId }: ProfileOr
           }}
           className="shrink-0 rounded-md border border-cyan-500/25 bg-neutral-950/80 px-2 py-1 text-[10px] font-semibold text-cyan-200/90 transition hover:border-cyan-400/45"
         >
-          {copiedId === o.id ? "已複製" : "複製編號"}
+          {isCopied ? "已複製" : "複製編號"}
         </button>
       </div>
     </li>
   );
-}
+});

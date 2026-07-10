@@ -8,8 +8,7 @@ import type {
   CartMode,
   CouponState,
 } from "@/src/store/cartTypes";
-
-const PHYSICAL_SHIPPING_FEE = 60;
+import { PHYSICAL_SHIPPING_FEE_VAC } from "@/src/shop/constants";
 
 /** 以購物車第一列對應的商品決定整車 fulfillment（實體／數位）；空車為 null。 */
 export function deriveMode(items: CartLineItem[], catalog: Product[]): CartMode {
@@ -46,7 +45,7 @@ export function calculateCartSummary(
     return sum + product.priceVac * item.quantity;
   }, 0);
 
-  const baseShipping = mode === "physical" && subtotalVac > 0 ? PHYSICAL_SHIPPING_FEE : 0;
+  const baseShipping = mode === "physical" && subtotalVac > 0 ? PHYSICAL_SHIPPING_FEE_VAC : 0;
 
   const effective =
     coupon && (mode === null || couponAppliesToMode(coupon, mode)) ? coupon : null;
@@ -64,7 +63,7 @@ export function calculateCartSummary(
       fixedDiscount = Math.min(subtotalVac, effective.fixedOffVac);
     }
     if (effective.discountType === "free_shipping") {
-      shippingDiscount = Math.min(baseShipping, PHYSICAL_SHIPPING_FEE);
+      shippingDiscount = Math.min(baseShipping, PHYSICAL_SHIPPING_FEE_VAC);
     }
   }
 

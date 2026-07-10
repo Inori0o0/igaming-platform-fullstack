@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { calculateCartSummary, useCartStore } from "@/src/store/cartStore";
 import { useShopCatalogStore } from "@/src/store/shopCatalogStore";
 import { useAuthStore } from "@/src/store/authStore";
+import { showToast } from "@/src/store/toastStore";
 
 export function useCartViewModel() {
   const userId = useAuthStore((s) => s.user?.id);
@@ -54,7 +55,10 @@ export function useCartViewModel() {
     setCouponMessage(null);
     try {
       const result = await applyCoupon(couponInput);
-      setCouponMessage(result.message);
+      setCouponMessage(result.ok ? null : result.message);
+      if (result.ok) {
+        showToast("success", result.message);
+      }
     } finally {
       setCouponLoading(false);
     }

@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { memo } from "react";
 import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import { productCategoryLabels } from "@/src/shop/types";
 import { useFeaturedHomeProduct } from "@/src/components/home/featured-product/useFeaturedHomeProduct";
 
-export function HomeFeaturedProductCard() {
+export const HomeFeaturedProductCard = memo(function HomeFeaturedProductCard() {
   const featuredProduct = useFeaturedHomeProduct();
 
   return (
@@ -39,4 +40,4 @@ export function HomeFeaturedProductCard() {
       </div>
     </Link>
   );
-}
+});

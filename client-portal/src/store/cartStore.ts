@@ -7,6 +7,10 @@
 
 import { create } from "zustand";
 import type { ApparelSize } from "@/src/shop/types";
+import {
+  AVATAR_MAX_QUANTITY,
+  MAX_LINE_QUANTITY,
+} from "@/src/shop/constants";
 import { stockAvailableForLine } from "@/src/shop/stock";
 import { couponAppliesToMode, deriveMode } from "@/src/store/cartSummary";
 import type { CartLineItem, CartMode, CouponFulfillmentScope, CouponState } from "@/src/store/cartTypes";
@@ -126,12 +130,18 @@ function normalizeStoredItems(raw: unknown): CartLineItem[] {
       const s = rec.size;
       const size: ApparelSize =
         s && product.sizeOptions.includes(s) ? s : "M";
-      const cap = Math.min(product.isAvatar ? 1 : 99, stockAvailableForLine(product, size));
+      const cap = Math.min(
+        product.isAvatar ? AVATAR_MAX_QUANTITY : MAX_LINE_QUANTITY,
+        stockAvailableForLine(product, size),
+      );
       if (cap <= 0) continue;
       const qty = Math.max(1, Math.min(cap, Math.floor(rec.quantity)));
       out.push({ productId: rec.productId, quantity: qty, size });
     } else {
-      const cap = Math.min(product.isAvatar ? 1 : 99, stockAvailableForLine(product));
+      const cap = Math.min(
+        product.isAvatar ? AVATAR_MAX_QUANTITY : MAX_LINE_QUANTITY,
+        stockAvailableForLine(product),
+      );
       if (cap <= 0) continue;
       const qty = Math.max(1, Math.min(cap, Math.floor(rec.quantity)));
       out.push({ productId: rec.productId, quantity: qty });
@@ -310,7 +320,7 @@ export const useCartStore = create<CartState>((set, get) => ({
     const inCartQty = existing?.quantity ?? 0;
 
     if (target.isAvatar) {
-      if (inCartQty >= 1) {
+      if (inCartQty >= AVATAR_MAX_QUANTITY) {
         return {
           ok: false,
           reason: "avatar_max_one_per_cart",
@@ -337,7 +347,7 @@ export const useCartStore = create<CartState>((set, get) => ({
       };
     }
 
-    const qtyCap = target.isAvatar ? 1 : 99;
+    const qtyCap = target.isAvatar ? AVATAR_MAX_QUANTITY : MAX_LINE_QUANTITY;
     const newLine: CartLineItem = needsSize
       ? { productId, quantity: Math.min(qtyCap, safeQuantity), size: resolvedSize }
       : { productId, quantity: Math.min(qtyCap, safeQuantity) };
@@ -390,7 +400,7 @@ export const useCartStore = create<CartState>((set, get) => ({
     if (!product) return;
     // 與 addItem 用同一套庫存來源（stockAvailableForLine），避免「加車有驗庫存、改數量沒驗」的落差，
     // 讓使用者無法透過購物車頁的數量選單把某個品項改到超過實際庫存。
-    const maxQty = product.isAvatar ? 1 : 99;
+    const maxQty = product.isAvatar ? AVATAR_MAX_QUANTITY : MAX_LINE_QUANTITY;
     const stockCap = stockAvailableForLine(product, size);
     const safeQuantity = Math.min(
       maxQty,

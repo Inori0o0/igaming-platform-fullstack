@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { memo } from "react";
 import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import type { Product } from "@/src/shop/types";
 import { productCategoryLabels } from "@/src/shop/types";
@@ -7,7 +10,7 @@ type ProductCardProps = {
   product: Product;
 };
 
-export function ProductCard({ product }: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       href={`/shop/${product.id}`}
@@ -40,4 +43,4 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
     </Link>
   );
-}
+});

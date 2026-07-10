@@ -20,8 +20,6 @@ export default function CartPage() {
     couponLoading,
     handleApplyCoupon,
     handleClearCoupon,
-    removeItem,
-    updateItemQuantity,
   } = useCartViewModel();
 
   const checkoutButton = (
@@ -69,8 +67,6 @@ export default function CartPage() {
         <CartItemsCard
           cartRows={cartRows}
           mode={mode}
-          onQuantityChange={updateItemQuantity}
-          onRemove={removeItem}
         />
 
         <div className="space-y-4">

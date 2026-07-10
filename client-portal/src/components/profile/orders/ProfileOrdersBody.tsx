@@ -65,7 +65,7 @@ export function ProfileOrdersBody({
         <ProfileOrderRow
           key={o.id}
           order={o}
-          copiedId={copiedId}
+          isCopied={copiedId === o.id}
           onCopyOrderId={onCopyOrderId}
         />
       ))}

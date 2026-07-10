@@ -1,30 +1,34 @@
+"use client";
+
+import { memo } from "react";
 import { LoadingImage } from "@/src/components/loading/LoadingImage";
 import { Button } from "@/src/components/ui/Button";
+import {
+  AVATAR_MAX_QUANTITY,
+  MAX_LINE_QUANTITY,
+} from "@/src/shop/constants";
 import { stockAvailableForLine } from "@/src/shop/stock";
 import type { ApparelSize, Product } from "@/src/shop/types";
+import { useCartStore } from "@/src/store/cartStore";
 
 type CartLineItemProps = {
   product: Product;
   size?: ApparelSize;
   quantity: number;
   lineTotal: number;
-  onQuantityChange: (quantity: number) => void;
-  onRemove: () => void;
 };
 
-export function CartLineItem({
+export const CartLineItem = memo(function CartLineItem({
   product,
   size,
   quantity,
   lineTotal,
-  onQuantityChange,
-  onRemove,
 }: CartLineItemProps) {
-  // 選單上限跟著實際庫存走（與 addItem/updateItemQuantity 用同一個 stockAvailableForLine），
-  // 避免選單本身就能選出超過庫存的數量；同時與 store 的單品上限（99）保持一致，並至少保留
-  // 目前已在購物車的數量，避免選單瞬間消失選項。
+  const updateItemQuantity = useCartStore((s) => s.updateItemQuantity);
+  const removeItem = useCartStore((s) => s.removeItem);
+
   const maxSelectable = Math.min(
-    99,
+    MAX_LINE_QUANTITY,
     Math.max(quantity, stockAvailableForLine(product, size)),
   );
   const quantityOptions = Array.from(
@@ -54,14 +58,16 @@ export function CartLineItem({
       <div className="flex items-center gap-2">
         {product.isAvatar ? (
           <span className="rounded-lg border border-cyan-500/20 bg-black/20 px-2 py-1 text-xs tabular-nums text-neutral-300">
-            數量 1
+            數量 {AVATAR_MAX_QUANTITY}
           </span>
         ) : (
           <select
             aria-label={`${product.name}${size ? ` ${size}` : ""} 數量`}
             className="rounded-lg border border-cyan-500/25 bg-black/30 px-2 py-1 text-xs text-neutral-100"
             value={quantity}
-            onChange={(event) => onQuantityChange(Number(event.target.value))}
+            onChange={(event) =>
+              updateItemQuantity(product.id, Number(event.target.value), size)
+            }
           >
             {quantityOptions.map((qty) => (
               <option key={qty} value={qty}>
@@ -70,10 +76,10 @@ export function CartLineItem({
             ))}
           </select>
         )}
-        <Button size="sm" variant="ghost" onClick={onRemove}>
+        <Button size="sm" variant="ghost" onClick={() => removeItem(product.id, size)}>
           移除
         </Button>
       </div>
     </div>
   );
-}
+});

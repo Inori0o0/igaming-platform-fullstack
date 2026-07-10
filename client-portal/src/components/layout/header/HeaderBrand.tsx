@@ -4,14 +4,13 @@ import Link from "next/link";
 export function HeaderBrand() {
   return (
     <Link href="/" className="flex items-center gap-2">
-      <div className="relative h-9 w-9 shrink-0 overflow-hidden filter-[drop-shadow(0_0_4px_rgba(255,255,255,0.45))_drop-shadow(0_0_10px_rgba(255,255,255,0.18))]">
+      <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg shadow-[0_0_10px_rgba(255,255,255,0.22)]">
         <Image
           src="/logo.svg"
           alt="vAcAnt"
           fill
           sizes="36px"
           className="object-contain"
-          priority
         />
       </div>
       <div className="hidden flex-col leading-tight sm:flex">

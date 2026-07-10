@@ -9,6 +9,7 @@ import { SplashScreen } from "@/src/components/loading/SplashScreen";
 import { ShopCatalogHydrator } from "@/src/components/shop/catalog/ShopCatalogHydrator";
 import { ShopCatalogStatusBanner } from "@/src/components/shop/catalog/ShopCatalogStatusBanner";
 import { CrossTabSyncProvider } from "@/src/components/layout/CrossTabSyncProvider";
+import { AppToastHost } from "@/src/components/ui/AppToastHost";
 import { useAuthStore } from "@/src/store/authStore";
 
 type ClientLayoutShellProps = {
@@ -26,6 +27,7 @@ export function ClientLayoutShell({ children }: ClientLayoutShellProps) {
 
   return (
     <>
+      <AppToastHost />
       <ShopCatalogHydrator />
       <CrossTabSyncProvider />
       <SplashScreen show={isAuthLoading && !isGamePage} mode="fullscreen" />
