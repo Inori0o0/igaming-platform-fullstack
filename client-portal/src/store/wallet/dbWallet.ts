@@ -1,13 +1,18 @@
 import { supabase } from "@/src/lib/supabaseClient";
+import { parseBalanceRpcResult } from "@shared/supabase/json";
+import type { Tables, TablesInsert } from "@shared/database.types";
 import { toNumber } from "./numberUtils";
 import type {
   AdjustWalletBalanceResult,
-  DbTransactionRow,
-  DbUserRow,
-  DbWalletRow,
   TransactionType,
   WalletTransaction,
 } from "./types";
+
+type DbUserRow = Pick<Tables<"users">, "id" | "auth_user_id">;
+type DbWalletRow = Pick<
+  Tables<"wallets">,
+  "user_id" | "coin_balance" | "btc_balance" | "eth_balance"
+>;
 
 export async function getDbUserByAuthUserId(
   authUserId: string,
@@ -22,7 +27,7 @@ export async function getDbUserByAuthUserId(
     throw new Error("找不到對應的資料庫使用者，請確認 SQL trigger 已生效。");
   }
 
-  return data as DbUserRow;
+  return data;
 }
 
 export async function getOrCreateWallet(
@@ -39,7 +44,7 @@ export async function getOrCreateWallet(
   }
 
   if (data) {
-    return data as DbWalletRow;
+    return data;
   }
 
   // phase-7：前端已無法直接 INSERT wallets（見 adjust_wallet_balance 遷移）。
@@ -53,7 +58,12 @@ export async function getOrCreateWallet(
     throw new Error("建立錢包失敗");
   }
 
-  return ensured as DbWalletRow;
+  return {
+    user_id: ensured.user_id,
+    coin_balance: ensured.coin_balance,
+    btc_balance: ensured.btc_balance,
+    eth_balance: ensured.eth_balance,
+  };
 }
 
 export async function listTransactions(
@@ -72,11 +82,11 @@ export async function listTransactions(
     throw new Error("讀取交易紀錄失敗");
   }
 
-  return (data as DbTransactionRow[]).map((row) => ({
+  return data.map((row) => ({
     id: row.id,
-    createdAt: row.created_at,
-    type: row.type,
-    currency: row.currency,
+    createdAt: row.created_at ?? "",
+    type: row.type as TransactionType,
+    currency: row.currency as WalletTransaction["currency"],
     amount: toNumber(row.amount),
     status:
       row.status === "pending" || row.status === "failed"
@@ -102,7 +112,7 @@ export async function insertTransaction(params: {
 }) {
   // 目前僅 withdraw（提領申請，pending，不影響餘額）還會走這條路徑；
   // 會異動餘額的交易一律改走 adjust_wallet_balance() RPC（見下方 adjustWalletBalance）。
-  const payload: Record<string, unknown> = {
+  const payload: TablesInsert<"transactions"> = {
     user_id: params.dbUserId,
     type: params.type,
     currency: "VAC",
@@ -110,11 +120,11 @@ export async function insertTransaction(params: {
     status: params.status,
     description: params.description,
     balance_after: params.balanceAfter,
+    game_id: params.gameId ?? null,
+    theme_id: params.themeId ?? null,
+    round_id: params.roundId ?? null,
+    metadata: (params.metadata as TablesInsert<"transactions">["metadata"]) ?? null,
   };
-  if (params.gameId) payload.game_id = params.gameId;
-  if (params.themeId) payload.theme_id = params.themeId;
-  if (params.roundId) payload.round_id = params.roundId;
-  if (params.metadata) payload.metadata = params.metadata;
   const { error } = await supabase.from("transactions").insert(payload);
 
   if (error) {
@@ -141,17 +151,20 @@ export async function adjustWalletBalance(params: {
     p_delta: params.delta,
     p_type: params.type,
     p_description: params.description,
-    p_game_id: params.gameId ?? null,
-    p_theme_id: params.themeId ?? null,
-    p_round_id: params.roundId ?? null,
-    p_metadata: params.metadata ?? null,
+    p_game_id: params.gameId,
+    p_theme_id: params.themeId,
+    p_round_id: params.roundId,
+    p_metadata: params.metadata as TablesInsert<"transactions">["metadata"],
   });
 
   if (error) {
     return { ok: false, error: error.message };
   }
 
-  const balance = toNumber((data as { balance?: number } | null)?.balance);
+  const balance = parseBalanceRpcResult(data);
+  if (balance === null) {
+    return { ok: false, error: "錢包回傳格式異常" };
+  }
   return { ok: true, balance };
 }
 
@@ -168,7 +181,10 @@ export async function claimFreeCoinsRpc(): Promise<AdjustWalletBalanceResult> {
     return { ok: false, error: error.message };
   }
 
-  const balance = toNumber((data as { balance?: number } | null)?.balance);
+  const balance = parseBalanceRpcResult(data);
+  if (balance === null) {
+    return { ok: false, error: "錢包回傳格式異常" };
+  }
   return { ok: true, balance };
 }
 
@@ -187,6 +203,9 @@ export async function depositWalletRpc(
     return { ok: false, error: error.message };
   }
 
-  const balance = toNumber((data as { balance?: number } | null)?.balance);
+  const balance = parseBalanceRpcResult(data);
+  if (balance === null) {
+    return { ok: false, error: "錢包回傳格式異常" };
+  }
   return { ok: true, balance };
 }

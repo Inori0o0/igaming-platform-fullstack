@@ -13,7 +13,7 @@ export function useProducts() {
         .from('products')
         .select('*')
         .order('sort_order', { ascending: true })
-      const rows = (data as DbProduct[]) ?? []
+      const rows = data ?? []
       // image_url 欄位為 NULL 時，從 image_object_path 組出 public URL
       const normalized = rows.map(p => {
         if (p.image_url || !p.image_object_path) return p

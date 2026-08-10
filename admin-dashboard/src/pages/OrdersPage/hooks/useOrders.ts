@@ -51,13 +51,23 @@ export function useOrders() {
         p_offset: page * PAGE_SIZE,
       });
       if (error) throw error;
-      const rows = (data ?? []) as Array<DbOrder & { total_count: number }>;
+      const rows = data ?? [];
       setOrders(
-        rows.map((row) => {
-          const order = { ...row };
-          Reflect.deleteProperty(order, "total_count");
-          return order as DbOrder;
-        }),
+        rows.map(({ total_count: _totalCount, ...order }) => ({
+          ...order,
+          // RPC 回傳非 null；對齊 Tables<'orders'> 可空欄位
+          coupon_code: order.coupon_code,
+          created_at: order.created_at,
+          discount_vac: order.discount_vac,
+          fulfillment_type: order.fulfillment_type,
+          shipping_fee_vac: order.shipping_fee_vac,
+          shipping_info: order.shipping_info,
+          shipping_snapshot: order.shipping_snapshot,
+          status: order.status,
+          subtotal_vac: order.subtotal_vac,
+          total_vac: order.total_vac,
+          updated_at: order.updated_at,
+        })),
       );
       setTotal(rows[0]?.total_count ?? 0);
     } finally {
@@ -75,14 +85,15 @@ export function useOrders() {
   }, [search, statusFilter]);
 
   const updateStatus = async (orderId: string, newStatus: string) => {
+    const status = newStatus as NonNullable<DbOrder["status"]>;
     await supabase
       .from("orders")
-      .update({ status: newStatus })
+      .update({ status })
       .eq("id", orderId);
     // 同步更新已開啟的詳情 drawer 狀態，避免關閉後資料舊化
     setSelectedOrder((prev) =>
       prev?.id === orderId
-        ? { ...prev, status: newStatus as DbOrder["status"] }
+        ? { ...prev, status }
         : prev,
     );
     void fetchOrders();

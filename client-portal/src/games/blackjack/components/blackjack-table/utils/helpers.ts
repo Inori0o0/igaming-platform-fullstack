@@ -7,6 +7,7 @@ import {
   handValue,
 } from "@/src/games/blackjack/logic/game";
 import type { BlackjackCard, PlayerHand, RoundPhase } from "@/src/games/blackjack/logic/types";
+import { createTranslator, DEFAULT_LOCALE } from "@shared/i18n";
 
 export function draw(deck: BlackjackCard[]): BlackjackCard {
   const card = deck.shift();
@@ -53,20 +54,22 @@ export function cardLabel(card: BlackjackCard) {
   return `${card.rank}${suitMap[card.suit]}`;
 }
 
+/** Pure helper for non-React call sites; defaults to zh-TW catalog. */
 export function tierLabel(tier: ReturnType<typeof classifyHandTier>) {
+  const t = createTranslator(DEFAULT_LOCALE);
   switch (tier) {
     case "big-five-21":
-      return "大過五關";
+      return t("blackjack.tierBigFive");
     case "small-five":
-      return "小過五關";
+      return t("blackjack.tierSmallFive");
     case "blackjack":
-      return "Blackjack";
+      return t("blackjack.tierBlackjack");
     case "twenty-one":
-      return "21點";
+      return t("blackjack.tierTwentyOne");
     case "points":
-      return "普通點數";
+      return t("blackjack.tierPoints");
     default:
-      return "爆牌";
+      return t("blackjack.tierBust");
   }
 }
 

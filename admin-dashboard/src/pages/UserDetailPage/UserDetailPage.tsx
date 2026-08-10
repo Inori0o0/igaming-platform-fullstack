@@ -217,7 +217,10 @@ export function UserDetailPage() {
             <TableBody>
               {orders.length === 0 ? <TableEmpty message="無訂單紀錄" /> : (
                 orders.map((o) => {
-                  const statusInfo = ORDER_STATUS_MAP[o.status] ?? { label: o.status, variant: 'default' as const }
+                  const statusInfo = ORDER_STATUS_MAP[o.status ?? ''] ?? {
+                    label: o.status ?? '—',
+                    variant: 'default' as const,
+                  }
                   return (
                     <TableRow key={o.id}>
                       <TableCell><span className="text-xs font-mono text-text-muted">{o.id.slice(0, 8)}…</span></TableCell>

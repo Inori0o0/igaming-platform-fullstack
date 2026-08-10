@@ -50,7 +50,7 @@ export function useCoupons() {
       }
 
       const { data } = await query
-      setCoupons((data as DbCoupon[]) ?? [])
+      setCoupons(data ?? [])
     } finally {
       setLoading(false)
     }
@@ -74,10 +74,15 @@ export function useCoupons() {
       title: coupon.title ?? '',
       discount_type: coupon.discount_type,
       discount_value: String(coupon.discount_value),
-      min_purchase: String(coupon.min_purchase),
-      applies_fulfillment: coupon.applies_fulfillment,
+      min_purchase: String(coupon.min_purchase ?? 0),
+      applies_fulfillment:
+        coupon.applies_fulfillment === 'physical' ||
+        coupon.applies_fulfillment === 'digital' ||
+        coupon.applies_fulfillment === 'any'
+          ? coupon.applies_fulfillment
+          : 'any',
       expires_at: coupon.expires_at ? coupon.expires_at.slice(0, 10) : '',
-      is_active: coupon.is_active,
+      is_active: Boolean(coupon.is_active),
       internal_note: coupon.internal_note ?? '',
     })
     setFormErrors({})
@@ -108,7 +113,7 @@ export function useCoupons() {
     try {
       const payload = {
         code: formValues.code.trim().toUpperCase(),
-        title: formValues.title.trim() || null,
+        title: formValues.title.trim() || '',
         discount_type: formValues.discount_type,
         discount_value: Number(formValues.discount_value),
         min_purchase: Number(formValues.min_purchase) || 0,

@@ -1,42 +1,49 @@
+import type { Translator } from "@shared/i18n";
 import type { SidebarItem } from "./sidebar/SidebarSection";
 
 /** 頂欄五連結（md+）；與左欄不同：不含子路由捷徑。 */
-export const headerNavItems: { href: string; label: string }[] = [
-  { href: "/", label: "首頁" },
-  { href: "/games", label: "遊戲大廳" },
-  { href: "/shop", label: "商品商店" },
-  { href: "/wallet", label: "錢包" },
-  { href: "/profile", label: "個人中心" },
-];
+export function getHeaderNavItems(t: Translator): { href: string; label: string }[] {
+  return [
+    { href: "/", label: t("nav.home") },
+    { href: "/games", label: t("nav.games") },
+    { href: "/shop", label: t("nav.shop") },
+    { href: "/wallet", label: t("nav.wallet") },
+    { href: "/profile", label: t("nav.profile") },
+  ];
+}
 
 /** 左欄與手機漢堡選單共用（lg+ 見 MainSidebar；更窄時見 MobileNavDrawer）。改導覽只改這裡。 */
-export const lobbySidebarSections: { title: string; items: SidebarItem[] }[] = [
-  {
-    title: "Casino",
-    items: [
-      { href: "/games", label: "遊戲大廳" },
-      { href: "/games/slots", label: "老虎機 Slots" },
-      { href: "/games/blackjack", label: "二十一點" },
-      { href: "/games/baccarat", label: "百家樂" },
-      { href: "/games/lottery", label: "Lottery 彩票" },
-    ],
-  },
-  {
-    title: "Shop",
-    items: [
-      { href: "/shop", label: "商品商店" },
-      { href: "/cart", label: "購物車" },
-      { href: "/checkout", label: "結帳" },
-    ],
-  },
-  {
-    title: "Account",
-    items: [
-      { href: "/wallet", label: "錢包" },
-      { href: "/profile", label: "個人中心" },
-      { href: "/profile/history", label: "遊戲歷史" },
-      { href: "/profile/orders", label: "訂單歷史" },
-      { href: "/profile/achievements", label: "成就" },
-    ],
-  },
-];
+export function getLobbySidebarSections(
+  t: Translator,
+): { title: string; items: SidebarItem[] }[] {
+  return [
+    {
+      title: t("nav.sectionCasino"),
+      items: [
+        { href: "/games", label: t("nav.games") },
+        { href: "/games/slots", label: t("nav.slots") },
+        { href: "/games/blackjack", label: t("nav.blackjack") },
+        { href: "/games/baccarat", label: t("nav.baccarat") },
+        { href: "/games/lottery", label: t("nav.lottery") },
+      ],
+    },
+    {
+      title: t("nav.sectionShop"),
+      items: [
+        { href: "/shop", label: t("nav.shop") },
+        { href: "/cart", label: t("nav.cart") },
+        { href: "/checkout", label: t("nav.checkout") },
+      ],
+    },
+    {
+      title: t("nav.sectionAccount"),
+      items: [
+        { href: "/wallet", label: t("nav.wallet") },
+        { href: "/profile", label: t("nav.profile") },
+        { href: "/profile/history", label: t("nav.history") },
+        { href: "/profile/orders", label: t("nav.orders") },
+        { href: "/profile/achievements", label: t("nav.achievements") },
+      ],
+    },
+  ];
+}

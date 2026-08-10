@@ -34,10 +34,10 @@ async function getDbUserId(authUserId: string) {
   if (error || !data?.id) {
     throw new Error("讀取使用者資料失敗");
   }
-  return data.id as string;
+  return data.id;
 }
 
-async function listAchievements(dbUserId: string) {
+async function listAchievements(dbUserId: string): Promise<DbAchievementRow[]> {
   const { data, error } = await supabase
     .from("achievements")
     .select("id, achievement_type, unlocked_at")
@@ -45,7 +45,19 @@ async function listAchievements(dbUserId: string) {
   if (error) {
     throw new Error(error.message);
   }
-  return (data ?? []) as DbAchievementRow[];
+  const known = new Set<string>(
+    achievementDefinitions.map((d) => d.type),
+  );
+  return (data ?? []).flatMap((row) => {
+    if (!known.has(row.achievement_type) || !row.unlocked_at) return [];
+    return [
+      {
+        id: row.id,
+        achievement_type: row.achievement_type as AchievementType,
+        unlocked_at: row.unlocked_at,
+      },
+    ];
+  });
 }
 
 export function useProfileAchievements() {

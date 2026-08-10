@@ -9,7 +9,7 @@ type DbUserRow = {
   id: string;
   display_name: string | null;
   avatar_url: string | null;
-  auth_user_id: string;
+  auth_user_id: string | null;
 };
 
 type AvatarSelectionRow = {
@@ -20,7 +20,7 @@ type AvatarProductRow = {
   id: string;
   name: string;
   image_bucket: string | null;
-  image_object_path: string;
+  image_object_path: string | null;
   sort_order: number | null;
 };
 
@@ -103,7 +103,7 @@ export function useProfileAvatarEditor() {
         .maybeSingle();
 
       if (selectionErr) throw new Error(selectionErr.message);
-      const selection = (selectionData ?? null) as AvatarSelectionRow;
+      const selection: AvatarSelectionRow = selectionData ?? null;
 
       // 2) 讀所有頭像商品（用鎖/解鎖決定可選）
       const { data: products, error: productsErr } = await supabase
@@ -114,7 +114,7 @@ export function useProfileAvatarEditor() {
         .order("sort_order", { ascending: true });
 
       if (productsErr) throw new Error(productsErr.message);
-      const productRows = (products ?? []) as AvatarProductRow[];
+      const productRows: AvatarProductRow[] = products ?? [];
 
       // 3) 讀擁有的頭像（user_entitlements）
       const { data: entitlements, error: entErr } = await supabase
@@ -124,7 +124,7 @@ export function useProfileAvatarEditor() {
         .eq("entitlement_type", "avatar");
 
       if (entErr) throw new Error(entErr.message);
-      const owned = new Set((entitlements ?? []).map((e) => e.product_id as string));
+      const owned = new Set((entitlements ?? []).map((e) => e.product_id));
 
       const mapped = productRows
         .map((p) => {
@@ -132,14 +132,14 @@ export function useProfileAvatarEditor() {
           return {
             productId: p.id,
             name: p.name,
-            imageSrc: publicObjectUrl(bucket, p.image_object_path),
+            imageSrc: publicObjectUrl(bucket, p.image_object_path ?? ""),
             isUnlocked: owned.has(p.id),
             sortOrder: Number(p.sort_order ?? 0),
           } satisfies AvatarProductOption;
         })
         .sort((a, b) => a.sortOrder - b.sortOrder);
 
-      setDbUser(userRow as DbUserRow);
+      setDbUser(userRow);
       setEquippedAvatarProductId(selection?.avatar_product_id ?? null);
       setAvatarProducts(mapped);
       setLoading(false);

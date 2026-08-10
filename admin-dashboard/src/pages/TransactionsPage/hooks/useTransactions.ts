@@ -25,18 +25,27 @@ export function useTransactions() {
         p_search: search.trim(),
         p_type: typeFilter,
         p_status: statusFilter,
-        p_date_from: dateFrom ? `${dateFrom}T00:00:00.000Z` : null,
-        p_date_to: dateTo ? `${dateTo}T23:59:59.999Z` : null,
-        p_amount_min: amountMin !== '' ? Number(amountMin) : null,
-        p_amount_max: amountMax !== '' ? Number(amountMax) : null,
+        p_date_from: dateFrom ? `${dateFrom}T00:00:00.000Z` : undefined,
+        p_date_to: dateTo ? `${dateTo}T23:59:59.999Z` : undefined,
+        p_amount_min: amountMin !== '' ? Number(amountMin) : undefined,
+        p_amount_max: amountMax !== '' ? Number(amountMax) : undefined,
         p_limit: PAGE_SIZE,
         p_offset: page * PAGE_SIZE,
       })
       if (error) throw error
 
-      const rows = (data ?? []) as Array<DbTransaction & { total_count: number }>
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      setTxs(rows.map(({ total_count, ...tx }) => tx as DbTransaction))
+      const rows = data ?? []
+      setTxs(
+        rows.map(({ total_count: _totalCount, ...tx }) => ({
+          ...tx,
+          created_at: tx.created_at,
+          description: tx.description,
+          game_id: tx.game_id,
+          metadata: tx.metadata,
+          round_id: tx.round_id,
+          theme_id: tx.theme_id,
+        })),
+      )
       setTotal(rows[0]?.total_count ?? 0)
     } finally {
       setLoading(false)

@@ -7,13 +7,8 @@ import {
   BACCARAT_PAYOUT,
   type BaccaratBetArea,
 } from "@/src/games/baccarat/logic/game";
+import { useT } from "@/src/i18n/I18nProvider";
 import { CHIP_CARD_ASSETS, MIN_BET, TABLE_BET_OPTIONS } from "../utils/constants";
-
-const AREA_LABEL: Record<BaccaratBetArea, string> = {
-  player: "閒 Player",
-  banker: "莊 Banker",
-  tie: "和 Tie",
-};
 
 type BettingSectionProps = {
   bet: number;
@@ -42,12 +37,19 @@ export function BettingSection({
   onSelectBetArea,
   onAllInBet,
 }: BettingSectionProps) {
+  const t = useT();
+  const areaLabel: Record<BaccaratBetArea, string> = {
+    player: t("baccarat.player"),
+    banker: t("baccarat.banker"),
+    tie: t("baccarat.tie"),
+  };
+
   return (
     <>
       <div className="rounded-xl border border-cyan-500/15 bg-neutral-950/70 px-3 py-2">
         <p className="text-neutral-400">下注區</p>
         <div className="mt-2 grid grid-cols-3 gap-2">
-          {(Object.keys(AREA_LABEL) as BaccaratBetArea[]).map((area) => (
+          {(Object.keys(areaLabel) as BaccaratBetArea[]).map((area) => (
             <button
               key={area}
               disabled={!canAdjustBet}
@@ -60,7 +62,7 @@ export function BettingSection({
                 "disabled:cursor-not-allowed disabled:opacity-45",
               )}
             >
-              <p className="text-[11px] font-semibold">{AREA_LABEL[area]}</p>
+              <p className="text-[11px] font-semibold">{areaLabel[area]}</p>
               <p className="mt-1 text-[10px] text-neutral-400">
                 派彩 x {BACCARAT_PAYOUT[area]}
               </p>

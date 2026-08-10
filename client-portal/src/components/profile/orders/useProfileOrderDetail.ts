@@ -2,8 +2,84 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabaseClient";
-import type { OrderDetail } from "@/src/components/profile/orders/types";
+import type {
+  OrderDetail,
+  OrderDetailLineItem,
+  OrderDetailProductRow,
+} from "@/src/components/profile/orders/types";
 import { useAuthStore } from "@/src/store/authStore";
+
+function normalizeProduct(
+  products: OrderDetailProductRow | OrderDetailProductRow[] | null,
+): OrderDetailProductRow | OrderDetailProductRow[] | null {
+  return products;
+}
+
+function mapOrderDetail(data: {
+  id: string;
+  status: string | null;
+  fulfillment_type: string | null;
+  subtotal_vac: number | null;
+  shipping_fee_vac: number | null;
+  discount_vac: number | null;
+  total_vac: number | null;
+  coupon_code: string | null;
+  shipping_snapshot: unknown;
+  created_at: string | null;
+  order_items:
+    | {
+        id: string;
+        quantity: number;
+        unit_price_vac: number | null;
+        line_total_vac: number | null;
+        size_snapshot: string | null;
+        products:
+          | {
+              name: string;
+              slug: string | null;
+              image_bucket: string | null;
+              image_object_path: string | null;
+            }
+          | {
+              name: string;
+              slug: string | null;
+              image_bucket: string | null;
+              image_object_path: string | null;
+            }[]
+          | null;
+      }[]
+    | null;
+}): OrderDetail {
+  const items: OrderDetailLineItem[] | null = data.order_items
+    ? data.order_items.map((item) => ({
+        id: item.id,
+        quantity: item.quantity,
+        unit_price_vac: item.unit_price_vac ?? 0,
+        line_total_vac: item.line_total_vac ?? 0,
+        size_snapshot: item.size_snapshot,
+        products: normalizeProduct(item.products),
+      }))
+    : null;
+
+  return {
+    id: data.id,
+    status: data.status ?? "pending",
+    fulfillment_type: data.fulfillment_type ?? "digital",
+    subtotal_vac: data.subtotal_vac ?? 0,
+    shipping_fee_vac: data.shipping_fee_vac ?? 0,
+    discount_vac: data.discount_vac ?? 0,
+    total_vac: data.total_vac ?? 0,
+    coupon_code: data.coupon_code,
+    shipping_snapshot:
+      data.shipping_snapshot !== null &&
+      typeof data.shipping_snapshot === "object" &&
+      !Array.isArray(data.shipping_snapshot)
+        ? (data.shipping_snapshot as Record<string, unknown>)
+        : null,
+    created_at: data.created_at ?? "",
+    order_items: items,
+  };
+}
 
 export function useProfileOrderDetail(orderId: string) {
   const user = useAuthStore((s) => s.user);
@@ -80,7 +156,7 @@ export function useProfileOrderDetail(orderId: string) {
           setError("找不到此訂單或無權限查看");
           setOrder(null);
         } else {
-          setOrder(data as unknown as OrderDetail);
+          setOrder(mapOrderDetail(data));
         }
         setLoading(false);
       })();

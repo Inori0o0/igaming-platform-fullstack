@@ -6,6 +6,7 @@
  */
 import clsx from "clsx";
 import { useEffect, useState } from "react";
+import { useT } from "@/src/i18n/I18nProvider";
 import { BACCARAT_ASSETS } from "../utils/constants";
 import { MascotLayer } from "./MascotLayer";
 import { SideSection } from "./SideSection";
@@ -16,6 +17,7 @@ type TableStageProps = {
 };
 
 export function TableStage({ round }: TableStageProps) {
+  const t = useT();
   const [hideCardsAfterSettle, setHideCardsAfterSettle] = useState(false);
   const cardMotionY = 6;
 
@@ -93,7 +95,7 @@ export function TableStage({ round }: TableStageProps) {
           <SideSection
             cards={round?.bankerCards ?? []}
             accent="banker"
-            label="Banker（莊）"
+            label={t("baccarat.bankerSide")}
             hideCards={hideCardsAfterSettle}
             revealedCount={round?.revealed.banker ?? 0}
             cardMotionY={cardMotionY}
@@ -101,7 +103,7 @@ export function TableStage({ round }: TableStageProps) {
           <SideSection
             cards={round?.playerCards ?? []}
             accent="player"
-            label="Player（閒）"
+            label={t("baccarat.playerSide")}
             hideCards={hideCardsAfterSettle}
             revealedCount={round?.revealed.player ?? 0}
             cardMotionY={cardMotionY}

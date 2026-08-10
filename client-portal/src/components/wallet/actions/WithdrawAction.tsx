@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/src/components/ui/Button";
 import { Input } from "@/src/components/ui/Input";
+import { useT } from "@/src/i18n/I18nProvider";
 
 type WithdrawActionProps = {
   onSubmitWithdrawRequest: (amount: number) => void;
@@ -15,6 +16,7 @@ export function WithdrawAction({
   isSubmitting,
   errorMessage,
 }: WithdrawActionProps) {
+  const t = useT();
   const [withdrawAmount, setWithdrawAmount] = useState("");
 
   const onSubmitWithdraw = () => {
@@ -37,7 +39,7 @@ export function WithdrawAction({
             onChange={(e) => setWithdrawAmount(e.target.value)}
             inputMode="decimal"
             placeholder="輸入數字"
-            helperText="送出後會新增一筆 pending 紀錄，餘額不扣除。"
+            helperText={t("wallet.withdrawPendingHint")}
             disabled={isSubmitting}
           />
         </div>

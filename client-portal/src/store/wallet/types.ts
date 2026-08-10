@@ -1,12 +1,12 @@
+import type {
+  TransactionStatus as SharedTransactionStatus,
+  WalletTransactionType,
+} from "@shared/labels/transaction";
+
 export type WalletCurrency = "VAC" | "BTC" | "ETH";
-export type TransactionType =
-  | "deposit"
-  | "withdraw"
-  | "claim"
-  | "wager"
-  | "payout"
-  | "purchase";
-export type TransactionStatus = "completed" | "pending" | "failed";
+/** Wallet UI / actions use the live product subset of `transaction_type`. */
+export type TransactionType = WalletTransactionType;
+export type TransactionStatus = SharedTransactionStatus;
 
 export type WalletBalances = {
   VAC: number;
@@ -106,29 +106,6 @@ export type WalletState = {
     roundId: string;
     metadata?: Record<string, unknown>;
   }) => Promise<void>;
-};
-
-export type DbUserRow = {
-  id: string;
-  auth_user_id: string | null;
-};
-
-export type DbWalletRow = {
-  user_id: string;
-  coin_balance: number | string | null;
-  btc_balance: number | string | null;
-  eth_balance: number | string | null;
-};
-
-export type DbTransactionRow = {
-  id: string;
-  type: TransactionType;
-  currency: WalletCurrency;
-  amount: number | string;
-  description: string | null;
-  created_at: string;
-  status: string | null;
-  balance_after: number | string | null;
 };
 
 export type AdjustWalletBalanceResult =

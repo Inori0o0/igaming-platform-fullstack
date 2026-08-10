@@ -57,7 +57,7 @@ type StoredCart = {
   couponCode: string | null;
 };
 
-/** Supabase DB 的 coupons 列型別（僅前端需要的欄位） */
+/** Supabase coupons 查詢結果（僅前端需要的欄位） */
 type DbCouponRow = {
   code: string;
   discount_type: "percentage" | "fixed" | "free_shipping";
@@ -79,9 +79,17 @@ async function fetchCouponFromDb(code: string): Promise<DbCouponRow | null> {
     .is("deleted_at", null)
     .maybeSingle();
   if (error || !data) return null;
-  const row = data as DbCouponRow;
-  if (row.expires_at && new Date(row.expires_at) < new Date()) return null;
-  return row;
+  if (data.expires_at && new Date(data.expires_at) < new Date()) return null;
+  return {
+    code: data.code,
+    discount_type: data.discount_type,
+    discount_value: data.discount_value,
+    min_purchase: data.min_purchase ?? 0,
+    expires_at: data.expires_at,
+    is_active: Boolean(data.is_active),
+    applies_fulfillment: data.applies_fulfillment,
+    title: data.title,
+  };
 }
 
 /** DB 列 → 前端 CouponState */

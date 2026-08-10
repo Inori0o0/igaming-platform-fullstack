@@ -1,10 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { headerNavItems } from "@/src/components/layout/navConfig";
+import { getHeaderNavItems } from "@/src/components/layout/navConfig";
+import { useT } from "@/src/i18n/I18nProvider";
 
 /** 僅 lg 以上顯示；手機與平板改由 MobileNavDrawer 承接完整導覽。 */
 export function HeaderNav() {
   const pathname = usePathname();
+  const t = useT();
+  const headerNavItems = getHeaderNavItems(t);
 
   return (
     <nav className="hidden items-center gap-2 text-sm font-medium text-neutral-300 lg:flex">
@@ -31,4 +36,3 @@ export function HeaderNav() {
     </nav>
   );
 }
-

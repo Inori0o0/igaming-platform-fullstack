@@ -108,12 +108,12 @@ export function OrderDetailModal({
                 訂單狀態
               </span>
               <div className="flex-1 flex items-center justify-end gap-2">
-                <Badge variant={STATUS_VARIANT[order.status] ?? "default"}>
-                  {STATUS_LABEL[order.status] ?? order.status}
+                <Badge variant={STATUS_VARIANT[order.status ?? ""] ?? "default"}>
+                  {STATUS_LABEL[order.status ?? ""] ?? order.status ?? "—"}
                 </Badge>
                 <Select
                   options={EDITABLE_STATUS_OPTIONS}
-                  value={order.status}
+                  value={order.status ?? "pending"}
                   onChange={(e) => {
                     if (e.target.value !== order.status) void onUpdateStatus(order.id, e.target.value)
                   }}

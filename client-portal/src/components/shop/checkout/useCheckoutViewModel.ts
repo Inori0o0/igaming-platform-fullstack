@@ -175,7 +175,7 @@ export function useCheckoutViewModel() {
 
       const { data, error } = await supabase.rpc("checkout_shop_order", {
         p_lines: lines,
-        p_coupon_code: couponCode,
+        p_coupon_code: couponCode ?? undefined,
         p_shipping: shipPayload,
       });
 

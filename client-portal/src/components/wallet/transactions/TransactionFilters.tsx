@@ -1,6 +1,11 @@
 "use client";
 
 import type { WalletTransaction } from "@/src/store/walletStore";
+import {
+  transactionTypeFilterOptions,
+  WALLET_TRANSACTION_TYPES,
+} from "@shared/labels/transaction";
+import { useT } from "@/src/i18n/I18nProvider";
 
 type TransactionFiltersProps = {
   txTypeFilter: "all" | WalletTransaction["type"];
@@ -11,6 +16,17 @@ export function TransactionFilters({
   txTypeFilter,
   onTypeFilterChange,
 }: TransactionFiltersProps) {
+  const t = useT();
+  const options = transactionTypeFilterOptions(t, WALLET_TRANSACTION_TYPES).map(
+    (opt) =>
+      opt.value === ""
+        ? { value: "all" as const, label: opt.label }
+        : {
+            value: opt.value as WalletTransaction["type"],
+            label: opt.label,
+          },
+  );
+
   return (
     <div className="flex flex-wrap gap-2">
       <select
@@ -20,15 +36,12 @@ export function TransactionFilters({
         }
         className="rounded-lg border border-cyan-500/30 bg-neutral-950/80 px-2 py-1 text-xs text-neutral-100"
       >
-        <option value="all">全部類型</option>
-        <option value="deposit">充值</option>
-        <option value="withdraw">提領</option>
-        <option value="claim">免費領取</option>
-        <option value="wager">下注</option>
-        <option value="payout">派彩</option>
-        <option value="purchase">商店消費</option>
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
       </select>
     </div>
   );
 }
-

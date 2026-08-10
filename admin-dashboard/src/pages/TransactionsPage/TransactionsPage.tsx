@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Search, RefreshCw } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { formatDate, formatCurrency } from '@/lib/utils'
@@ -6,25 +7,15 @@ import { Select } from '@/components/ui/Select'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell, TableEmpty } from '@/components/ui/Table'
+import {
+  transactionStatusFilterOptions,
+  transactionStatusLabel,
+  transactionTypeFilterOptions,
+  transactionTypeLabel,
+  WALLET_TRANSACTION_TYPES,
+} from '@shared/labels/transaction'
+import { useT } from '@/i18n/I18nProvider'
 import { useTransactions } from './hooks/useTransactions'
-
-// 與實際 transactions.type 資料對應
-const TYPE_OPTIONS = [
-  { value: '', label: '全部類型' },
-  { value: 'wager', label: 'wager 下注' },
-  { value: 'payout', label: 'payout 派彩' },
-  { value: 'claim', label: 'claim 免費領取' },
-  { value: 'deposit', label: 'deposit 儲值' },
-  { value: 'purchase', label: 'purchase 購買' },
-  { value: 'withdraw', label: 'withdraw 提款' },
-]
-
-const STATUS_OPTIONS = [
-  { value: '', label: '全部狀態' },
-  { value: 'completed', label: '已完成' },
-  { value: 'pending', label: '待處理' },
-  { value: 'failed', label: '失敗' },
-]
 
 const STATUS_VARIANT: Record<string, 'success' | 'warning' | 'danger'> = {
   completed: 'success',
@@ -42,6 +33,13 @@ const TYPE_VARIANT: Record<string, 'gold' | 'success' | 'danger' | 'default'> = 
 }
 
 export function TransactionsPage() {
+  const t = useT()
+  const typeOptions = useMemo(
+    () => transactionTypeFilterOptions(t, WALLET_TRANSACTION_TYPES),
+    [t],
+  )
+  const statusOptions = useMemo(() => transactionStatusFilterOptions(t), [t])
+
   const {
     txs, total, page, setPage,
     search, setSearch,
@@ -67,10 +65,10 @@ export function TransactionsPage() {
           />
         </div>
         <div className="w-40">
-          <Select options={TYPE_OPTIONS} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} />
+          <Select options={typeOptions} value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} />
         </div>
         <div className="w-32">
-          <Select options={STATUS_OPTIONS} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
+          <Select options={statusOptions} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} />
         </div>
         <Button variant="secondary" size="sm" onClick={() => void refetch()}>
           <RefreshCw size={14} />
@@ -176,7 +174,9 @@ export function TransactionsPage() {
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={TYPE_VARIANT[tx.type] ?? 'default'}>{tx.type}</Badge>
+                    <Badge variant={TYPE_VARIANT[tx.type] ?? 'default'}>
+                      {transactionTypeLabel(tx.type, t)}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <span
@@ -197,7 +197,9 @@ export function TransactionsPage() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={STATUS_VARIANT[tx.status] ?? 'default'}>{tx.status}</Badge>
+                    <Badge variant={STATUS_VARIANT[tx.status] ?? 'default'}>
+                      {transactionStatusLabel(tx.status, t)}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <span className="text-xs text-text-muted whitespace-nowrap">{formatDate(tx.created_at)}</span>

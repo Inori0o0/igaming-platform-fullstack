@@ -1,14 +1,20 @@
 "use client";
 
 import type { WalletTransaction } from "@/src/store/walletStore";
-import { statusLabels, typeLabels } from "@/src/components/wallet/constants";
+import {
+  transactionStatusLabel,
+  transactionTypeLabel,
+} from "@shared/labels/transaction";
 import { formatAmount, formatTime } from "@/src/components/wallet/format";
+import { useT } from "@/src/i18n/I18nProvider";
 
 type TransactionTableProps = {
   transactions: WalletTransaction[];
 };
 
 export function TransactionTable({ transactions }: TransactionTableProps) {
+  const t = useT();
+
   return (
     <div className="overflow-hidden rounded-2xl border border-cyan-500/20">
       <table className="w-full border-collapse text-xs">
@@ -33,12 +39,12 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
             transactions.map((tx) => (
               <tr key={tx.id} className="border-t border-cyan-500/10 align-top">
                 <td className="px-3 py-2 text-neutral-400">{formatTime(tx.createdAt)}</td>
-                <td className="px-3 py-2">{typeLabels[tx.type]}</td>
+                <td className="px-3 py-2">{transactionTypeLabel(tx.type, t)}</td>
                 <td className="px-3 py-2">{tx.currency}</td>
                 <td className="px-3 py-2 text-right font-semibold text-cyan-100">
                   {formatAmount(tx.currency, tx.amount)}
                 </td>
-                <td className="px-3 py-2">{statusLabels[tx.status]}</td>
+                <td className="px-3 py-2">{transactionStatusLabel(tx.status, t)}</td>
                 <td className="px-3 py-2 text-neutral-400">{tx.description}</td>
               </tr>
             ))
@@ -48,4 +54,3 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
     </div>
   );
 }
-

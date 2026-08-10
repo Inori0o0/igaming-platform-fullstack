@@ -3,13 +3,16 @@
 import { startTransition, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
-import { lobbySidebarSections } from "@/src/components/layout/navConfig";
+import { getLobbySidebarSections } from "@/src/components/layout/navConfig";
 import { SidebarSection } from "@/src/components/layout/sidebar/SidebarSection";
+import { useT } from "@/src/i18n/I18nProvider";
 import { cn } from "@/src/lib/cn";
 
 /** `lg` 以下使用抽屜導覽；portal 疊在 header 上，關閉時還原 body overflow。 */
 export function MobileNavDrawer() {
   const pathname = usePathname();
+  const t = useT();
+  const lobbySidebarSections = getLobbySidebarSections(t);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {

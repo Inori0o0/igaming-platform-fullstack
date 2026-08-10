@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import { Button } from "@/src/components/ui/Button";
+import { useT } from "@/src/i18n/I18nProvider";
 
 type ActionSectionProps = {
   isMobile: boolean;
@@ -36,6 +37,7 @@ export function ActionSection({
   onDoubleDown,
   onSplit,
 }: ActionSectionProps) {
+  const t = useT();
   return (
     <div
       className={clsx(
@@ -52,7 +54,7 @@ export function ActionSection({
           isMobile ? "min-h-12" : "py-2.5 sm:py-2",
         )}
       >
-        開始本局
+        {t("blackjack.startRound")}
       </Button>
       <Button
         variant="outline"
@@ -63,7 +65,7 @@ export function ActionSection({
           isMobile ? "min-h-11" : "min-h-10 sm:min-h-9",
         )}
       >
-        要牌 Hit
+        {t("blackjack.hit")}
       </Button>
       <Button
         variant="outline"
@@ -74,7 +76,7 @@ export function ActionSection({
           isMobile ? "min-h-11" : "min-h-10 sm:min-h-9",
         )}
       >
-        停牌 Stand
+        {t("blackjack.stand")}
       </Button>
       <Button
         variant="outline"
@@ -85,7 +87,7 @@ export function ActionSection({
           isMobile ? "min-h-11" : "min-h-10 sm:min-h-9",
         )}
       >
-        雙倍 Double
+        {t("blackjack.double")}
       </Button>
       <Button
         variant="outline"
@@ -96,7 +98,7 @@ export function ActionSection({
           isMobile ? "min-h-11" : "min-h-10 sm:min-h-9",
         )}
       >
-        分牌 Split
+        {t("blackjack.split")}
       </Button>
       </div>
     </div>

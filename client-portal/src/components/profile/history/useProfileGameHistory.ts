@@ -110,7 +110,7 @@ export function useProfileGameHistory() {
         }
 
         const historyRows = (listData ?? []) as DbHistoryRow[];
-        const winTotal = sumWinAmount((statsData ?? []) as Array<{ amount: number | string }>);
+        const winTotal = sumWinAmount(statsData ?? []);
 
         setRows(historyRows.map(buildHistoryRow));
         setTotalCount(count ?? 0);

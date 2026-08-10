@@ -13,7 +13,8 @@ export function formatCurrency(n: number, symbol = 'VAC'): string {
   return `${formatNumber(n)} ${symbol}`
 }
 
-export function formatDate(dateStr: string): string {
+export function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '—'
   return new Intl.DateTimeFormat('zh-TW', {
     year: 'numeric',
     month: '2-digit',
@@ -23,7 +24,8 @@ export function formatDate(dateStr: string): string {
   }).format(new Date(dateStr))
 }
 
-export function formatDateShort(dateStr: string): string {
+export function formatDateShort(dateStr: string | null | undefined): string {
+  if (!dateStr) return '—'
   return new Intl.DateTimeFormat('zh-TW', {
     year: 'numeric',
     month: '2-digit',

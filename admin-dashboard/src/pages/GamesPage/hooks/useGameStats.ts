@@ -36,19 +36,22 @@ const THEME_NAME_MAP: Record<string, string> = {
   'vacant-classic': 'Classic',
 }
 
-function makeLabel(game_id: string, theme_id: string | null): string {
-  const game = GAME_NAME_MAP[game_id] ?? game_id
+function makeLabel(game_id: string | null, theme_id: string | null): string {
+  const id = game_id ?? '—'
+  const game = GAME_NAME_MAP[id] ?? id
   const theme = theme_id ? (THEME_NAME_MAP[theme_id] ?? theme_id) : ''
   return theme ? `${game} · ${theme}` : game
 }
 
 /** 將 UTC ISO 字串轉為台灣時間（UTC+8）的小時 */
-function toTaiwanHour(isoStr: string): number {
+function toTaiwanHour(isoStr: string | null): number {
+  if (!isoStr) return 0
   return (new Date(isoStr).getUTCHours() + 8) % 24
 }
 
 /** 將 UTC ISO 字串轉為台灣時間的日期字串 YYYY-MM-DD */
-function toTaiwanDate(isoStr: string): string {
+function toTaiwanDate(isoStr: string | null): string {
+  if (!isoStr) return ''
   const d = new Date(isoStr)
   const utcMs = d.getTime() + 8 * 60 * 60 * 1000
   return new Date(utcMs).toISOString().slice(0, 10)
@@ -89,7 +92,7 @@ export function useGameStats() {
         if (!betMap[key]) {
           betMap[key] = {
             key,
-            game_id: row.game_id,
+            game_id: row.game_id ?? '—',
             theme_id: row.theme_id,
             label: makeLabel(row.game_id, row.theme_id),
             plays: 0,

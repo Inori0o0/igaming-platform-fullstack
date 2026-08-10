@@ -36,7 +36,7 @@ export function useUserList() {
 
       const { data, count, error } = await query
       if (error) throw error
-      setUsers((data as DbUser[]) ?? [])
+      setUsers(data ?? [])
       setTotal(count ?? 0)
     } finally {
       setLoading(false)

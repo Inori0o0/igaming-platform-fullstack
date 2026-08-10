@@ -133,8 +133,8 @@ export function OrdersPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={STATUS_VARIANT[order.status] ?? "default"}>
-                      {STATUS_LABEL[order.status] ?? order.status}
+                    <Badge variant={STATUS_VARIANT[order.status ?? ""] ?? "default"}>
+                      {STATUS_LABEL[order.status ?? ""] ?? order.status ?? "—"}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -147,9 +147,14 @@ export function OrdersPage() {
                     <div onClick={(e) => e.stopPropagation()}>
                       <Select
                         options={EDITABLE_STATUS_OPTIONS}
-                        value={order.status}
+                        value={order.status ?? "pending"}
                         onChange={(e) => {
-                          if (e.target.value !== order.status) void updateStatus(order.id, e.target.value)
+                          if (e.target.value !== order.status) {
+                            void updateStatus(
+                              order.id,
+                              e.target.value as NonNullable<typeof order.status>,
+                            )
+                          }
                         }}
                         className="text-xs py-1 h-auto"
                       />

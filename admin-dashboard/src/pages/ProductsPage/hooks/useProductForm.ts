@@ -71,10 +71,10 @@ export function useProductForm(onSuccess: () => void) {
       description: product.description ?? '',
       category: (product.category as ProductCategory) ?? 'digital',
       fulfillment_type: (product.fulfillment_type as FulfillmentType) ?? 'digital',
-      is_avatar: product.is_avatar,
+      is_avatar: Boolean(product.is_avatar),
       price_vac: String(product.price_vac ?? 0),
-      is_active: product.is_active,
-      force_sold_out: product.force_sold_out,
+      is_active: Boolean(product.is_active),
+      force_sold_out: Boolean(product.force_sold_out),
       sort_order: String(product.sort_order),
     })
     setImageFile(null)

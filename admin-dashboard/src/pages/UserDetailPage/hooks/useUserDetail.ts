@@ -54,9 +54,9 @@ export function useUserDetail(userId: string | undefined) {
           .limit(10),
       ])
 
-      setUser(userRes.data as DbUser | null)
-      setWallet(walletRes.data as DbWallet | null)
-      setOrders((ordersRes.data as DbOrder[]) ?? [])
+      setUser(userRes.data)
+      setWallet(walletRes.data)
+      setOrders(ordersRes.data ?? [])
       setGameTotal(wagerRes.count ?? 0)
 
       // 建立 round_id → payout 金額的對應表，方便 O(1) 查找
@@ -71,7 +71,7 @@ export function useUserDetail(userId: string | undefined) {
         theme_id: w.theme_id ?? null,
         bet_amount: Number(w.amount) || 0,
         win_amount: w.round_id ? (payoutMap[w.round_id] ?? 0) : 0,
-        created_at: w.created_at,
+        created_at: w.created_at ?? '',
       }))
       setGames(sessions)
     } finally {

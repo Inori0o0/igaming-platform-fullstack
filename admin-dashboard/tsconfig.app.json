@@ -17,10 +17,10 @@
     "jsx": "react-jsx",
     "resolveJsonModule": true,
 
-    /* Path alias */
-    "baseUrl": ".",
+    /* Path alias — relative to this config file (baseUrl no longer required) */
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"],
+      "@shared/*": ["../client-portal/shared/*"]
     },
 
     /* Linting */

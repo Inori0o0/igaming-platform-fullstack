@@ -1,16 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/utils'
+import { asJsonObject } from '@shared/supabase/json'
+import type { Json } from '@shared/database.types'
+import { createTranslator, DEFAULT_LOCALE } from '@shared/i18n'
 
-// game_id 欄位儲存的是前端遊戲組件的英文識別碼，統一對應為中文顯示名稱
-// 若未來新增遊戲類型，在此補上對應即可
-const GAME_DISPLAY_NAMES: Record<string, string> = {
-  blackjack: '二十一點',
-  slots: '老虎機',
-  baccarat: '百家樂',
-}
-
-// SQL 函式回傳的 JSON 結構型別
 interface AdminDashboardRpcResult {
   total_users: number
   active_today: number
@@ -44,6 +38,54 @@ export interface GameTypeStat {
   value: number
 }
 
+function readNumber(value: Json | undefined, fallback = 0): number {
+  const n = Number(value)
+  return Number.isFinite(n) ? n : fallback
+}
+
+function parseDashboardRpc(data: Json | null): AdminDashboardRpcResult | null {
+  const obj = asJsonObject(data)
+  if (!obj) return null
+
+  const dauTrendRaw = obj.dau_trend
+  const gameTypesRaw = obj.game_types
+
+  const dau_trend: AdminDashboardRpcResult['dau_trend'] = Array.isArray(dauTrendRaw)
+    ? dauTrendRaw.flatMap((row) => {
+        const item = asJsonObject(row)
+        if (!item || typeof item.date !== 'string') return []
+        return [{ date: item.date, count: readNumber(item.count) }]
+      })
+    : []
+
+  const game_types: AdminDashboardRpcResult['game_types'] = Array.isArray(gameTypesRaw)
+    ? gameTypesRaw.flatMap((row) => {
+        const item = asJsonObject(row)
+        if (!item || typeof item.game_id !== 'string') return []
+        return [{ game_id: item.game_id, count: readNumber(item.count) }]
+      })
+    : []
+
+  return {
+    total_users: readNumber(obj.total_users),
+    active_today: readNumber(obj.active_today),
+    total_wagers: readNumber(obj.total_wagers),
+    total_transaction_volume: readNumber(obj.total_transaction_volume),
+    total_orders: readNumber(obj.total_orders),
+    total_products: readNumber(obj.total_products),
+    dau_trend,
+    game_types,
+  }
+}
+
+function gameDisplayName(gameId: string): string {
+  const t = createTranslator(DEFAULT_LOCALE)
+  if (gameId === 'blackjack') return t('game.blackjack')
+  if (gameId === 'slots') return t('game.slots')
+  if (gameId === 'baccarat') return t('game.baccarat')
+  return gameId
+}
+
 export function useDashboardStats() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [dailyActive, setDailyActive] = useState<DailyActive[]>([])
@@ -64,7 +106,8 @@ export function useDashboardStats() {
       const { data, error } = await supabase.rpc('get_admin_dashboard_stats')
       if (error) throw error
 
-      const d = data as AdminDashboardRpcResult
+      const d = parseDashboardRpc(data)
+      if (!d) throw new Error('儀表板統計回傳格式異常')
 
       setStats({
         totalUsers:             d.total_users,
@@ -77,13 +120,13 @@ export function useDashboardStats() {
 
       // SQL 端已補齊 14 天並格式化為 MM/DD，直接使用
       setDailyActive(
-        (d.dau_trend ?? []).map((row) => ({ date: row.date, count: row.count })),
+        d.dau_trend.map((row) => ({ date: row.date, count: row.count })),
       )
 
-      // game_id 對應中文名稱；未登記的 id 直接顯示原始值，保持擴充彈性
+      // game_id 對應顯示名稱；未登記的 id 直接顯示原始值，保持擴充彈性
       setGameTypes(
-        (d.game_types ?? []).map((row) => ({
-          name:  GAME_DISPLAY_NAMES[row.game_id] ?? row.game_id,
+        d.game_types.map((row) => ({
+          name:  gameDisplayName(row.game_id),
           value: row.count,
         })),
       )

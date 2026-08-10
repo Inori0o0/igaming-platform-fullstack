@@ -103,7 +103,7 @@ export function CouponsPage() {
                         </TableCell>
                         <TableCell>
                           <span className="text-sm text-text-secondary">
-                            {c.min_purchase > 0 ? `${c.min_purchase} VAC` : '無限制'}
+                            {(c.min_purchase ?? 0) > 0 ? `${c.min_purchase} VAC` : '無限制'}
                           </span>
                         </TableCell>
                         <TableCell>

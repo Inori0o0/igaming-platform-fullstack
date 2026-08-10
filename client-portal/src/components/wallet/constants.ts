@@ -1,4 +1,8 @@
-import type { WalletCurrency, WalletTransaction } from "@/src/store/walletStore";
+import type { WalletCurrency } from "@/src/store/walletStore";
+import {
+  transactionStatusLabels,
+  transactionTypeLabels,
+} from "@shared/labels/transaction";
 
 export const TRANSACTIONS_PER_PAGE = 10;
 
@@ -8,18 +12,6 @@ export const currencyLabels: Record<WalletCurrency, string> = {
   ETH: "ETH",
 };
 
-export const typeLabels: Record<WalletTransaction["type"], string> = {
-  deposit: "充值",
-  withdraw: "提領",
-  claim: "免費領取",
-  wager: "下注",
-  payout: "派彩",
-  purchase: "商店消費",
-};
-
-export const statusLabels: Record<WalletTransaction["status"], string> = {
-  completed: "完成",
-  pending: "待處理",
-  failed: "失敗",
-};
-
+/** Default zh-TW labels; table/filter components that are client-side should prefer `useT()`. */
+export const typeLabels = transactionTypeLabels("zh-TW");
+export const statusLabels = transactionStatusLabels("zh-TW");

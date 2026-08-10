@@ -24,7 +24,7 @@ export function useStockManager() {
         .select('*')
         .eq('product_id', p.id)
         .order('size', { ascending: true, nullsFirst: true })
-      const v = (data as DbProductVariant[]) ?? []
+      const v = data ?? []
       setVariants(v)
 
       const d: Record<string, number> = {}

@@ -4,6 +4,7 @@
  * 右側面板：餘額、下注步進、開局／Hit／Stand／Double／Split 與 StatusPanel、角色說明卡。
  */
 import { Card } from "@/src/components/ui/Card";
+import { useT } from "@/src/i18n/I18nProvider";
 import { ActionSection } from "./ActionSection";
 import { BettingSection } from "./BettingSection";
 import { TABLE_BET_OPTIONS } from "../utils/constants";
@@ -63,14 +64,15 @@ export function ControlPanel(props: ControlPanelProps) {
     onDoubleDown,
     onSplit,
   } = props;
+  const t = useT();
 
   return (
     <div className="space-y-2">
       {/* 手機版排版（< xl）：操作鍵上浮，下注區在下方。 */}
       <div className="xl:hidden">
         <Card
-          title="操作區"
-          description="標準玩法：Hit / Stand / Double / Split"
+          title={t("blackjack.actionsTitle")}
+          description={t("blackjack.actionsHint")}
         >
           <div className="space-y-3 text-[11px] text-neutral-300">
             <ActionSection
@@ -117,8 +119,8 @@ export function ControlPanel(props: ControlPanelProps) {
       {/* 桌機版排版（>= xl）：保留完整操作區塊。 */}
       <div className="hidden xl:block">
         <Card
-          title="操作區"
-          description="標準玩法：Hit / Stand / Double / Split"
+          title={t("blackjack.actionsTitle")}
+          description={t("blackjack.actionsHint")}
         >
           <div className="space-y-3 text-[11px] text-neutral-300">
             <BettingSection
